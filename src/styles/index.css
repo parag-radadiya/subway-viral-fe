@@ -1,0 +1,133 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #1e293b;
+  --primary-light: #334155;
+  --secondary: #64748b;
+  --accent: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --sidebar-width: 256px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer components {
+  .sidebar-transition {
+    transition: width 0.25s ease, transform 0.25s ease;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150;
+  }
+
+  .nav-link-active {
+    @apply bg-accent text-white shadow-sm;
+  }
+
+  .nav-link-inactive {
+    @apply text-primary-300 hover:bg-primary-700 hover:text-white;
+  }
+
+  .stat-card {
+    @apply bg-white rounded-xl p-5 shadow-card border border-slate-100 hover:shadow-card-hover transition-shadow duration-200;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-primary-800 text-sm placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400
+           transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-accent-600 hover:bg-accent-700
+           text-white text-sm font-semibold rounded-lg shadow-sm
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-accent-200
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200
+           hover:bg-slate-50 text-primary-700 text-sm font-semibold rounded-lg shadow-sm
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-200
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
