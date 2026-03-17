@@ -27,7 +27,7 @@ export interface Role {
 export enum UserRole {
   ADMIN = "Admin",
   MANAGER = "Manager",
-  SUB_MANAGER = "Sub-manager",
+  SUB_MANAGER = "Sub-Manager",
   STAFF = "Staff",
   ROOT = "Root",
 }
@@ -64,6 +64,18 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+}
+
+// ─── Rotas ───────────────────────────────────────────────────────────────────
+
+export interface Rota {
+  _id: string;
+  user_id: string | User;
+  shop_id: string | { _id: string; name: string };
+  shift_date: string;
+  start_time: string;
+  end_time?: string;
+  is_published?: boolean;
 }
 
 // ─── API ─────────────────────────────────────────────────────────────────────

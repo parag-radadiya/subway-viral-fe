@@ -22,16 +22,28 @@ export const ROUTES = {
       EDIT: (id: string) => `/admin/users/${id}/edit`,
       DETAILS: (id: string) => `/admin/users/${id}`,
     },
+    ROTAS: {
+      LIST: "/admin/rotas",
+      DASHBOARD: "/admin/rotas/dashboard",
+    },
   },
   MANAGER: {
     DASHBOARD: "/manager/dashboard",
+    ROTAS: {
+      PLANNER: "/manager/rotas/planner",
+      DASHBOARD: "/manager/rotas/dashboard",
+    },
   },
   SUB_MANAGER: {
     DASHBOARD: "/sub-manager/dashboard",
+    ROTAS: {
+      LIST: "/sub-manager/rotas",
+    },
   },
   STAFF: {
     DASHBOARD: "/staff/dashboard",
     ATTENDANCE: "/staff/attendance",
+    MY_ROTA: "/staff/my-rota",
   },
 } as const;
 

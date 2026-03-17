@@ -39,8 +39,8 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
-      email: "staff@org.com",
-      password: "Demo@123",
+      email: "",
+      password: "",
       newPassword: "",
       confirmPassword: "",
     },

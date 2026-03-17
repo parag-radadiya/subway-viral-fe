@@ -30,6 +30,13 @@ import UserDetail from "./screen/admin/users/UserDetail";
 import UserForm from "./screen/admin/users/UserForm";
 import PunchInOut from "./screen/staff/attendance/PunchInOut";
 
+// Rota Screens
+import RotaManagement from "./screen/admin/rotas/RotaManagement";
+import WeeklyPlanner from "./screen/manager/rotas/WeeklyPlanner";
+import RotaDashboard from "./screen/manager/rotas/RotaDashboard";
+import RotaView from "./screen/sub-manager/rotas/RotaView";
+import MyRota from "./screen/staff/rotas/MyRota";
+
 // Pages
 import LoginPage from "./screen/auth/LoginPage";
 import {
@@ -129,6 +136,10 @@ const App = () => {
                 path={ROUTES.ADMIN.USERS.DETAILS(":id")}
                 element={<UserDetail />}
               />
+              <Route
+                path={ROUTES.ADMIN.ROTAS.LIST}
+                element={<RotaManagement />}
+              />
             </Route>
 
             {/* Manager Flow */}
@@ -143,6 +154,14 @@ const App = () => {
                 path={ROUTES.MANAGER.DASHBOARD}
                 element={<ManagerDashboard />}
               />
+              <Route
+                path={ROUTES.MANAGER.ROTAS.PLANNER}
+                element={<WeeklyPlanner />}
+              />
+              <Route
+                path={ROUTES.MANAGER.ROTAS.DASHBOARD}
+                element={<RotaDashboard />}
+              />
             </Route>
 
             {/* Sub-Manager Flow */}
@@ -156,6 +175,10 @@ const App = () => {
               <Route
                 path={ROUTES.SUB_MANAGER.DASHBOARD}
                 element={<SubManagerDashboard />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.ROTAS.LIST}
+                element={<RotaView />}
               />
             </Route>
 
@@ -172,6 +195,7 @@ const App = () => {
                 element={<StaffDashboard />}
               />
               <Route path={ROUTES.STAFF.ATTENDANCE} element={<PunchInOut />} />
+              <Route path={ROUTES.STAFF.MY_ROTA} element={<MyRota />} />
             </Route>
           </Route>
 
