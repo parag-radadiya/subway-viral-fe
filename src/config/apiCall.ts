@@ -81,9 +81,9 @@ export const attendanceApi = {
 // ─── Rotas API ────────────────────────────────────────────────────────────────
 
 export const rotasApi = {
-  list: () => api.get("/rotas"),
+  list: () => api.get("/rotas?week_start=2026-03-16"),
   week: (week_start: string) => api.get(`/rotas/week?week_start=${week_start}`),
-  dashboard: () => api.get("/rotas/dashboard"),
+  dashboard: () => api.get("/rotas/dashboard?week_start=2026-03-16"),
   bulkCreate: (data: Record<string, unknown>) => api.post("/rotas/bulk", data),
   update: (id: string, data: Record<string, unknown>) =>
     api.put(`/rotas/${id}`, data),
