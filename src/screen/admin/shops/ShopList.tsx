@@ -96,16 +96,16 @@ const ShopList = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-3 border-b border-slate-100">
+                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
                   Shop Name
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100">
+                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
                   Location (Lat/Lng)
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center">
+                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
                   Geofence
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-right">
+                <th className="px-6 py-3 border-b border-slate-100 text-right whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -116,7 +116,7 @@ const ShopList = () => {
                   key={shop._id}
                   className="hover:bg-slate-50/50 transition-colors group"
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
                         <Store size={18} />
@@ -126,7 +126,7 @@ const ShopList = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-1.5 text-slate-500">
                       <MapPin size={14} className="text-slate-400" />
                       <span className="text-xs font-mono">
@@ -134,12 +134,12 @@ const ShopList = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
                       {shop.geofence_radius_m}m Radius
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
                     <button
                       onClick={() =>
                         navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))

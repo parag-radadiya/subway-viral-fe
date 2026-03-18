@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { format } from "date-fns";
 import { attendanceApi } from "../../../config/apiCall";
 import { useBiometric } from "../../../hooks/useBiometric";
 import {
@@ -10,16 +11,28 @@ import {
   Loader2,
   Navigation,
   Fingerprint,
+  KeyRound,
+  RefreshCw,
 } from "lucide-react";
 import Button from "../../../components/common/Button";
 import { useAppSelector } from "../../../store";
 import { toast } from "react-toastify";
 import { clsx } from "clsx";
 
+const PIN_LENGTH = 4;
+const FALLBACK_PIN = "1234";
+
 const PunchInOut = () => {
   const { user } = useAppSelector((s) => s.auth);
-  console.log("🚀 - PunchInOut - user:", user);
-  const { authenticate, status: bioStatus, error: bioError } = useBiometric();
+  const {
+    isSupported,
+    isRegistered,
+    status: bioStatus,
+    error: bioError,
+    register,
+    authenticate,
+    reset: bioReset,
+  } = useBiometric();
 
   const [locationVerified, setLocationVerified] = useState(false);
   const [locationToken, setLocationToken] = useState<string | null>(null);
@@ -27,7 +40,7 @@ const PunchInOut = () => {
   const [activeTab, setActiveTab] = useState<"in" | "out">("in");
   const [punching, setPunching] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [activeAttendance, _] = useState<any>(null);
+  const [activeAttendance, setActiveAttendance] = useState<any>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
 
   const timerRef = useRef<any>(null);
@@ -42,18 +55,17 @@ const PunchInOut = () => {
   const fetchCurrentStatus = useCallback(async () => {
     setLoadingStatus(true);
     try {
-      // const res = await attendanceApi.list();
+      const res = await attendanceApi.list();
+      console.log("🚀 - PunchInOut - res:", res.data.data);
       // Filter for active (no punch_out_time) record for the current user
-      // const records = res.data.data.attendance_records || [];
-      // const active = records.find(
-      //   (rec: any) => rec.user_id === user?.id && !rec.punch_out_time,
-      // );
-      // setActiveAttendance(active);
-      // if (active) {
-      // setActiveTab("out");
-      // } else {
-      //   setActiveTab("in");
-      // }
+      const records = res.data.data.records || [];
+      const active = records.find((rec: any) => !rec.punch_out);
+      setActiveAttendance(active);
+      if (active) {
+        setActiveTab("out");
+      } else {
+        setActiveTab("in");
+      }
     } catch (err) {
       console.error("Error fetching attendance status:", err);
     } finally {
@@ -127,45 +139,50 @@ const PunchInOut = () => {
     );
   };
 
-  const handlePunch = async () => {
-    if (!locationVerified || !locationToken || !user?.shop_id) {
-      toast.error("Session expired. Please verify your location again.");
-      resetVerification();
-      return;
-    }
-
+  const executePunch = async () => {
     setPunching(true);
-    const success = await authenticate();
-
-    if (success) {
-      try {
-        if (activeTab === "in") {
-          await attendanceApi.punchIn({
-            shop_id: user.shop_id,
-            location_token: locationToken,
-            biometric_verified: true,
-          });
-          toast.success("Punched In Successfully!");
-          resetVerification();
-          fetchCurrentStatus();
-        } else {
-          if (!activeAttendance?._id) {
-            setPunching(false);
-            toast.error("No active attendance record found to punch out.");
-            return;
-          }
-          await attendanceApi.punchOut(activeAttendance._id);
-          toast.success("Punched Out Successfully!");
-          resetVerification();
-          fetchCurrentStatus();
+    try {
+      if (activeTab === "in") {
+        await attendanceApi.punchIn({
+          shop_id: user?.shop_id || "",
+          location_token: locationToken || "",
+          biometric_verified: true,
+        });
+        toast.success("Punched In Successfully!");
+        resetVerification();
+        fetchCurrentStatus();
+      } else {
+        if (!activeAttendance?._id) {
+          setPunching(false);
+          toast.error("No active attendance record found to punch out.");
+          return;
         }
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || "Punch action failed.");
+        await attendanceApi.punchOut(activeAttendance._id);
+        toast.success("Punched Out Successfully!");
+        resetVerification();
+        fetchCurrentStatus();
       }
-    } else if (bioError) {
-      toast.error(bioError);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Punch action failed.");
     }
     setPunching(false);
+  };
+
+  const handleSuccess = () => {
+    setTimeout(() => {
+      executePunch();
+    }, 800);
+  };
+
+  const handleBiometric = async () => {
+    bioReset();
+    let ok = false;
+    if (!isRegistered) {
+      ok = await register();
+    } else {
+      ok = await authenticate();
+    }
+    if (ok) handleSuccess();
   };
 
   if (loadingStatus) {
@@ -284,13 +301,11 @@ const PunchInOut = () => {
                 <div
                   className={clsx(
                     "absolute inset-0 rounded-full border-4 border-dashed animate-spin-slow",
-                    bioStatus === "authenticating"
-                      ? "border-primary-400"
-                      : "border-slate-100",
+                    "border-slate-100",
                   )}
                 />
                 <button
-                  onClick={handlePunch}
+                  onClick={handleBiometric}
                   disabled={punching}
                   className={clsx(
                     "absolute inset-2 rounded-full flex items-center justify-center transition-all duration-300 shadow-inner",
@@ -323,7 +338,7 @@ const PunchInOut = () => {
                 <div className="flex items-center gap-2 justify-center bg-success-50 text-success-700 px-4 py-3 rounded-xl border border-success-100">
                   <CheckCircle2 size={16} />
                   <span className="text-xs font-bold">
-                    Currently Clocked In: {activeAttendance.punch_in_time}
+                    Currently Clocked In: {format(new Date(activeAttendance.punch_in), "dd MMM, hh:mm a")}
                   </span>
                 </div>
               )}
@@ -332,7 +347,7 @@ const PunchInOut = () => {
                 variant={activeTab === "in" ? "primary" : "secondary"}
                 fullWidth
                 size="lg"
-                onClick={handlePunch}
+                onClick={handleBiometric}
                 isLoading={punching}
                 className="rounded-2xl h-14 text-base font-black shadow-lg"
               >

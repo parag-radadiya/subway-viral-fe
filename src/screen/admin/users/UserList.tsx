@@ -116,16 +116,16 @@ const UserList = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-3 border-b border-slate-100">
+                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
                   Name & Email
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center">
+                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
                   Role
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center">
+                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
                   Assignments
                 </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-right">
+                <th className="px-6 py-3 border-b border-slate-100 text-right whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -136,7 +136,7 @@ const UserList = () => {
                   key={user._id}
                   className="hover:bg-slate-50/50 transition-colors group"
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <p className="text-sm font-semibold text-slate-700">
                         {user.name}
@@ -146,7 +146,7 @@ const UserList = () => {
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${getRoleBadgeColor(user.role_id.role_name)}`}
                     >
@@ -154,7 +154,7 @@ const UserList = () => {
                       {user.role_id.role_name}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
                     <div className="flex justify-center flex-wrap gap-1">
                       {user.assigned_shop_ids.length > 0 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
@@ -168,7 +168,7 @@ const UserList = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() =>
