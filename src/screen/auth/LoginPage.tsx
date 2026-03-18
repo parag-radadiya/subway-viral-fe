@@ -1,31 +1,30 @@
+import { Lock, Mail, Store } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Mail, Lock, Store } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAppDispatch, useAppSelector } from "../../store";
-import {
-  setCredentials,
-  setLoading,
-  setAuthenticated,
-} from "../../store/slices/authSlice";
-import { authApi } from "../../config/apiCall";
-import { UserRole, type LoginCredentials } from "../../utils/types";
-import { ENV } from "../../utils/constants";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../utils/routes";
+import { authApi } from "../../config/apiCall";
+import { useAppDispatch, useAppSelector } from "../../store";
+import {
+  setAuthenticated,
+  setCredentials,
+  setLoading,
+} from "../../store/slices/authSlice";
+import { ENV } from "../../utils/constants";
+import { type LoginCredentials } from "../../utils/types";
 
 type FinalLoginCredentials =
   | (LoginCredentials & {
       role: string;
+      response: any;
     })
   | null;
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector(({ auth }) => auth);
-  console.log("🚀 - LoginPage - isLoading:", isLoading);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [tempCredentials, setTempCredentials] =
     useState<FinalLoginCredentials>(null);
@@ -59,12 +58,13 @@ const LoginPage = () => {
         .then((res) => {
           const response = res.data.data;
           const role = response.user.role.role_name;
-
+          localStorage.setItem("auth_token", response.token);
           if (response.must_change_password) {
             setTempCredentials({
               email: data.email,
               password: data.password,
               role,
+              response,
             });
 
             setIsChangingPassword(true);
@@ -90,21 +90,10 @@ const LoginPage = () => {
           currentPassword: tempCredentials?.password || "",
           newPassword: data.newPassword,
         })
-        .then(({ data }) => {
+        .then(() => {
           dispatch(setAuthenticated(true));
-
-          const role = tempCredentials?.role;
-          if (role === UserRole.ADMIN) {
-            navigate(ROUTES.ADMIN.DASHBOARD);
-          } else if (role === UserRole.MANAGER) {
-            navigate(ROUTES.MANAGER.DASHBOARD);
-          } else if (role === UserRole.SUB_MANAGER) {
-            navigate(ROUTES.SUB_MANAGER.DASHBOARD);
-          } else if (role === UserRole.STAFF) {
-            navigate(ROUTES.STAFF.DASHBOARD);
-          }
-
-          dispatch(setCredentials({ token: data.token, user: data.user }));
+          dispatch(setCredentials(tempCredentials?.response));
+          navigate("/");
         })
         .catch((err: Error) => {
           toast.error(err.message);
