@@ -31,8 +31,19 @@ manager
   - create
   - update
   - delete
+- inventory
+  - list
+  - create
+  - update
+  - delete
 
 sub manager
+
+- inventory
+  - list
+  - create
+  - update
+  - delete
 
 - rota
   - list
@@ -49,6 +60,11 @@ admin
   - create
   - detail
 - rota
+  - list
+  - create
+  - update
+  - delete
+- inventory
   - list
   - create
   - update

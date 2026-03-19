@@ -1,34 +1,26 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { clsx } from "clsx";
 import { format } from "date-fns";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Fingerprint,
+  Loader2,
+  MapPin,
+  Navigation,
+  ShieldCheck,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import Button from "../../../components/common/Button";
 import { attendanceApi } from "../../../config/apiCall";
 import { useBiometric } from "../../../hooks/useBiometric";
-import {
-  MapPin,
-  ShieldCheck,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Navigation,
-  Fingerprint,
-  KeyRound,
-  RefreshCw,
-} from "lucide-react";
-import Button from "../../../components/common/Button";
 import { useAppSelector } from "../../../store";
-import { toast } from "react-toastify";
-import { clsx } from "clsx";
-
-const PIN_LENGTH = 4;
-const FALLBACK_PIN = "1234";
 
 const PunchInOut = () => {
   const { user } = useAppSelector((s) => s.auth);
   const {
-    isSupported,
     isRegistered,
-    status: bioStatus,
-    error: bioError,
     register,
     authenticate,
     reset: bioReset,
@@ -338,7 +330,11 @@ const PunchInOut = () => {
                 <div className="flex items-center gap-2 justify-center bg-success-50 text-success-700 px-4 py-3 rounded-xl border border-success-100">
                   <CheckCircle2 size={16} />
                   <span className="text-xs font-bold">
-                    Currently Clocked In: {format(new Date(activeAttendance.punch_in), "dd MMM, hh:mm a")}
+                    Currently Clocked In:{" "}
+                    {format(
+                      new Date(activeAttendance.punch_in),
+                      "dd MMM, hh:mm a",
+                    )}
                   </span>
                 </div>
               )}

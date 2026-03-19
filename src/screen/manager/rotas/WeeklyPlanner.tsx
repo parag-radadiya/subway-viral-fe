@@ -1,21 +1,21 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { rotasApi, usersApi, shopsApi } from "../../../config/apiCall";
-import { useAppSelector } from "../../../store";
 import {
-  Plus,
-  Save,
-  Trash2,
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  Loader2,
-  AlertTriangle,
-  Users as UsersIcon,
   Clock,
+  Loader2,
+  Plus,
+  Save,
   Search,
+  Trash2,
+  Users as UsersIcon,
   X,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
+import { rotasApi, shopsApi, usersApi } from "../../../config/apiCall";
+import { useAppSelector } from "../../../store";
 
 // ShiftCell interface update
 interface ShiftCell {
@@ -30,7 +30,7 @@ interface ShiftCell {
 
 const WeeklyPlanner = () => {
   const { user } = useAppSelector((s) => s.auth);
-  const [loading, setLoading] = useState(false);
+  const [loading, _] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
   // Data
