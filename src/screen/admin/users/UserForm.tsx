@@ -13,7 +13,6 @@ import {
   Loader2,
   Key,
   Phone,
-  Smartphone,
 } from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
@@ -24,10 +23,10 @@ interface UserFormData {
   name: string;
   email: string;
   password?: string;
+  confirm_password?: string;
   phone_code: string;
   phone_num: string;
   role_id: string;
-  device_id: string;
   active_shop_id: string;
   assigned_shop_ids: string[];
 }
@@ -45,6 +44,7 @@ const UserForm = () => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<UserFormData>({
     defaultValues: {
@@ -72,7 +72,6 @@ const UserForm = () => {
             phone_code: userData.phone_code,
             phone_num: userData.phone_num,
             role_id: userData.role_id._id,
-            device_id: userData.device_id,
             active_shop_id: userData.shop_id._id,
             assigned_shop_ids: userData.assigned_shop_ids,
           });
@@ -95,6 +94,8 @@ const UserForm = () => {
     if (isEdit && !data.password) {
       delete data.password;
     }
+
+    delete data.confirm_password; // Remove before sending to API
 
     const apiCall = isEdit
       ? usersApi.update(id!, data as any)
@@ -186,11 +187,19 @@ const UserForm = () => {
           />
 
           <Input
-            label="Device ID"
-            placeholder="e.g. device-001"
-            leftIcon={<Smartphone size={16} />}
-            error={errors.device_id?.message}
-            {...register("device_id", { required: "Device ID is required" })}
+            label="Confirm Password"
+            type="password"
+            placeholder="••••••••"
+            leftIcon={<Key size={16} />}
+            error={errors.confirm_password?.message}
+            {...register("confirm_password", {
+              required: !isEdit && "Please confirm your password",
+              validate: (val) => {
+                if (!val && isEdit && !watch("password")) return true;
+                if (watch("password") !== val) return "Passwords do not match";
+                return true;
+              },
+            })}
           />
 
           <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">

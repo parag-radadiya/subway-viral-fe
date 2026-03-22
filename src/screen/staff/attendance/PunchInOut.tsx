@@ -16,6 +16,8 @@ import Button from "../../../components/common/Button";
 import { attendanceApi } from "../../../config/apiCall";
 import { useBiometric } from "../../../hooks/useBiometric";
 import { useAppSelector } from "../../../store";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../utils/routes";
 
 const PunchInOut = () => {
   const { user } = useAppSelector((s) => s.auth);
@@ -25,7 +27,7 @@ const PunchInOut = () => {
     authenticate,
     reset: bioReset,
   } = useBiometric();
-
+  const navigate = useNavigate();
   const [locationVerified, setLocationVerified] = useState(false);
   const [locationToken, setLocationToken] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -48,7 +50,6 @@ const PunchInOut = () => {
     setLoadingStatus(true);
     try {
       const res = await attendanceApi.list();
-      console.log("🚀 - PunchInOut - res:", res.data.data);
       // Filter for active (no punch_out_time) record for the current user
       const records = res.data.data.records || [];
       const active = records.find((rec: any) => !rec.punch_out);
@@ -99,7 +100,6 @@ const PunchInOut = () => {
             setLocationToken(res.data.data.location_token);
             setLocationVerified(true);
             toast.success("Location verified successfully!");
-
             // Start 5 min countdown
             setTimeLeft(300);
             if (timerRef.current) clearInterval(timerRef.current);
@@ -142,7 +142,8 @@ const PunchInOut = () => {
         });
         toast.success("Punched In Successfully!");
         resetVerification();
-        fetchCurrentStatus();
+        // fetchCurrentStatus();
+        navigate(ROUTES.STAFF.ATTENDANCE);
       } else {
         if (!activeAttendance?._id) {
           setPunching(false);
@@ -150,9 +151,11 @@ const PunchInOut = () => {
           return;
         }
         await attendanceApi.punchOut(activeAttendance._id);
+
         toast.success("Punched Out Successfully!");
         resetVerification();
-        fetchCurrentStatus();
+        // fetchCurrentStatus();
+        navigate(ROUTES.STAFF.ATTENDANCE);
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Punch action failed.");

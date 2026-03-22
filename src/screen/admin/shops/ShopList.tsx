@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
+import Table from "../../../components/common/Table";
 import { toast } from "react-toastify";
 
 interface Shop {
@@ -92,81 +93,59 @@ const ShopList = () => {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
-                  Shop Name
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
-                  Location (Lat/Lng)
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
-                  Geofence
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-right whitespace-nowrap">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredShops.map((shop) => (
-                <tr
-                  key={shop._id}
-                  className="hover:bg-slate-50/50 transition-colors group"
+        <Table
+          columns={[
+            {
+              header: "Shop Name",
+              render: (shop) => (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                    <Store size={18} />
+                  </div>
+                  <span className="text-sm font-semibold text-slate-700">
+                    {shop.name}
+                  </span>
+                </div>
+              ),
+            },
+            {
+              header: "Location (Lat/Lng)",
+              render: (shop) => (
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <MapPin size={14} className="text-slate-400" />
+                  <span className="text-xs font-mono">
+                    {shop.latitude.toFixed(4)}, {shop.longitude.toFixed(4)}
+                  </span>
+                </div>
+              ),
+            },
+            {
+              header: "Geofence",
+              align: "center",
+              render: (shop) => (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
+                  {shop.geofence_radius_m}m Radius
+                </span>
+              ),
+            },
+            {
+              header: "Actions",
+              align: "right",
+              render: (shop) => (
+                <button
+                  onClick={() => navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))}
+                  className="inline-flex items-center text-primary-600 font-bold text-xs hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                        <Store size={18} />
-                      </div>
-                      <span className="text-sm font-semibold text-slate-700">
-                        {shop.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <MapPin size={14} className="text-slate-400" />
-                      <span className="text-xs font-mono">
-                        {shop.latitude.toFixed(4)}, {shop.longitude.toFixed(4)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
-                      {shop.geofence_radius_m}m Radius
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right whitespace-nowrap">
-                    <button
-                      onClick={() =>
-                        navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))
-                      }
-                      className="inline-flex items-center text-primary-600 font-bold text-xs hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
-                    >
-                      View Details
-                      <ChevronRight size={14} className="ml-1" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredShops.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-12 text-center text-slate-400"
-                  >
-                    <p className="text-sm">
-                      No shops found matching your search.
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  View Details
+                  <ChevronRight size={14} className="ml-1" />
+                </button>
+              ),
+            },
+          ]}
+          data={filteredShops}
+          keyExtractor={(shop) => shop._id}
+          emptyStateMessage="No shops found matching your search."
+        />
       </div>
     </div>
   );

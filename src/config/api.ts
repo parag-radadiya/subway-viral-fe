@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ENV } from "../utils/constants";
+import { ClientJS } from "clientjs";
 
 // ─── Axios Instance ────────────────────────────────────────────────────────────
 
@@ -18,8 +19,8 @@ api.interceptors.request.use(
     const token = localStorage.getItem("auth_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-
-      config.headers["x-device-id"] = "testr123";
+      const client = new ClientJS();
+      config.headers["x-device-id"] = client.getFingerprint().toString();
     }
     return config;
   },

@@ -43,6 +43,7 @@ export const ROUTES = {
   STAFF: {
     DASHBOARD: "/staff/dashboard",
     ATTENDANCE: "/staff/attendance",
+    MANAGE_ATTENDANCE: "/staff/manage-attendance",
     MY_ROTA: "/staff/my-rota",
   },
 } as const;

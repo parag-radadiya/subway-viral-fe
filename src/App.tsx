@@ -29,6 +29,7 @@ import UserList from "./screen/admin/users/UserList";
 import UserDetail from "./screen/admin/users/UserDetail";
 import UserForm from "./screen/admin/users/UserForm";
 import PunchInOut from "./screen/staff/attendance/PunchInOut";
+import MyAttendance from "./screen/staff/attendance/MyAttendance";
 
 // Rota Screens
 import RotaManagement from "./screen/admin/rotas/RotaManagement";
@@ -194,7 +195,14 @@ const App = () => {
                 path={ROUTES.STAFF.DASHBOARD}
                 element={<StaffDashboard />}
               />
-              <Route path={ROUTES.STAFF.ATTENDANCE} element={<PunchInOut />} />
+              <Route
+                path={ROUTES.STAFF.MANAGE_ATTENDANCE}
+                element={<PunchInOut />}
+              />
+              <Route
+                path={ROUTES.STAFF.ATTENDANCE}
+                element={<MyAttendance />}
+              />
               <Route path={ROUTES.STAFF.MY_ROTA} element={<MyRota />} />
             </Route>
           </Route>

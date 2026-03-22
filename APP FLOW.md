@@ -18,10 +18,13 @@ Modules
 
 login (admin, staff, manager, sub-manager) // open seperate screen
 
+- add device id on forget password ✅
+
 staff
 
-- punch in (biometric/location) attendence 9the module
-- punch out
+- punch in (biometric/location) attendence 9the module ✅
+- punch out ✅
+- view all attendence
 - rota (view my rota)
 
 manager
@@ -36,6 +39,14 @@ manager
   - create
   - update
   - delete
+- users
+  - list ✅
+  - detail
+    - show attendence
+- query
+  - create query
+  - update query
+  - delete query
 
 sub manager
 
@@ -44,6 +55,14 @@ sub manager
   - create
   - update
   - delete
+- users
+  - list✅
+  - detail
+    - show attendence
+- query
+  - create query
+  - update query
+  - delete query
 
 - rota
   - list
@@ -51,14 +70,15 @@ sub manager
 admin
 
 - shops
-  - list
-  - details
-  - create
-  - update
+  - list ✅
+  - details ✅
+  - create ✅
+  - update ✅
 - users
-  - list
-  - create
+  - list ✅
+  - create ✅
   - detail
+    - show attendence
 - rota
   - list
   - create
@@ -69,3 +89,7 @@ admin
   - create
   - update
   - delete
+- query
+  - create query
+  - update query
+  - delete query

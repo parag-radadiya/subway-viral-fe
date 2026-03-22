@@ -4,6 +4,7 @@ import { Clock, MapPin, Loader2, Search } from "lucide-react";
 import { Rota } from "../../../utils/types";
 import { toast } from "react-toastify";
 import clsx from "clsx";
+import Table from "../../../components/common/Table";
 
 const RotaView = () => {
   const [rotas, setRotas] = useState<Rota[]>([]);
@@ -55,66 +56,62 @@ const RotaView = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
-              <th className="p-4">Employee</th>
-              <th className="p-4">Date</th>
-              <th className="p-4">Shift</th>
-              <th className="p-4">Location</th>
-              <th className="p-4">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredRotas.map((rota: Rota) => (
-              <tr key={rota._id} className="hover:bg-slate-50 transition-colors">
-                <td className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
-                      {(typeof rota.user_id === 'string' ? 'U' : rota.user_id?.name?.slice(0,2) || 'U').toUpperCase()}
-                    </div>
-                    <p className="text-sm font-bold text-slate-700">
-                      {typeof rota.user_id === 'string' ? rota.user_id : rota.user_id?.name}
-                    </p>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <p className="text-sm font-bold text-slate-600">
-                    {new Date(rota.shift_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </p>
-                </td>
-                <td className="p-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-600">
-                    <Clock size={12} /> {rota.start_time} - {rota.end_time || "TBA"}
-                  </div>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <MapPin size={14} className="text-slate-300" />
-                    {typeof rota.shop_id === 'string' ? rota.shop_id : rota.shop_id?.name}
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span className={clsx(
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter",
-                    rota.is_published ? "bg-success-50 text-success-600" : "bg-warning-50 text-warning-600"
-                  )}>
-                    {rota.is_published ? "Published" : "Draft"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {filteredRotas.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-12 text-center text-slate-400 italic text-sm">
-                  No shifts found matching your search.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        columns={[
+          {
+            header: "Employee",
+            render: (rota) => (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
+                  {(typeof rota.user_id === 'string' ? 'U' : rota.user_id?.name?.slice(0,2) || 'U').toUpperCase()}
+                </div>
+                <p className="text-sm font-bold text-slate-700">
+                  {typeof rota.user_id === 'string' ? rota.user_id : rota.user_id?.name}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: "Date",
+            render: (rota) => (
+              <p className="text-sm font-bold text-slate-600">
+                {new Date(rota.shift_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+              </p>
+            ),
+          },
+          {
+            header: "Shift",
+            render: (rota) => (
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-600">
+                <Clock size={12} /> {rota.start_time} - {rota.end_time || "TBA"}
+              </div>
+            ),
+          },
+          {
+            header: "Location",
+            render: (rota) => (
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                <MapPin size={14} className="text-slate-300" />
+                {typeof rota.shop_id === 'string' ? rota.shop_id : rota.shop_id?.name}
+              </div>
+            ),
+          },
+          {
+            header: "Status",
+            render: (rota) => (
+              <span className={clsx(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter",
+                rota.is_published ? "bg-success-50 text-success-600" : "bg-warning-50 text-warning-600"
+              )}>
+                {rota.is_published ? "Published" : "Draft"}
+              </span>
+            ),
+          },
+        ]}
+        data={filteredRotas}
+        keyExtractor={(rota) => rota._id}
+        emptyStateMessage={<span className="italic">No shifts found matching your search.</span>}
+      />
     </div>
   );
 };

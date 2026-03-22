@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
+import Table from "../../../components/common/Table";
 import { toast } from "react-toastify";
 
 type FinalUser = {
@@ -112,99 +113,82 @@ const UserList = () => {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-3 border-b border-slate-100 whitespace-nowrap">
-                  Name & Email
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
-                  Role
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-center whitespace-nowrap">
-                  Assignments
-                </th>
-                <th className="px-6 py-3 border-b border-slate-100 text-right whitespace-nowrap">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user._id}
-                  className="hover:bg-slate-50/50 transition-colors group"
+        <Table
+          columns={[
+            {
+              header: "Name & Email",
+              render: (userItem) => (
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">
+                    {userItem.name}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {userItem.email}
+                  </p>
+                </div>
+              ),
+            },
+            {
+              header: "Role",
+              align: "center",
+              render: (userItem) => (
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${getRoleBadgeColor(
+                    userItem.role_id.role_name
+                  )}`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-700">
-                        {user.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-medium">
-                        {user.email}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${getRoleBadgeColor(user.role_id.role_name)}`}
-                    >
-                      <Shield size={10} className="mr-1" />
-                      {user.role_id.role_name}
+                  <Shield size={10} className="mr-1" />
+                  {userItem.role_id.role_name}
+                </span>
+              ),
+            },
+            {
+              header: "Assignments",
+              align: "center",
+              render: (userItem) => (
+                <div className="flex justify-center flex-wrap gap-1">
+                  {userItem.assigned_shop_ids.length > 0 ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                      <MapPin size={10} className="mr-1" />
+                      {userItem.assigned_shop_ids.length} Shops
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <div className="flex justify-center flex-wrap gap-1">
-                      {user.assigned_shop_ids.length > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                          <MapPin size={10} className="mr-1" />
-                          {user.assigned_shop_ids.length} Shops
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-slate-300 italic">
-                          No assignments
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right whitespace-nowrap">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() =>
-                          navigate(ROUTES.ADMIN.USERS.EDIT(user._id))
-                        }
-                        className="inline-flex items-center text-primary-600 font-bold text-[10px] uppercase tracking-wider hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
-                      >
-                        <Pencil size={12} className="mr-1" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() =>
-                          navigate(ROUTES.ADMIN.USERS.DETAILS(user._id))
-                        }
-                        className="inline-flex items-center text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:text-slate-700 transition-colors p-2 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100"
-                      >
-                        Details
-                        <ChevronRight size={12} className="ml-1" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredUsers.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-12 text-center text-slate-400"
+                  ) : (
+                    <span className="text-[10px] text-slate-300 italic">
+                      No assignments
+                    </span>
+                  )}
+                </div>
+              ),
+            },
+            {
+              header: "Actions",
+              align: "right",
+              render: (userItem) => (
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => navigate(ROUTES.ADMIN.USERS.EDIT(userItem._id))}
+                    className="inline-flex items-center text-primary-600 font-bold text-[10px] uppercase tracking-wider hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
                   >
-                    <p className="text-sm">No personnel found.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    <Pencil size={12} className="mr-1" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() =>
+                      navigate(ROUTES.ADMIN.USERS.DETAILS(userItem._id))
+                    }
+                    className="inline-flex items-center text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:text-slate-700 transition-colors p-2 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100"
+                  >
+                    Details
+                    <ChevronRight size={12} className="ml-1" />
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+          data={filteredUsers}
+          keyExtractor={(u) => u._id}
+          emptyStateMessage="No personnel found."
+        />
       </div>
     </div>
   );

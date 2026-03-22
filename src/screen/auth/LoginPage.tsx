@@ -1,3 +1,4 @@
+import { ClientJS } from "clientjs";
 import { Lock, Mail, Store } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -49,7 +50,7 @@ const LoginPage = () => {
   const newPassword = watch("newPassword");
 
   // ─── Submit handler ──────────────────────────────────────────────────────────
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     dispatch(setLoading(true));
 
     if (!isChangingPassword) {
@@ -85,22 +86,31 @@ const LoginPage = () => {
           dispatch(setLoading(false));
         });
     } else {
-      authApi
-        .changePassword({
-          currentPassword: tempCredentials?.password || "",
-          newPassword: data.newPassword,
-        })
-        .then(() => {
-          dispatch(setAuthenticated(true));
-          dispatch(setCredentials(tempCredentials?.response));
-          navigate("/");
-        })
-        .catch((err: Error) => {
-          toast.error(err.message);
-        })
-        .finally(() => {
-          dispatch(setLoading(false));
-        });
+      try {
+        const client = new ClientJS();
+        const device_id = client.getFingerprint().toString();
+
+        authApi
+          .changePassword({
+            currentPassword: tempCredentials?.password || "",
+            newPassword: data.newPassword,
+            device_id,
+          })
+          .then(() => {
+            dispatch(setAuthenticated(true));
+            dispatch(setCredentials(tempCredentials?.response));
+            navigate("/");
+          })
+          .catch((err: Error) => {
+            toast.error(err.message);
+          })
+          .finally(() => {
+            dispatch(setLoading(false));
+          });
+      } catch (err: any) {
+        toast.error(err.message);
+        console.error("ClientJS error:", err);
+      }
     }
   };
 
