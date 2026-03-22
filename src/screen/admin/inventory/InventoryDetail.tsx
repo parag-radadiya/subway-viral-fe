@@ -1,35 +1,33 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { 
-  ArrowLeft, 
-  Edit, 
-  Package, 
-  Calendar, 
-  Store, 
+import {
+  Activity,
   AlertCircle,
-  History,
-  Wrench,
-  CheckCircle2,
-  PlusCircle,
+  ArrowLeft,
+  Calendar,
   Clock,
-  Loader2,
-  Tag,
+  Edit,
   Hash,
-  Activity
+  Loader2,
+  Package,
+  PlusCircle,
+  Store,
+  Tag,
+  Wrench,
 } from "lucide-react";
-import { inventoryApi } from "../../../config/inventoryApi";
-import { 
-  InventoryItem, 
-  InventoryStatus, 
-  InventoryQuery,
-  QueryStatus
-} from "../../../utils/types";
-import { ROUTES } from "../../../utils/routes";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
-import Table from "../../../components/common/Table";
 import Dialog from "../../../components/common/Dialog";
-import { toast } from "react-toastify";
+import Table from "../../../components/common/Table";
+import { inventoryApi } from "../../../config/inventoryApi";
+import { ROUTES } from "../../../utils/routes";
+import {
+  InventoryItem,
+  InventoryQuery,
+  InventoryStatus,
+  QueryStatus,
+} from "../../../utils/types";
 
 const InventoryDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,7 +35,7 @@ const InventoryDetail = () => {
   const [item, setItem] = useState<InventoryItem | null>(null);
   const [queries, setQueries] = useState<InventoryQuery[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Open Issue Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [issueNote, setIssueNote] = useState("");
@@ -49,7 +47,7 @@ const InventoryDetail = () => {
       setIsLoading(true);
       const [itemData, queriesData] = await Promise.all([
         inventoryApi.getItemById(id),
-        inventoryApi.getQueries({ item_id: id })
+        inventoryApi.getQueries({ item_id: id }),
       ]);
       setItem(itemData);
       setQueries(queriesData.queries);
@@ -70,7 +68,9 @@ const InventoryDetail = () => {
     try {
       setIsSubmittingDetail(true);
       await inventoryApi.openQuery({ item_id: id, issue_note: issueNote });
-      toast.success("Issue reported successfully. Item status updated to Damaged.");
+      toast.success(
+        "Issue reported successfully. Item status updated to Damaged.",
+      );
       setIsDialogOpen(false);
       setIssueNote("");
       fetchData(); // Refresh data
@@ -110,41 +110,48 @@ const InventoryDetail = () => {
     {
       header: "Status",
       render: (q: InventoryQuery) => (
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-          q.status === QueryStatus.OPEN ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
-        }`}>
+        <span
+          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+            q.status === QueryStatus.OPEN
+              ? "bg-rose-100 text-rose-700"
+              : "bg-emerald-100 text-emerald-700"
+          }`}
+        >
           {q.status}
         </span>
-      )
+      ),
     },
     {
       header: "Issue Note",
       render: (q: InventoryQuery) => (
-        <p className="text-sm text-slate-600 line-clamp-1 max-w-xs">{q.issue_note}</p>
-      )
+        <p className="text-sm text-slate-600 line-clamp-1 max-w-xs">
+          {q.issue_note}
+        </p>
+      ),
     },
     {
       header: "Opened At",
-      render: (q: InventoryQuery) => new Date(q.opened_at).toLocaleDateString()
+      render: (q: InventoryQuery) => new Date(q.opened_at).toLocaleDateString(),
     },
     {
       header: "Cost",
-      render: (q: InventoryQuery) => q.repair_cost ? `£${q.repair_cost}` : '-'
+      render: (q: InventoryQuery) =>
+        q.repair_cost ? `£${q.repair_cost}` : "-",
     },
     {
       header: "Actions",
       align: "right" as const,
       render: (q: InventoryQuery) => (
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => navigate(ROUTES.ADMIN.INVENTORY.QUERY_DETAILS(q._id))}
           className="text-primary-600 font-bold"
         >
           View
         </Button>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -159,9 +166,9 @@ const InventoryDetail = () => {
           Back to Directory
         </button>
         <div className="flex gap-2">
-           {item.status !== InventoryStatus.DAMAGED && (
-            <Button 
-              variant="secondary" 
+          {item.status !== InventoryStatus.DAMAGED && (
+            <Button
+              variant="secondary"
               size="sm"
               className="border-rose-200 text-rose-600 hover:bg-rose-50"
               onClick={() => setIsDialogOpen(true)}
@@ -188,19 +195,25 @@ const InventoryDetail = () => {
         </div>
         <div className="pt-12 p-8 pb-6 flex justify-between items-end">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">{item.item_name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {item.item_name}
+            </h1>
             <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-1">
               <Hash size={14} /> Global Asset ID: {item._id}
             </p>
           </div>
           <div className="flex flex-col items-end">
-             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
-                item.status === InventoryStatus.GOOD ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                item.status === InventoryStatus.DAMAGED ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                'bg-amber-50 text-amber-600 border border-amber-100'
-              }`}>
-                {item.status}
-              </span>
+            <span
+              className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                item.status === InventoryStatus.GOOD
+                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                  : item.status === InventoryStatus.DAMAGED
+                    ? "bg-rose-50 text-rose-600 border border-rose-100"
+                    : "bg-amber-50 text-amber-600 border border-amber-100"
+              }`}
+            >
+              {item.status}
+            </span>
           </div>
         </div>
 
@@ -213,7 +226,9 @@ const InventoryDetail = () => {
             <div className="flex items-end gap-2 text-slate-800">
               <Store size={20} className="text-primary-500 mb-1" />
               <span className="text-lg font-black truncate max-w-full">
-                {typeof item.shop_id === 'object' ? item.shop_id.name : 'Unknown'}
+                {typeof item.shop_id === "object"
+                  ? item.shop_id.name
+                  : "Unknown"}
               </span>
             </div>
           </div>
@@ -234,9 +249,7 @@ const InventoryDetail = () => {
             </p>
             <div className="flex items-end gap-2 text-slate-800">
               <Activity size={20} className="text-amber-500 mb-1" />
-              <span className="text-xl font-black">
-                {queries.length}
-              </span>
+              <span className="text-xl font-black">{queries.length}</span>
               <span className="text-xs font-bold mb-1 ml-[-4px]">Tickets</span>
             </div>
           </div>
@@ -255,28 +268,41 @@ const InventoryDetail = () => {
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               <Wrench size={20} />
             </div>
-            <h4 className="font-bold text-lg leading-tight text-white">Maintenance Overview</h4>
+            <h4 className="font-bold text-lg leading-tight text-white">
+              Maintenance Overview
+            </h4>
           </div>
           <p className="text-primary-100 text-sm mb-6 leading-relaxed">
-            This asset is currently marked as <span className="font-black uppercase">{item.status}</span>. 
-            All maintenance cycles and repair history should be documented here for operational continuity.
+            This asset is currently marked as{" "}
+            <span className="font-black uppercase">{item.status}</span>. All
+            maintenance cycles and repair history should be documented here for
+            operational continuity.
           </p>
-          
+
           <div className="space-y-3">
-             <div className="flex items-center justify-between text-xs bg-white/10 p-3 rounded-xl backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                   <Clock size={16} className="text-primary-200 shrink-0" />
-                   <span>Warranty / Expiry</span>
-                </div>
-                <span className="font-bold">{item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'None'}</span>
-             </div>
-             <div className="flex items-center justify-between text-xs bg-white/10 p-3 rounded-xl backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                   <Tag size={16} className="text-primary-200 shrink-0" />
-                   <span>Total Maintenance Cost</span>
-                </div>
-                <span className="font-bold">£{queries.reduce((acc, q) => acc + (q.repair_cost || 0), 0).toFixed(2)}</span>
-             </div>
+            <div className="flex items-center justify-between text-xs bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <Clock size={16} className="text-primary-200 shrink-0" />
+                <span>Warranty / Expiry</span>
+              </div>
+              <span className="font-bold">
+                {item.expiry_date
+                  ? new Date(item.expiry_date).toLocaleDateString()
+                  : "None"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <Tag size={16} className="text-primary-200 shrink-0" />
+                <span>Total Maintenance Cost</span>
+              </div>
+              <span className="font-bold">
+                £
+                {queries
+                  .reduce((acc, q) => acc + (q.repair_cost || 0), 0)
+                  .toFixed(2)}
+              </span>
+            </div>
           </div>
         </Card>
 
@@ -287,17 +313,26 @@ const InventoryDetail = () => {
             Asset Management Policy
           </h3>
           <p className="text-sm leading-relaxed text-slate-600 mb-4">
-            Property of Subway Viral. Ensure all defects are reported immediately using the <strong>Report Issue</strong> action.
+            Property of Subway Viral. Ensure all defects are reported
+            immediately using the <strong>Report Issue</strong> action.
           </p>
           <div className="flex gap-4">
-             <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Open Tickets</p>
-                <p className="text-xl font-black text-rose-500">{queries.filter(q => q.status === QueryStatus.OPEN).length}</p>
-             </div>
-             <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Resolved Cases</p>
-                <p className="text-xl font-black text-emerald-500">{queries.filter(q => q.status === QueryStatus.CLOSED).length}</p>
-             </div>
+            <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                Open Tickets
+              </p>
+              <p className="text-xl font-black text-rose-500">
+                {queries.filter((q) => q.status === QueryStatus.OPEN).length}
+              </p>
+            </div>
+            <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                Resolved Cases
+              </p>
+              <p className="text-xl font-black text-emerald-500">
+                {queries.filter((q) => q.status === QueryStatus.CLOSED).length}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -348,11 +383,14 @@ const InventoryDetail = () => {
           <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
             <AlertCircle size={20} className="text-amber-600 shrink-0" />
             <p className="text-sm text-amber-800 leading-snug">
-              Reporting an issue will record a new ticket and automatically flag this item as <strong>Damaged</strong>.
+              Reporting an issue will record a new ticket and automatically flag
+              this item as <strong>Damaged</strong>.
             </p>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Issue details *</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              Issue details *
+            </label>
             <textarea
               className="w-full h-32 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 transition-all outline-none resize-none text-sm text-slate-700 placeholder:text-slate-300"
               placeholder="Explain the problem in detail..."

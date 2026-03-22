@@ -1,21 +1,20 @@
-import { useEffect, useState } from "react";
-import { usersApi } from "../../../config/apiCall";
 import {
+  Edit2,
+  Eye,
+  Loader2,
+  MapPin,
   Plus,
   Search,
   Shield,
-  MapPin,
-  Loader2,
-  Pencil,
-  Eye,
-  Edit2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../../utils/routes";
+import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Input from "../../../components/common/Input";
 import Table from "../../../components/common/Table";
-import { toast } from "react-toastify";
+import { usersApi } from "../../../config/apiCall";
+import { ROUTES } from "../../../utils/routes";
 
 type FinalUser = {
   _id: string;
