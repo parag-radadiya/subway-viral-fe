@@ -30,9 +30,11 @@ import UserDetail from "./screen/admin/users/UserDetail";
 import UserForm from "./screen/admin/users/UserForm";
 import PunchInOut from "./screen/staff/attendance/PunchInOut";
 import MyAttendance from "./screen/staff/attendance/MyAttendance";
-import AttendanceList from "./screen/admin/attendance/AttendanceList";
 import ManagerAttendanceList from "./screen/manager/attendance/AttendanceList";
+import ManagerPunchInPage from "./screen/manager/attendance/PunchInPage";
 import SubManagerAttendanceList from "./screen/sub-manager/attendance/AttendanceList";
+import SubManagerPunchInPage from "./screen/sub-manager/attendance/PunchInPage";
+import AttendanceList from "./screen/admin/attendance/AttendanceList";
 
 // Rota Screens - Admin
 import RotaList from "./screen/admin/rotas/RotaList";
@@ -223,6 +225,10 @@ const App = () => {
                 path={ROUTES.MANAGER.ATTENDANCE}
                 element={<ManagerAttendanceList />}
               />
+              <Route
+                path={ROUTES.MANAGER.PUNCH_IN_OUT}
+                element={<ManagerPunchInPage />}
+              />
               <Route path={ROUTES.MANAGER.INVENTORY.LIST} element={<InventoryList />} />
               <Route path={ROUTES.MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />
               <Route path={ROUTES.MANAGER.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
@@ -263,6 +269,10 @@ const App = () => {
               <Route
                 path={ROUTES.SUB_MANAGER.ATTENDANCE}
                 element={<SubManagerAttendanceList />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.PUNCH_IN_OUT}
+                element={<SubManagerPunchInPage />}
               />
               <Route path={ROUTES.SUB_MANAGER.INVENTORY.LIST} element={<InventoryList />} />
               <Route path={ROUTES.SUB_MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />

@@ -1,12 +1,17 @@
 import type { ReactNode } from "react";
 import RoleLayout from "./RoleLayout";
-import { LayoutDashboard, Clock, Calendar } from "lucide-react";
+import { LayoutDashboard, UserCheck, Calendar, Navigation } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
 const StaffLayout = ({ children }: { children: ReactNode }) => {
   const navItems = [
     { label: "Dashboard", path: ROUTES.STAFF.DASHBOARD, icon: LayoutDashboard },
-    { label: "Attendance", path: ROUTES.STAFF.ATTENDANCE, icon: Clock },
+    {
+      label: "Punch In/Out",
+      path: ROUTES.STAFF.MANAGE_ATTENDANCE,
+      icon: Navigation,
+    },
+    { label: "Attendance", path: ROUTES.STAFF.ATTENDANCE, icon: UserCheck },
     { label: "My Rota", path: ROUTES.STAFF.MY_ROTA, icon: Calendar },
   ];
 

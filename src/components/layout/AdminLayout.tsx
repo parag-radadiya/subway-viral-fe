@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import RoleLayout from "./RoleLayout";
-import { LayoutDashboard, Store, Users, Calendar, Clock, Package } from "lucide-react";
+import {
+  LayoutDashboard,
+  Store,
+  Users,
+  Calendar,
+  Clock,
+  Package,
+} from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {

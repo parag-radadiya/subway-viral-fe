@@ -51,6 +51,7 @@ export const ROUTES = {
       DASHBOARD: "/manager/rotas/dashboard",
     },
     ATTENDANCE: "/manager/attendance",
+    PUNCH_IN_OUT: "/manager/attendance/punch",
     INVENTORY: {
       LIST: "/manager/inventory",
       CREATE: "/manager/inventory/create",
@@ -70,6 +71,7 @@ export const ROUTES = {
       DETAILS: (id: string) => `/sub-manager/rotas/${id}`,
     },
     ATTENDANCE: "/sub-manager/attendance",
+    PUNCH_IN_OUT: "/sub-manager/attendance/punch",
     INVENTORY: {
       LIST: "/sub-manager/inventory",
       CREATE: "/sub-manager/inventory/create",

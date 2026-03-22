@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import RoleLayout from "./RoleLayout";
-import { LayoutDashboard, Calendar, BarChart3, UserCheck, Package } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  BarChart3,
+  UserCheck,
+  Package,
+  Navigation,
+} from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
 export const RootLayout = ({ children }: { children: ReactNode }) => (
@@ -29,9 +36,20 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         icon: LayoutDashboard,
       },
       {
-        label: "Rota Stats",
-        path: ROUTES.MANAGER.ROTAS.DASHBOARD,
-        icon: BarChart3,
+        label: "Punch In/Out",
+        path: ROUTES.MANAGER.PUNCH_IN_OUT,
+        icon: Navigation,
+      },
+      {
+        label: "Attendance",
+        path: ROUTES.MANAGER.ATTENDANCE,
+        icon: UserCheck,
+      },
+
+      {
+        label: "Inventory",
+        path: ROUTES.MANAGER.INVENTORY.LIST,
+        icon: Package,
       },
       {
         label: "Rota Planner",
@@ -39,19 +57,15 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         icon: Calendar,
       },
       {
+        label: "Rota Stats",
+        path: ROUTES.MANAGER.ROTAS.DASHBOARD,
+        icon: BarChart3,
+      },
+
+      {
         label: "Rotas",
         path: ROUTES.MANAGER.ROTAS.LIST,
         icon: Calendar,
-      },
-      {
-        label: "Attendance",
-        path: ROUTES.MANAGER.ATTENDANCE,
-        icon: UserCheck,
-      },
-      {
-        label: "Inventory",
-        path: ROUTES.MANAGER.INVENTORY.LIST,
-        icon: Package,
       },
     ]}
   >
@@ -69,9 +83,9 @@ export const SubManagerLayout = ({ children }: { children: ReactNode }) => (
         icon: LayoutDashboard,
       },
       {
-        label: "Rotas",
-        path: ROUTES.SUB_MANAGER.ROTAS.LIST,
-        icon: Calendar,
+        label: "Punch In/Out",
+        path: ROUTES.SUB_MANAGER.PUNCH_IN_OUT,
+        icon: Navigation,
       },
       {
         label: "Attendance",
@@ -82,6 +96,11 @@ export const SubManagerLayout = ({ children }: { children: ReactNode }) => (
         label: "Inventory",
         path: ROUTES.SUB_MANAGER.INVENTORY.LIST,
         icon: Package,
+      },
+      {
+        label: "Rotas",
+        path: ROUTES.SUB_MANAGER.ROTAS.LIST,
+        icon: Calendar,
       },
     ]}
   >
