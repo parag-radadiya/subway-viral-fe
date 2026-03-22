@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { shopsApi } from "../../../config/apiCall";
-import { Store, MapPin, Navigation, Edit, Trash2, ArrowLeft, Loader2, Radius } from "lucide-react";
+import {
+  Store,
+  MapPin,
+  Navigation,
+  Edit,
+  Trash2,
+  ArrowLeft,
+  Loader2,
+  Radius,
+} from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
 
@@ -21,8 +30,9 @@ const ShopDetail = () => {
 
   useEffect(() => {
     if (id) {
-      shopsApi.getById(id)
-        .then(res => setShop(res.data.data.shop))
+      shopsApi
+        .getById(id)
+        .then((res) => setShop(res.data.data.shop))
         .catch(console.error)
         .finally(() => setLoading(false));
     }
@@ -41,7 +51,11 @@ const ShopDetail = () => {
     return (
       <div className="text-center p-12">
         <p className="text-slate-500">Shop not found.</p>
-        <Button variant="ghost" className="mt-4" onClick={() => navigate(ROUTES.ADMIN.SHOPS.LIST)}>
+        <Button
+          variant="ghost"
+          className="mt-4"
+          onClick={() => navigate(ROUTES.ADMIN.SHOPS.LIST)}
+        >
           <ArrowLeft size={16} className="mr-2" /> Back to List
         </Button>
       </div>
@@ -49,9 +63,9 @@ const ShopDetail = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <button 
+        <button
           onClick={() => navigate(ROUTES.ADMIN.SHOPS.LIST)}
           className="flex items-center text-slate-500 hover:text-primary-600 transition-colors text-xs font-bold uppercase tracking-wider"
         >
@@ -59,7 +73,11 @@ const ShopDetail = () => {
           Back to Directory
         </button>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.ADMIN.SHOPS.EDIT(shop._id))}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => navigate(ROUTES.ADMIN.SHOPS.EDIT(shop._id))}
+          >
             <Edit size={16} className="mr-2" /> Edit Shop
           </Button>
           <Button variant="danger" size="sm">
@@ -83,25 +101,40 @@ const ShopDetail = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 pt-0 border-b border-slate-100">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Geofence Radius</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+              Geofence Radius
+            </p>
             <div className="flex items-end gap-2 text-slate-800">
               <Radius size={20} className="text-primary-500 mb-1" />
-              <span className="text-xl font-black">{shop.geofence_radius_m}</span>
+              <span className="text-xl font-black">
+                {shop.geofence_radius_m}
+              </span>
               <span className="text-xs font-bold mb-1 ml-[-4px]">meters</span>
             </div>
           </div>
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Latitude</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+              Latitude
+            </p>
             <div className="flex items-end gap-2 text-slate-800">
               <Navigation size={20} className="text-accent-500 mb-1" />
-              <span className="text-xl font-mono font-bold tracking-tighter">{shop.latitude.toFixed(6)}</span>
+              <span className="text-xl font-mono font-bold tracking-tighter">
+                {shop.latitude.toFixed(6)}
+              </span>
             </div>
           </div>
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Longitude</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+              Longitude
+            </p>
             <div className="flex items-end gap-2 text-slate-800">
-              <Navigation size={20} className="text-accent-500 mb-1 -rotate-90" />
-              <span className="text-xl font-mono font-bold tracking-tighter">{shop.longitude.toFixed(6)}</span>
+              <Navigation
+                size={20}
+                className="text-accent-500 mb-1 -rotate-90"
+              />
+              <span className="text-xl font-mono font-bold tracking-tighter">
+                {shop.longitude.toFixed(6)}
+              </span>
             </div>
           </div>
         </div>
@@ -119,8 +152,9 @@ const ShopDetail = () => {
             Security Protocol
           </h3>
           <p className="text-sm leading-relaxed">
-            Attendance at this location requires active geofencing and biometric verification. 
-            The current radius of <span className="font-bold">{shop.geofence_radius_m}m</span> is 
+            Attendance at this location requires active geofencing and biometric
+            verification. The current radius of{" "}
+            <span className="font-bold">{shop.geofence_radius_m}m</span> is
             optimized for the branch perimeter.
           </p>
         </div>
@@ -130,8 +164,9 @@ const ShopDetail = () => {
             Personnel Summary
           </h3>
           <p className="text-sm leading-relaxed">
-            There are currently <span className="font-bold">12 staff members</span> assigned to this shop.
-            User assignments can be managed via the Users directory.
+            There are currently{" "}
+            <span className="font-bold">12 staff members</span> assigned to this
+            shop. User assignments can be managed via the Users directory.
           </p>
         </div>
       </div>

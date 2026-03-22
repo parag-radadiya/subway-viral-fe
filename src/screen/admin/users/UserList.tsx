@@ -5,9 +5,10 @@ import {
   Search,
   Shield,
   MapPin,
-  ChevronRight,
   Loader2,
   Pencil,
+  Eye,
+  Edit2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
@@ -113,82 +114,85 @@ const UserList = () => {
           </p>
         </div>
 
-        <Table
-          columns={[
-            {
-              header: "Name & Email",
-              render: (userItem) => (
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {userItem.name}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-medium">
-                    {userItem.email}
-                  </p>
-                </div>
-              ),
-            },
-            {
-              header: "Role",
-              align: "center",
-              render: (userItem) => (
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${getRoleBadgeColor(
-                    userItem.role_id.role_name
-                  )}`}
-                >
-                  <Shield size={10} className="mr-1" />
-                  {userItem.role_id.role_name}
-                </span>
-              ),
-            },
-            {
-              header: "Assignments",
-              align: "center",
-              render: (userItem) => (
-                <div className="flex justify-center flex-wrap gap-1">
-                  {userItem.assigned_shop_ids.length > 0 ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                      <MapPin size={10} className="mr-1" />
-                      {userItem.assigned_shop_ids.length} Shops
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-300 italic">
-                      No assignments
-                    </span>
-                  )}
-                </div>
-              ),
-            },
-            {
-              header: "Actions",
-              align: "right",
-              render: (userItem) => (
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => navigate(ROUTES.ADMIN.USERS.EDIT(userItem._id))}
-                    className="inline-flex items-center text-primary-600 font-bold text-[10px] uppercase tracking-wider hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
+        <div className="p-4">
+          <Table
+            columns={[
+              {
+                header: "Name & Email",
+                render: (userItem) => (
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">
+                      {userItem.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      {userItem.email}
+                    </p>
+                  </div>
+                ),
+              },
+              {
+                header: "Role",
+                align: "center",
+                render: (userItem) => (
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${getRoleBadgeColor(
+                      userItem.role_id.role_name,
+                    )}`}
                   >
-                    <Pencil size={12} className="mr-1" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() =>
-                      navigate(ROUTES.ADMIN.USERS.DETAILS(userItem._id))
-                    }
-                    className="inline-flex items-center text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:text-slate-700 transition-colors p-2 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100"
-                  >
-                    Details
-                    <ChevronRight size={12} className="ml-1" />
-                  </button>
-                </div>
-              ),
-            },
-          ]}
-          data={filteredUsers}
-          keyExtractor={(u) => u._id}
-          emptyStateMessage="No personnel found."
-        />
+                    <Shield size={10} className="mr-1" />
+                    {userItem.role_id.role_name}
+                  </span>
+                ),
+              },
+              {
+                header: "Assignments",
+                align: "center",
+                render: (userItem) => (
+                  <div className="flex justify-center flex-wrap gap-1">
+                    {userItem.assigned_shop_ids.length > 0 ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        <MapPin size={10} className="mr-1" />
+                        {userItem.assigned_shop_ids.length} Shops
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-300 italic">
+                        No assignments
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                header: "Actions",
+                align: "right",
+                render: (userItem) => (
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(ROUTES.ADMIN.USERS.EDIT(userItem._id))
+                      }
+                      className="p-2 hover:bg-accent-50 text-accent-500 rounded-lg transition-colors"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigate(ROUTES.ADMIN.USERS.DETAILS(userItem._id))
+                      }
+                      className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  </div>
+                ),
+              },
+            ]}
+            data={filteredUsers}
+            keyExtractor={(u) => u._id}
+            emptyStateMessage="No personnel found."
+          />
+        </div>
       </div>
     </div>
   );

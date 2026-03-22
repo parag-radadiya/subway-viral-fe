@@ -24,6 +24,9 @@ export const ROUTES = {
     },
     ROTAS: {
       LIST: "/admin/rotas",
+      CREATE: "/admin/rotas/create",
+      EDIT: (id: string) => `/admin/rotas/${id}/edit`,
+      DETAILS: (id: string) => `/admin/rotas/${id}`,
       DASHBOARD: "/admin/rotas/dashboard",
     },
   },

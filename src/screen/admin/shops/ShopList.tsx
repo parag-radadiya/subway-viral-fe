@@ -5,8 +5,8 @@ import {
   Plus,
   Search,
   MapPin,
-  ChevronRight,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
@@ -92,60 +92,63 @@ const ShopList = () => {
             {filteredShops.length} Total Locations
           </p>
         </div>
-
-        <Table
-          columns={[
-            {
-              header: "Shop Name",
-              render: (shop) => (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                    <Store size={18} />
+        <div className="p-4">
+          <Table
+            columns={[
+              {
+                header: "Shop Name",
+                render: (shop) => (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                      <Store size={18} />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {shop.name}
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">
-                    {shop.name}
+                ),
+              },
+              {
+                header: "Location (Lat/Lng)",
+                render: (shop) => (
+                  <div className="flex items-center gap-1.5 text-slate-500">
+                    <MapPin size={14} className="text-slate-400" />
+                    <span className="text-xs font-mono">
+                      {shop.latitude.toFixed(4)}, {shop.longitude.toFixed(4)}
+                    </span>
+                  </div>
+                ),
+              },
+              {
+                header: "Geofence",
+                align: "center",
+                render: (shop) => (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
+                    {shop.geofence_radius_m}m Radius
                   </span>
-                </div>
-              ),
-            },
-            {
-              header: "Location (Lat/Lng)",
-              render: (shop) => (
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <MapPin size={14} className="text-slate-400" />
-                  <span className="text-xs font-mono">
-                    {shop.latitude.toFixed(4)}, {shop.longitude.toFixed(4)}
-                  </span>
-                </div>
-              ),
-            },
-            {
-              header: "Geofence",
-              align: "center",
-              render: (shop) => (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
-                  {shop.geofence_radius_m}m Radius
-                </span>
-              ),
-            },
-            {
-              header: "Actions",
-              align: "right",
-              render: (shop) => (
-                <button
-                  onClick={() => navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))}
-                  className="inline-flex items-center text-primary-600 font-bold text-xs hover:text-primary-700 transition-colors p-2 rounded-lg hover:bg-primary-50"
-                >
-                  View Details
-                  <ChevronRight size={14} className="ml-1" />
-                </button>
-              ),
-            },
-          ]}
-          data={filteredShops}
-          keyExtractor={(shop) => shop._id}
-          emptyStateMessage="No shops found matching your search."
-        />
+                ),
+              },
+              {
+                header: "Actions",
+                align: "right",
+                render: (shop) => (
+                  <button
+                    onClick={() =>
+                      navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))
+                    }
+                    className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
+                    title="View Details"
+                  >
+                    <Eye size={16} />
+                  </button>
+                ),
+              },
+            ]}
+            data={filteredShops}
+            keyExtractor={(shop) => shop._id}
+            emptyStateMessage="No shops found matching your search."
+          />
+        </div>
       </div>
     </div>
   );

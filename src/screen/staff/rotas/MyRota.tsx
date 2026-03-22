@@ -18,7 +18,7 @@ const MyRota = () => {
     if (user?.id) {
       setLoading(true);
       const fetchCall = selectedWeek
-        ? rotasApi.week(selectedWeek)
+        ? rotasApi.week({ week_start: selectedWeek })
         : rotasApi.list();
 
       fetchCall

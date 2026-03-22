@@ -84,9 +84,16 @@ export const attendanceApi = {
 // ─── Rotas API ────────────────────────────────────────────────────────────────
 
 export const rotasApi = {
-  list: () => api.get("/rotas?week_start=2026-03-16"),
-  week: (week_start: string) => api.get(`/rotas/week?week_start=${week_start}`),
+  list: (query?: Record<string, string>) => {
+    const q = query && Object.keys(query).length > 0 
+      ? new URLSearchParams(query).toString() 
+      : "week_start=2026-03-16";
+    return api.get(`/rotas?${q}`);
+  },
+  week: (query: Record<string, string>) => api.get(`/rotas/week?${new URLSearchParams(query).toString()}`),
   dashboard: () => api.get("/rotas/dashboard?week_start=2026-03-16"),
+  getById: (id: string) => api.get(`/rotas/${id}`),
+  create: (data: Record<string, unknown>) => api.post("/rotas", data),
   bulkCreate: (data: Record<string, unknown>) => api.post("/rotas/bulk", data),
   update: (id: string, data: Record<string, unknown>) =>
     api.put(`/rotas/${id}`, data),

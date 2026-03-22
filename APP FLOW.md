@@ -80,10 +80,10 @@ admin
   - detail
     - show attendence
 - rota
-  - list
+  - list ✅
   - create
   - update
-  - delete
+  - delete ✅
 - inventory
   - list
   - create

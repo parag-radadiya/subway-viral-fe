@@ -32,7 +32,9 @@ import PunchInOut from "./screen/staff/attendance/PunchInOut";
 import MyAttendance from "./screen/staff/attendance/MyAttendance";
 
 // Rota Screens
-import RotaManagement from "./screen/admin/rotas/RotaManagement";
+import RotaList from "./screen/admin/rotas/RotaList";
+import RotaDetail from "./screen/admin/rotas/RotaDetail";
+import RotaForm from "./screen/admin/rotas/RotaForm";
 import WeeklyPlanner from "./screen/manager/rotas/WeeklyPlanner";
 import RotaDashboard from "./screen/manager/rotas/RotaDashboard";
 import RotaView from "./screen/sub-manager/rotas/RotaView";
@@ -137,9 +139,15 @@ const App = () => {
                 path={ROUTES.ADMIN.USERS.DETAILS(":id")}
                 element={<UserDetail />}
               />
+              <Route path={ROUTES.ADMIN.ROTAS.LIST} element={<RotaList />} />
+              <Route path={ROUTES.ADMIN.ROTAS.CREATE} element={<RotaForm />} />
               <Route
-                path={ROUTES.ADMIN.ROTAS.LIST}
-                element={<RotaManagement />}
+                path={ROUTES.ADMIN.ROTAS.EDIT(":id")}
+                element={<RotaForm />}
+              />
+              <Route
+                path={ROUTES.ADMIN.ROTAS.DETAILS(":id")}
+                element={<RotaDetail />}
               />
             </Route>
 
