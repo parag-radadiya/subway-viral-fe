@@ -1,34 +1,33 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft,
-  CheckCircle2,
-  ShieldCheck,
-  Eye,
-  FileText,
-  User,
-  Clock,
-  DollarSign,
-  Calendar,
-  MessageSquare,
-  Package,
   Activity,
   AlertCircle,
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Eye,
+  FileText,
   Hash,
   Loader2,
+  MessageSquare,
+  Package,
+  ShieldCheck,
+  User,
 } from "lucide-react";
-import { inventoryApi } from "../../../config/inventoryApi";
-import {
-  InventoryQuery,
-  QueryStatus,
-  InventoryItem,
-  InventoryStatus,
-} from "../../../utils/types";
-import { ROUTES } from "../../../utils/routes";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
-import { toast } from "react-toastify";
+import { inventoryApi } from "../../../config/inventoryApi";
+import { ROUTES } from "../../../utils/routes";
+import {
+  InventoryItem,
+  InventoryQuery,
+  QueryStatus,
+} from "../../../utils/types";
 
 const QueryDetail = () => {
   const { id } = useParams<{ id: string }>();

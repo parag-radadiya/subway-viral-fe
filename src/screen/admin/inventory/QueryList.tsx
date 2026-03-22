@@ -1,23 +1,13 @@
-import { useState, useEffect } from "react";
+import { ArrowLeft, Calendar, Eye, Loader2, Package } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Eye,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Package,
-  Calendar,
-  Activity,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
-import { inventoryApi } from "../../../config/inventoryApi";
-import { InventoryQuery, QueryStatus } from "../../../utils/types";
-import { ROUTES } from "../../../utils/routes";
-import Table from "../../../components/common/Table";
+import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Select from "../../../components/common/Select";
-import { toast } from "react-toastify";
+import Table from "../../../components/common/Table";
+import { inventoryApi } from "../../../config/inventoryApi";
+import { ROUTES } from "../../../utils/routes";
+import { InventoryQuery, QueryStatus } from "../../../utils/types";
 
 const QueryList = () => {
   const navigate = useNavigate();
