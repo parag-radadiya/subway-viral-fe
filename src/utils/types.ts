@@ -59,6 +59,62 @@ export interface Permissions {
   can_manage_roles: boolean;
 }
 
+// ─── Inventory ───────────────────────────────────────────────────────────────
+
+export enum InventoryStatus {
+  GOOD = "Good",
+  DAMAGED = "Damaged",
+  IN_REPAIR = "In Repair",
+}
+
+export enum QueryStatus {
+  OPEN = "Open",
+  CLOSED = "Closed",
+}
+
+export interface InventoryItem {
+  _id: string;
+  shop_id: string | { _id: string; name: string };
+  item_name: string;
+  purchase_date: string;
+  expiry_date: string | null;
+  status: InventoryStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryQuery {
+  _id: string;
+  item_id: string | InventoryItem;
+  shop_id: string;
+  opened_by: string | User;
+  closed_by: string | User | null;
+  issue_note: string;
+  resolve_note: string | null;
+  repair_cost: number | null;
+  status: QueryStatus;
+  opened_at: string;
+  closed_at: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryAuditLog {
+  _id: string;
+  shop_id: string;
+  item_id: string | InventoryItem;
+  query_id: string | InventoryQuery | null;
+  action:
+    | "ITEM_CREATED"
+    | "ITEM_UPDATED"
+    | "ITEM_DELETED"
+    | "QUERY_OPENED"
+    | "QUERY_CLOSED";
+  performed_by: string | User;
+  details: any;
+  createdAt: string;
+}
+
 export interface AuthState {
   token: string | null;
   user: User | null;

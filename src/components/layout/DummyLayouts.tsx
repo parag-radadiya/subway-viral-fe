@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import RoleLayout from "./RoleLayout";
-import { LayoutDashboard, Calendar, BarChart3, UserCheck } from "lucide-react";
+import { LayoutDashboard, Calendar, BarChart3, UserCheck, Package } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
 export const RootLayout = ({ children }: { children: ReactNode }) => (
@@ -48,6 +48,11 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         path: ROUTES.MANAGER.ATTENDANCE,
         icon: UserCheck,
       },
+      {
+        label: "Inventory",
+        path: ROUTES.MANAGER.INVENTORY.LIST,
+        icon: Package,
+      },
     ]}
   >
     {children}
@@ -72,6 +77,11 @@ export const SubManagerLayout = ({ children }: { children: ReactNode }) => (
         label: "Attendance",
         path: ROUTES.SUB_MANAGER.ATTENDANCE,
         icon: UserCheck,
+      },
+      {
+        label: "Inventory",
+        path: ROUTES.SUB_MANAGER.INVENTORY.LIST,
+        icon: Package,
       },
     ]}
   >

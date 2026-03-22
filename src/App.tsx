@@ -53,6 +53,14 @@ import WeeklyPlanner from "./screen/manager/rotas/WeeklyPlanner";
 import RotaDashboard from "./screen/manager/rotas/RotaDashboard";
 import MyRota from "./screen/staff/rotas/MyRota";
 
+// Inventory Screens
+import InventoryList from "./screen/admin/inventory/InventoryList";
+import InventoryForm from "./screen/admin/inventory/InventoryForm";
+import InventoryDetail from "./screen/admin/inventory/InventoryDetail";
+import QueryList from "./screen/admin/inventory/QueryList";
+import QueryDetail from "./screen/admin/inventory/QueryDetail";
+import AuditLogList from "./screen/admin/inventory/AuditLogList";
+
 // Pages
 import LoginPage from "./screen/auth/LoginPage";
 import {
@@ -166,6 +174,13 @@ const App = () => {
                 path={ROUTES.ADMIN.ATTENDANCE}
                 element={<AttendanceList />}
               />
+              <Route path={ROUTES.ADMIN.INVENTORY.LIST} element={<InventoryList />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.CREATE} element={<InventoryForm />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.QUERIES} element={<QueryList />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
+              <Route path={ROUTES.ADMIN.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
             </Route>
 
             {/* Manager Flow */}
@@ -208,6 +223,13 @@ const App = () => {
                 path={ROUTES.MANAGER.ATTENDANCE}
                 element={<ManagerAttendanceList />}
               />
+              <Route path={ROUTES.MANAGER.INVENTORY.LIST} element={<InventoryList />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.QUERIES} element={<QueryList />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
+              <Route path={ROUTES.MANAGER.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
             </Route>
 
             {/* Sub-Manager Flow */}
@@ -242,6 +264,13 @@ const App = () => {
                 path={ROUTES.SUB_MANAGER.ATTENDANCE}
                 element={<SubManagerAttendanceList />}
               />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.LIST} element={<InventoryList />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.QUERIES} element={<QueryList />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
+              <Route path={ROUTES.SUB_MANAGER.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
             </Route>
 
             {/* Staff Flow */}

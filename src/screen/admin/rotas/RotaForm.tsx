@@ -181,6 +181,7 @@ export default function RotaForm() {
           setShopId={(id) => setFormData((prev) => ({ ...prev, shop_id: id }))}
           shops={shops}
           users={users}
+          onSuccess={() => navigate(ROUTES.ADMIN.ROTAS.LIST)}
         />
       )}
     </div>

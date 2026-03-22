@@ -30,6 +30,15 @@ export const ROUTES = {
       DASHBOARD: "/admin/rotas/dashboard",
     },
     ATTENDANCE: "/admin/attendance",
+    INVENTORY: {
+      LIST: "/admin/inventory",
+      CREATE: "/admin/inventory/create",
+      EDIT: (id: string) => `/admin/inventory/${id}/edit`,
+      DETAILS: (id: string) => `/admin/inventory/${id}`,
+      QUERIES: "/admin/inventory/queries",
+      QUERY_DETAILS: (id: string) => `/admin/inventory/queries/${id}`,
+      AUDIT_LOGS: "/admin/inventory/audit-logs",
+    },
   },
   MANAGER: {
     DASHBOARD: "/manager/dashboard",
@@ -42,6 +51,15 @@ export const ROUTES = {
       DASHBOARD: "/manager/rotas/dashboard",
     },
     ATTENDANCE: "/manager/attendance",
+    INVENTORY: {
+      LIST: "/manager/inventory",
+      CREATE: "/manager/inventory/create",
+      EDIT: (id: string) => `/manager/inventory/${id}/edit`,
+      DETAILS: (id: string) => `/manager/inventory/${id}`,
+      QUERIES: "/manager/inventory/queries",
+      QUERY_DETAILS: (id: string) => `/manager/inventory/queries/${id}`,
+      AUDIT_LOGS: "/manager/inventory/audit-logs",
+    },
   },
   SUB_MANAGER: {
     DASHBOARD: "/sub-manager/dashboard",
@@ -52,6 +70,15 @@ export const ROUTES = {
       DETAILS: (id: string) => `/sub-manager/rotas/${id}`,
     },
     ATTENDANCE: "/sub-manager/attendance",
+    INVENTORY: {
+      LIST: "/sub-manager/inventory",
+      CREATE: "/sub-manager/inventory/create",
+      EDIT: (id: string) => `/sub-manager/inventory/${id}/edit`,
+      DETAILS: (id: string) => `/sub-manager/inventory/${id}`,
+      QUERIES: "/sub-manager/inventory/queries",
+      QUERY_DETAILS: (id: string) => `/sub-manager/inventory/queries/${id}`,
+      AUDIT_LOGS: "/sub-manager/inventory/audit-logs",
+    },
   },
   STAFF: {
     DASHBOARD: "/staff/dashboard",

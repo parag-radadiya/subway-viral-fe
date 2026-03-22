@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import RoleLayout from "./RoleLayout";
-import { LayoutDashboard, Store, Users, Calendar, Clock } from "lucide-react";
+import { LayoutDashboard, Store, Users, Calendar, Clock, Package } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -10,6 +10,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { label: "Users", path: ROUTES.ADMIN.USERS.LIST, icon: Users },
     { label: "Rotas", path: ROUTES.ADMIN.ROTAS.LIST, icon: Calendar },
     { label: "Attendance", path: ROUTES.ADMIN.ATTENDANCE, icon: Clock },
+    { label: "Inventory", path: ROUTES.ADMIN.INVENTORY.LIST, icon: Package },
   ];
 
   return (
