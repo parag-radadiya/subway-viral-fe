@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { rotasApi, shopsApi, usersApi } from "../../../config/apiCall";
 import {
@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Rota } from "../../../utils/types";
 import { toast } from "react-toastify";
-import clsx from "clsx";
 import Table from "../../../components/common/Table";
 import Input from "../../../components/common/Input";
 import Select from "../../../components/common/Select";
@@ -23,6 +22,7 @@ import Dialog from "../../../components/common/Dialog";
 import Tabs from "../../../components/common/Tabs";
 import Button from "../../../components/common/Button";
 import { ROUTES } from "../../../utils/routes";
+import WeeklyScheduleGrid from "../../../components/admin/rotas/WeeklyScheduleGrid";
 
 const RotaList = () => {
   const [rotas, setRotas] = useState<Rota[]>([]);
@@ -39,6 +39,7 @@ const RotaList = () => {
   const [selectedWeek, setSelectedWeek] = useState<string>("");
   const [selectedWeeklyShop, setSelectedWeeklyShop] = useState<string>("");
   const [weekData, setWeekData] = useState<any>(null);
+  console.log("🚀 - RotaList - weekData:", weekData);
 
   // Delete confirm state
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -95,7 +96,7 @@ const RotaList = () => {
       setLoading(true);
       rotasApi
         .week({ week_start: selectedWeek, shop_id: selectedWeeklyShop })
-        .then(({ data }) => setWeekData(data.data || data))
+        .then(({ data }) => setWeekData(data.data))
         .catch(() => toast.error("Failed to fetch weekly rotas."))
         .finally(() => setLoading(false));
     } else {
@@ -111,7 +112,6 @@ const RotaList = () => {
       if (activeTab === "all") {
         setRotas((prev) => prev.filter((r) => r._id !== deleteTargetId));
       } else {
-        // Optimistically update weekly view data by reloading it briefly or filtering out locally
         if (selectedWeek && selectedWeeklyShop) {
           rotasApi
             .week({ week_start: selectedWeek, shop_id: selectedWeeklyShop })
@@ -126,55 +126,134 @@ const RotaList = () => {
     }
   };
 
-  const clearFilters = () => {
-    setActiveFilters({ shop_id: "all", user_id: "all" });
+  // Date/Time Formatters
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "TBA";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
-  const hasActiveFilters =
-    activeFilters.shop_id !== "all" || activeFilters.user_id !== "all";
-
-  // we don't need local filtering since it's server-side now
-  const filteredRotas = rotas;
-
-  if (loading)
-    return (
-      <div className="p-12 text-center text-slate-400">
-        <Loader2 className="animate-spin inline mr-2" /> Loading global rotas...
-      </div>
-    );
+  const rotaColumns = useMemo(
+    () => [
+      {
+        header: "Employee",
+        render: (rota: Rota) => (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+              <User size={18} />
+            </div>
+            <p className="text-sm font-black text-slate-700">
+              {typeof rota.user_id === "string"
+                ? rota.user_id
+                : rota.user_id?.name}
+            </p>
+          </div>
+        ),
+      },
+      {
+        header: "Date",
+        render: (rota: Rota) => (
+          <div className="flex items-center gap-2 text-slate-600">
+            <Calendar size={14} className="text-slate-400" />
+            <span className="text-xs font-medium">
+              {formatDate(rota.shift_date)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        header: "Shift Time",
+        render: (rota: Rota) => (
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-50 text-secondary-600 border border-secondary-100">
+            <Clock size={12} /> {rota.start_time} - {rota.end_time || "TBA"}
+          </div>
+        ),
+      },
+      {
+        header: "Location",
+        render: (rota: Rota) => (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+            <Store size={14} className="text-slate-400" />
+            <span className="text-slate-700">
+              {typeof rota.shop_id === "string"
+                ? rota.shop_id
+                : rota.shop_id?.name}
+            </span>
+          </div>
+        ),
+      },
+      {
+        header: "Actions",
+        align: "right" as const,
+        render: (rota: Rota) => (
+          <div className="flex items-center justify-end gap-1">
+            <button
+              onClick={() => navigate(ROUTES.ADMIN.ROTAS.DETAILS(rota._id))}
+              className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors"
+              title="View Details"
+            >
+              <Eye size={16} />
+            </button>
+            <button
+              onClick={() => navigate(ROUTES.ADMIN.ROTAS.EDIT(rota._id))}
+              className="p-2 hover:bg-slate-50 text-slate-500 rounded-lg transition-colors"
+              title="Edit Shift"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button
+              onClick={() => setDeleteTargetId(rota._id)}
+              className="p-2 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors"
+              title="Delete Shift"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [navigate, setDeleteTargetId],
+  );
 
   return (
-    <div className="space-y-6 animate-fade-in pb-20">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Org-Wide Rotas</h1>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+            Org-Wide Rotas
+          </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             Global oversight and management across all locations
           </p>
         </div>
-        <Button
-          variant="primary"
-          onClick={() => navigate(ROUTES.ADMIN.ROTAS.CREATE)}
-          className="rounded-lg px-4"
-        >
-          <Plus size={18} className="mr-2" />
-          Create Rota
-        </Button>
-      </div>
-
-      <div className="flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-1 items-center gap-3 justify-between">
+        <div className="flex gap-3">
           <Tabs
             options={[
               { label: "All Rotas", value: "all" },
               { label: "Weekly View", value: "weekly" },
             ]}
+            className="h-full"
             activeTab={activeTab}
             onChange={(val) => setActiveTab(val as "all" | "weekly")}
           />
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ADMIN.ROTAS.CREATE)}
+            className="rounded-lg px-4"
+          >
+            <Plus size={18} className="mr-2" />
+            Create Rota
+          </Button>
+        </div>
+      </div>
 
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
           {activeTab === "all" && (
-            <div className="flex  items-center gap-3 w-full sm:w-auto mt-4 md:mt-0">
+            <div className="flex items-center gap-3">
               <Select
                 value={activeFilters.shop_id}
                 onChange={(e) =>
@@ -193,6 +272,7 @@ const RotaList = () => {
               </Select>
 
               <Select
+                value={activeFilters.user_id}
                 onChange={(e) =>
                   setActiveFilters({
                     ...activeFilters,
@@ -210,7 +290,7 @@ const RotaList = () => {
             </div>
           )}
           {activeTab === "weekly" && (
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+            <div className="flex items-center gap-3">
               <Select
                 value={selectedWeeklyShop}
                 onChange={(e) => setSelectedWeeklyShop(e.target.value)}
@@ -228,253 +308,59 @@ const RotaList = () => {
                 type="date"
                 value={selectedWeek}
                 onChange={(e) => setSelectedWeek(e.target.value)}
+                className="w-auto h-10"
               />
             </div>
           )}
+
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto">
+            {rotas.length} Total Rotas
+          </p>
+        </div>
+
+        <div className="p-4">
+          {loading && rotas.length === 0 && weekData === null ? (
+            <div className="flex flex-col items-center justify-center p-20 text-slate-400">
+              <Loader2
+                className="animate-spin mb-4 text-primary-500"
+                size={32}
+              />
+              <p className="text-xs font-black uppercase tracking-widest">
+                Synchronizing Rota Logs...
+              </p>
+            </div>
+          ) : (
+            <>
+              {activeTab === "all" ? (
+                <Table
+                  columns={rotaColumns}
+                  data={rotas}
+                  keyExtractor={(rota) => rota._id}
+                  emptyStateMessage="No rotas found matching filters."
+                />
+              ) : (
+                <div className="space-y-8 min-h-[400px]">
+                  {!weekData ? (
+                    <div className="flex flex-col items-center justify-center p-20 text-slate-400">
+                      <BarChart3 className="mb-4 opacity-20" size={64} />
+                      <p className="text-sm font-bold text-slate-400">
+                        Select a Shop and Week to load the schedule.
+                      </p>
+                    </div>
+                  ) : (
+                    <WeeklyScheduleGrid
+                      data={weekData}
+                      onShiftClick={(shiftId) =>
+                        navigate(ROUTES.ADMIN.ROTAS.DETAILS(shiftId))
+                      }
+                    />
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
-      {activeTab === "all" && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden p-4">
-          <Table
-            columns={[
-              {
-                header: "Employee",
-                render: (rota) => (
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                      <User size={18} />
-                    </div>
-                    <p className="text-sm font-bold text-slate-700">
-                      {typeof rota.user_id === "string"
-                        ? rota.user_id
-                        : rota.user_id?.name}
-                    </p>
-                  </div>
-                ),
-              },
-              {
-                header: "Date",
-                render: (rota) => (
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <Calendar size={14} className="text-slate-400" />
-                    <p className="text-sm font-bold">
-                      {new Date(rota.shift_date).toLocaleDateString(undefined, {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                  </div>
-                ),
-              },
-              {
-                header: "Shift",
-                render: (rota) => (
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-700">
-                    <Clock size={12} /> {rota.start_time} -{" "}
-                    {rota.end_time || "TBA"}
-                  </div>
-                ),
-              },
-              {
-                header: "Location",
-                render: (rota) => (
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <Store size={14} className="text-slate-300" />
-                    {typeof rota.shop_id === "string"
-                      ? rota.shop_id
-                      : rota.shop_id?.name}
-                  </div>
-                ),
-              },
-              {
-                header: "Status",
-                render: (rota) => (
-                  <span
-                    className={clsx(
-                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter",
-                      rota.is_published
-                        ? "bg-success-50 text-success-600"
-                        : "bg-warning-50 text-warning-600",
-                    )}
-                  >
-                    {rota.is_published ? "Published" : "Draft"}
-                  </span>
-                ),
-              },
-              {
-                header: "Actions",
-                align: "right",
-                render: (rota) => (
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() =>
-                        navigate(ROUTES.ADMIN.ROTAS.DETAILS(rota._id))
-                      }
-                      className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors"
-                      title="View Details"
-                    >
-                      <Eye size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate(ROUTES.ADMIN.ROTAS.EDIT(rota._id))
-                      }
-                      className="p-2 hover:bg-accent-50 text-accent-500 rounded-lg transition-colors"
-                      title="Edit Shift"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTargetId(rota._id)}
-                      className="p-2 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors inline-flex items-center"
-                      title="Delete Shift"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ),
-              },
-            ]}
-            data={filteredRotas}
-            keyExtractor={(rota) => rota._id}
-            emptyStateMessage={
-              <div className="py-12 flex flex-col items-center justify-center text-slate-400">
-                <BarChart3 size={48} className="mb-4 opacity-10" />
-                <p className="text-sm font-bold uppercase tracking-tighter text-slate-500">
-                  No Rotas Found
-                </p>
-                <p className="text-xs font-medium mt-1">
-                  Try adjusting your filters or search term.
-                </p>
-              </div>
-            }
-          />
-        </div>
-      )}
-
-      {activeTab === "weekly" && (
-        <>
-          {!selectedWeek || !selectedWeeklyShop ? (
-            <div className="bg-white rounded-3xl border border-dashed border-slate-200 p-20 flex flex-col items-center justify-center text-slate-400">
-              <Calendar size={64} className="mb-4 opacity-5" />
-              <p className="text-lg font-black uppercase tracking-tighter">
-                Select Filters
-              </p>
-              <p className="text-sm font-medium">
-                Please select a shop and a week start date to view this week's
-                rotas.
-              </p>
-            </div>
-          ) : weekData ? (
-            <div className="space-y-6 animate-fade-in text-left">
-              {Object.entries(weekData.days || {}).map(
-                ([dayStr, shifts]: [string, any]) => {
-                  return (
-                    <div
-                      key={dayStr}
-                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
-                    >
-                      <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 font-bold text-slate-700 text-sm tracking-widest uppercase">
-                        {dayStr}
-                      </div>
-                      <div className="p-6">
-                        {shifts.length === 0 ? (
-                          <p className="text-slate-400 text-sm italic py-2 text-center">
-                            No shifts assigned for this day.
-                          </p>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {shifts.map((shift: any) => (
-                              <div
-                                key={shift._id}
-                                className="border border-slate-100 rounded-xl p-4 bg-white hover:border-primary-200 hover:shadow-md transition-all group relative"
-                              >
-                                <div className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                  <button
-                                    onClick={() =>
-                                      navigate(
-                                        ROUTES.ADMIN.ROTAS.DETAILS(shift._id),
-                                      )
-                                    }
-                                    className="p-1 hover:bg-primary-50 text-primary-500 rounded-lg"
-                                    title="View Details"
-                                  >
-                                    <Eye size={14} />
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      navigate(
-                                        ROUTES.ADMIN.ROTAS.EDIT(shift._id),
-                                      )
-                                    }
-                                    className="p-1 hover:bg-accent-50 text-accent-500 rounded-lg"
-                                    title="Edit Shift"
-                                  >
-                                    <Edit2 size={14} />
-                                  </button>
-                                  <button
-                                    onClick={() => setDeleteTargetId(shift._id)}
-                                    className="p-1 hover:bg-danger-50 text-danger-500 rounded-lg"
-                                    title="Delete Shift"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </div>
-                                <div className="flex justify-between items-start mb-4">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
-                                      {(typeof shift.user_id === "string"
-                                        ? "U"
-                                        : shift.user_id?.name?.slice(0, 2) ||
-                                          "U"
-                                      ).toUpperCase()}
-                                    </div>
-                                    <span className="text-xs font-bold text-slate-700">
-                                      {typeof shift.user_id === "string"
-                                        ? shift.user_id
-                                        : shift.user_id?.name}
-                                    </span>
-                                  </div>
-                                  {shift.is_published && (
-                                    <span className="flex items-center gap-1 text-[10px] font-bold text-success-600 uppercase ml-auto">
-                                      <div className="w-1.5 h-1.5 rounded-full bg-success-500" />{" "}
-                                      Published
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-3 mb-4">
-                                  <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                                    <Clock size={20} />
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                      Shift Time
-                                    </p>
-                                    <p className="text-sm font-bold text-slate-700">
-                                      {shift.start_time} -{" "}
-                                      {shift.end_time || "TBA"}
-                                    </p>
-                                  </div>
-                                </div>
-                                {shift.note && (
-                                  <div className="mt-4 pt-3 border-t border-slate-50 text-xs text-slate-500 font-medium italic">
-                                    Note: {shift.note}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          ) : null}
-        </>
-      )}
 
       <Dialog
         isOpen={!!deleteTargetId}

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { rotasApi, shopsApi, usersApi } from "../../../config/apiCall";
 import { toast } from "react-toastify";
-import Input from "../../../components/common/Input";
-import Select from "../../../components/common/Select";
-import Button from "../../../components/common/Button";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import Tabs from "../../../components/common/Tabs";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
+import SingleRotaForm from "../../../components/admin/rotas/SingleRotaForm";
+import BulkWeeklyRotaForm from "../../../components/admin/rotas/BulkWeeklyRotaForm";
 
 export default function RotaForm() {
   const { id: editItemId } = useParams<{ id: string }>();
@@ -24,6 +24,10 @@ export default function RotaForm() {
     endTime: "17:00",
     note: "",
   });
+
+  const [assignmentMode, setAssignmentMode] = useState<"single" | "bulk">(
+    "single",
+  );
 
   useEffect(() => {
     setInitLoading(true);
@@ -138,120 +142,48 @@ export default function RotaForm() {
         </button>
         <div>
           <h1 className="text-xl font-bold text-slate-800">
-            {editItemId ? "Edit Shift Details" : "Assign New Shift"}
+            {editItemId ? "Edit Shift Details" : "Assign Shifts"}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             {editItemId
               ? "Modify existing rota assignment"
-              : "Assign a new shift to an employee"}
+              : "Create individual or bulk roster assignments"}
           </p>
         </div>
+        {!editItemId && (
+          <div className="ml-auto">
+            <Tabs
+              options={[
+                { label: "Single Assignment", value: "single" },
+                { label: "Bulk Weekly Allocation", value: "bulk" },
+              ]}
+              activeTab={assignmentMode}
+              onChange={(val) => setAssignmentMode(val as "single" | "bulk")}
+            />
+          </div>
+        )}
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-2xl border border-slate-200 shadow-card p-8 space-y-5"
-      >
-        {!editItemId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Select
-              label="Shop *"
-              value={formData.shop_id}
-              onChange={(e) =>
-                setFormData({ ...formData, shop_id: e.target.value })
-              }
-            >
-              <option value="" disabled>
-                Select Shop
-              </option>
-              {shops.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.name}
-                </option>
-              ))}
-            </Select>
-
-            <Select
-              label="Employee *"
-              value={formData.user_id}
-              onChange={(e) =>
-                setFormData({ ...formData, user_id: e.target.value })
-              }
-            >
-              <option value="" disabled>
-                Select Employee
-              </option>
-              {users.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )}
-
-        {editItemId && (
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 mb-6">
-            Editing time for an existing shift assignment. To change shop or
-            employee, please delete and recreate.
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Input
-            type="date"
-            label="Shift Date *"
-            value={formData.shiftDate}
-            onChange={(e) =>
-              setFormData({ ...formData, shiftDate: e.target.value })
-            }
-          />
-          <Input
-            type="time"
-            label="Start Time *"
-            value={formData.startTime}
-            onChange={(e) =>
-              setFormData({ ...formData, startTime: e.target.value })
-            }
-          />
-          <Input
-            type="time"
-            label="End Time *"
-            value={formData.endTime}
-            onChange={(e) =>
-              setFormData({ ...formData, endTime: e.target.value })
-            }
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-primary-700 block mb-1.5">
-            Note (Optional)
-          </label>
-          <textarea
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm text-primary-800 focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400"
-            rows={3}
-            placeholder="Add any instructions or notes about this shift..."
-            value={formData.note}
-            onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-          />
-        </div>
-
-        <div className="pt-4 flex gap-3">
-          <Button
-            variant="secondary"
-            fullWidth
-            type="button"
-            onClick={() => navigate(ROUTES.ADMIN.ROTAS.LIST)}
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" fullWidth type="submit" disabled={loading}>
-            <Save size={18} className="mr-2" />
-            {editItemId ? "Update Shift" : "Create Shift"}
-          </Button>
-        </div>
-      </form>
+      {assignmentMode === "single" ? (
+        <SingleRotaForm
+          formData={formData}
+          setFormData={setFormData}
+          shops={shops}
+          users={users}
+          loading={loading}
+          editItemId={editItemId}
+          onSubmit={handleSubmit}
+          onCancel={() => navigate(ROUTES.ADMIN.ROTAS.LIST)}
+        />
+      ) : (
+        <BulkWeeklyRotaForm
+          shopId={formData.shop_id}
+          setShopId={(id) => setFormData((prev) => ({ ...prev, shop_id: id }))}
+          shops={shops}
+          users={users}
+          navigate={navigate}
+        />
+      )}
     </div>
   );
 }

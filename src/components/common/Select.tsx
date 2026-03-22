@@ -14,10 +14,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label
-            htmlFor={id}
-            className="text-sm font-medium text-primary-700"
-          >
+          <label htmlFor={id} className="text-sm font-medium text-primary-700">
             {label}
           </label>
         )}
@@ -34,13 +31,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               "w-full rounded-lg border text-sm text-primary-800 bg-white appearance-none cursor-pointer",
               "px-4 py-2.5 transition-all duration-150",
               "focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400",
-              "disabled:opacity-60 disabled:cursor-not-allowed",
+              "disabled:opacity-60 disabled:cursor-not-allowed bg-white border-slate-200 rounded-lg text-xs font-bold text-slate-700",
               leftIcon ? "pl-10" : "pl-4",
               "pr-10",
               error
                 ? "border-danger-500 focus:ring-danger-100"
                 : "border-slate-200 hover:border-slate-300",
-              className
+              className,
             )}
             {...rest}
           >
@@ -55,12 +52,10 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             <span>⚠</span> {error}
           </p>
         )}
-        {hint && !error && (
-          <p className="text-xs text-slate-400">{hint}</p>
-        )}
+        {hint && !error && <p className="text-xs text-slate-400">{hint}</p>}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = "Select";

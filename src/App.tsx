@@ -30,6 +30,7 @@ import UserDetail from "./screen/admin/users/UserDetail";
 import UserForm from "./screen/admin/users/UserForm";
 import PunchInOut from "./screen/staff/attendance/PunchInOut";
 import MyAttendance from "./screen/staff/attendance/MyAttendance";
+import AttendanceList from "./screen/admin/attendance/AttendanceList";
 
 // Rota Screens
 import RotaList from "./screen/admin/rotas/RotaList";
@@ -148,6 +149,10 @@ const App = () => {
               <Route
                 path={ROUTES.ADMIN.ROTAS.DETAILS(":id")}
                 element={<RotaDetail />}
+              />
+              <Route
+                path={ROUTES.ADMIN.ATTENDANCE}
+                element={<AttendanceList />}
               />
             </Route>
 

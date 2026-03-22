@@ -45,11 +45,11 @@ const Button = ({
       {...rest}
       disabled={disabled || isLoading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap",
         sizeClasses[size],
         variantClasses[variant],
         fullWidth && "w-full",
-        className
+        className,
       )}
     >
       {isLoading ? (

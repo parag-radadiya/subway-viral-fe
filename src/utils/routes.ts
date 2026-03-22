@@ -29,6 +29,7 @@ export const ROUTES = {
       DETAILS: (id: string) => `/admin/rotas/${id}`,
       DASHBOARD: "/admin/rotas/dashboard",
     },
+    ATTENDANCE: "/admin/attendance",
   },
   MANAGER: {
     DASHBOARD: "/manager/dashboard",

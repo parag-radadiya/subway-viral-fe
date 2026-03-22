@@ -6,11 +6,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   leftIcon?: ReactNode;
+  startIcon?: ReactNode;
   hint?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, leftIcon, hint, className, type, id, ...rest }, ref) => {
+  ({ label, error, leftIcon, startIcon, hint, className, type, id, ...rest }, ref) => {
+    const icon = leftIcon || startIcon;
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
@@ -26,9 +28,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <div className="relative">
-          {leftIcon && (
+          {icon && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-              {leftIcon}
+              {icon}
             </span>
           )}
           <input
@@ -40,7 +42,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               "px-4 py-2.5 transition-all duration-150",
               "focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400",
               "disabled:opacity-60 disabled:cursor-not-allowed",
-              leftIcon && "pl-10",
+              icon && "pl-10",
               isPassword && "pr-10",
               error
                 ? "border-danger-500 focus:ring-danger-100"

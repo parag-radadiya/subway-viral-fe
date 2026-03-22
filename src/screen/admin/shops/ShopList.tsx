@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
 import { shopsApi } from "../../../config/apiCall";
-import {
-  Store,
-  Plus,
-  Search,
-  MapPin,
-  Loader2,
-  Eye,
-} from "lucide-react";
+import { Store, Plus, Search, MapPin, Loader2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
+import Input from "../../../components/common/Input";
 import Table from "../../../components/common/Table";
 import { toast } from "react-toastify";
 
@@ -75,20 +69,14 @@ const ShopList = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="Search shops by name..."
-              className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto">
+          <Input
+            placeholder="Search shops by name..."
+            className="max-w-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            startIcon={<Search size={16} />}
+          />
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto whitespace-nowrap">
             {filteredShops.length} Total Locations
           </p>
         </div>
