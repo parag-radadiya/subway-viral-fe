@@ -74,7 +74,7 @@ export enum QueryStatus {
 
 export interface InventoryItem {
   _id: string;
-  shop_id: string | { _id: string; name: string };
+  shop_id: { _id: string; name: string };
   item_name: string;
   purchase_date: string;
   expiry_date: string | null;
@@ -86,15 +86,14 @@ export interface InventoryItem {
 export interface InventoryQuery {
   _id: string;
   item_id: string | InventoryItem;
-  shop_id: string;
+  shop_id: { _id: string; name: string };
   opened_by: string | User;
   closed_by: string | User | null;
   issue_note: string;
   resolve_note: string | null;
   repair_cost: number | null;
   status: QueryStatus;
-  opened_at: string;
-  closed_at: string | null;
+  resolved_at: string | null;
   createdAt: string;
   updatedAt: string;
 }

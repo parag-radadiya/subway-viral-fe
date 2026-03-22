@@ -1,9 +1,11 @@
 import {
   Activity,
+  AlertCircle,
   Calendar,
   Edit2,
   Eye,
   Loader2,
+  MessageSquare,
   Package,
   Plus,
   Search,
@@ -34,6 +36,13 @@ const InventoryList = () => {
   // Delete confirm state
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Report Issue state
+  const [reportIssueItemId, setReportIssueItemId] = useState<string | null>(
+    null,
+  );
+  const [issueNote, setIssueNote] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -70,6 +79,27 @@ const InventoryList = () => {
       toast.error(error.message || "Failed to delete item");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleOpenIssue = async () => {
+    if (!reportIssueItemId || !issueNote.trim()) return;
+    setIsReporting(true);
+    try {
+      await inventoryApi.openQuery({
+        item_id: reportIssueItemId,
+        issue_note: issueNote,
+      });
+      toast.success(
+        "Issue reported successfully. Item status moved to Damaged.",
+      );
+      setReportIssueItemId(null);
+      setIssueNote("");
+      fetchItems();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to report issue");
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -142,6 +172,13 @@ const InventoryList = () => {
             title="View Details"
           >
             <Eye size={16} />
+          </button>
+          <button
+            onClick={() => setReportIssueItemId(item._id)}
+            className="p-2 hover:bg-amber-50 text-amber-500 rounded-lg transition-colors"
+            title="Report Issue"
+          >
+            <MessageSquare size={16} />
           </button>
           <button
             onClick={() => navigate(ROUTES.ADMIN.INVENTORY.EDIT(item._id))}
@@ -307,6 +344,64 @@ const InventoryList = () => {
             Do you really want to delete this inventory item? This action cannot
             be undone and will permanently remove it from the system.
           </p>
+        </div>
+      </Dialog>
+
+      {/* Report Issue Dialog */}
+      <Dialog
+        isOpen={!!reportIssueItemId}
+        onClose={() => {
+          setReportIssueItemId(null);
+          setIssueNote("");
+        }}
+        title="Quick Report Issue"
+        maxWidth="sm"
+        footer={
+          <>
+            <button
+              onClick={() => {
+                setReportIssueItemId(null);
+                setIssueNote("");
+              }}
+              className="flex-1 py-3 text-[10px] font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest rounded-xl hover:bg-slate-200/50 transition-colors"
+              disabled={isReporting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleOpenIssue}
+              className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/30 transition-all disabled:opacity-50"
+              disabled={isReporting || !issueNote.trim()}
+            >
+              {isReporting ? (
+                <Loader2 className="animate-spin inline" size={16} />
+              ) : (
+                "Submit Report"
+              )}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
+            <AlertCircle className="text-amber-500 shrink-0" size={20} />
+            <p className="text-xs text-amber-800 leading-snug">
+              Reporting an issue will record a new maintenance ticket and
+              automatically flag this item as <strong>Damaged</strong>.
+            </p>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
+              Issue details *
+            </label>
+            <textarea
+              className="w-full h-32 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 transition-all outline-none resize-none text-sm text-slate-700 placeholder:text-slate-300"
+              placeholder="Explain the problem in detail..."
+              value={issueNote}
+              onChange={(e) => setIssueNote(e.target.value)}
+              autoFocus
+            />
+          </div>
         </div>
       </Dialog>
     </div>

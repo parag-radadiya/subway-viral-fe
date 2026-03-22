@@ -131,7 +131,7 @@ const InventoryDetail = () => {
     },
     {
       header: "Opened At",
-      render: (q: InventoryQuery) => new Date(q.opened_at).toLocaleDateString(),
+      render: (q: InventoryQuery) => new Date(q.createdAt).toLocaleDateString(),
     },
     {
       header: "Cost",

@@ -33,7 +33,6 @@ const UserList = () => {
     usersApi
       .list()
       .then(({ data }) => {
-        console.log("🚀 - UserList - res:", data);
         setUsers(data.data.users);
       })
       .catch((err) => {
