@@ -34,13 +34,23 @@ import AttendanceList from "./screen/admin/attendance/AttendanceList";
 import ManagerAttendanceList from "./screen/manager/attendance/AttendanceList";
 import SubManagerAttendanceList from "./screen/sub-manager/attendance/AttendanceList";
 
-// Rota Screens
+// Rota Screens - Admin
 import RotaList from "./screen/admin/rotas/RotaList";
 import RotaDetail from "./screen/admin/rotas/RotaDetail";
 import RotaForm from "./screen/admin/rotas/RotaForm";
+
+// Rota Screens - Manager
+import ManagerRotaList from "./screen/manager/rotas/RotaList";
+import ManagerRotaDetail from "./screen/manager/rotas/RotaDetail";
+import ManagerRotaForm from "./screen/manager/rotas/RotaForm";
+
+// Rota Screens - Sub-Manager
+import SubManagerRotaList from "./screen/sub-manager/rotas/RotaList";
+import SubManagerRotaDetail from "./screen/sub-manager/rotas/RotaDetail";
+import SubManagerRotaForm from "./screen/sub-manager/rotas/RotaForm";
+
 import WeeklyPlanner from "./screen/manager/rotas/WeeklyPlanner";
 import RotaDashboard from "./screen/manager/rotas/RotaDashboard";
-import RotaView from "./screen/sub-manager/rotas/RotaView";
 import MyRota from "./screen/staff/rotas/MyRota";
 
 // Pages
@@ -171,6 +181,22 @@ const App = () => {
                 element={<ManagerDashboard />}
               />
               <Route
+                path={ROUTES.MANAGER.ROTAS.LIST}
+                element={<ManagerRotaList />}
+              />
+              <Route
+                path={ROUTES.MANAGER.ROTAS.CREATE}
+                element={<ManagerRotaForm />}
+              />
+              <Route
+                path={ROUTES.MANAGER.ROTAS.EDIT(":id")}
+                element={<ManagerRotaForm />}
+              />
+              <Route
+                path={ROUTES.MANAGER.ROTAS.DETAILS(":id")}
+                element={<ManagerRotaDetail />}
+              />
+              <Route
                 path={ROUTES.MANAGER.ROTAS.PLANNER}
                 element={<WeeklyPlanner />}
               />
@@ -198,7 +224,19 @@ const App = () => {
               />
               <Route
                 path={ROUTES.SUB_MANAGER.ROTAS.LIST}
-                element={<RotaView />}
+                element={<SubManagerRotaList />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.ROTAS.CREATE}
+                element={<SubManagerRotaForm />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.ROTAS.EDIT(":id")}
+                element={<SubManagerRotaForm />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.ROTAS.DETAILS(":id")}
+                element={<SubManagerRotaDetail />}
               />
               <Route
                 path={ROUTES.SUB_MANAGER.ATTENDANCE}

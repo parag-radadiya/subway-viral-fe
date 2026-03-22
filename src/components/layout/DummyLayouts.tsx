@@ -39,6 +39,11 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         icon: Calendar,
       },
       {
+        label: "Rotas",
+        path: ROUTES.MANAGER.ROTAS.LIST,
+        icon: Calendar,
+      },
+      {
         label: "Attendance",
         path: ROUTES.MANAGER.ATTENDANCE,
         icon: UserCheck,

@@ -112,7 +112,7 @@ export default function RotaForm() {
         await rotasApi.create(payload);
         toast.success("Shift created successfully");
       }
-      navigate(ROUTES.ADMIN.ROTAS.LIST);
+      navigate(ROUTES.SUB_MANAGER.ROTAS.LIST);
     } catch (err) {
       toast.error(
         editItemId ? "Failed to update shift" : "Failed to create shift",
@@ -135,7 +135,7 @@ export default function RotaForm() {
     <div className="space-y-6 animate-fade-in pb-20">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate(ROUTES.ADMIN.ROTAS.LIST)}
+          onClick={() => navigate(ROUTES.SUB_MANAGER.ROTAS.LIST)}
           className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
         >
           <ArrowLeft size={20} />
@@ -173,7 +173,7 @@ export default function RotaForm() {
           loading={loading}
           editItemId={editItemId}
           onSubmit={handleSubmit}
-          onCancel={() => navigate(ROUTES.ADMIN.ROTAS.LIST)}
+          onCancel={() => navigate(ROUTES.SUB_MANAGER.ROTAS.LIST)}
         />
       ) : (
         <BulkWeeklyRotaForm
@@ -181,6 +181,7 @@ export default function RotaForm() {
           setShopId={(id) => setFormData((prev) => ({ ...prev, shop_id: id }))}
           shops={shops}
           users={users}
+          onSuccess={() => navigate(ROUTES.SUB_MANAGER.ROTAS.LIST)}
         />
       )}
     </div>

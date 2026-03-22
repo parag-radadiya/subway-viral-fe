@@ -34,6 +34,10 @@ export const ROUTES = {
   MANAGER: {
     DASHBOARD: "/manager/dashboard",
     ROTAS: {
+      LIST: "/manager/rotas",
+      CREATE: "/manager/rotas/create",
+      EDIT: (id: string) => `/manager/rotas/${id}/edit`,
+      DETAILS: (id: string) => `/manager/rotas/${id}`,
       PLANNER: "/manager/rotas/planner",
       DASHBOARD: "/manager/rotas/dashboard",
     },
@@ -43,6 +47,9 @@ export const ROUTES = {
     DASHBOARD: "/sub-manager/dashboard",
     ROTAS: {
       LIST: "/sub-manager/rotas",
+      CREATE: "/sub-manager/rotas/create",
+      EDIT: (id: string) => `/sub-manager/rotas/${id}/edit`,
+      DETAILS: (id: string) => `/sub-manager/rotas/${id}`,
     },
     ATTENDANCE: "/sub-manager/attendance",
   },

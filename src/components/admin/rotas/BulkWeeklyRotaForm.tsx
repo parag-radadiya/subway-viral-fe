@@ -33,7 +33,7 @@ interface BulkWeeklyRotaFormProps {
   setShopId: (id: string) => void;
   shops: any[];
   users: any[];
-  navigate: (path: string) => void;
+  onSuccess: () => void;
 }
 
 const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
@@ -41,7 +41,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   setShopId,
   shops,
   users,
-  navigate,
+  onSuccess,
 }) => {
   const [bulkShifts, setBulkShifts] = useState<ShiftCell[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -119,7 +119,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         );
       } else {
         toast.success("Weekly rota published successfully!");
-        navigate(ROUTES.ADMIN.ROTAS.LIST);
+        onSuccess();
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to publish bulk rota");
