@@ -31,6 +31,8 @@ import UserForm from "./screen/admin/users/UserForm";
 import PunchInOut from "./screen/staff/attendance/PunchInOut";
 import MyAttendance from "./screen/staff/attendance/MyAttendance";
 import AttendanceList from "./screen/admin/attendance/AttendanceList";
+import ManagerAttendanceList from "./screen/manager/attendance/AttendanceList";
+import SubManagerAttendanceList from "./screen/sub-manager/attendance/AttendanceList";
 
 // Rota Screens
 import RotaList from "./screen/admin/rotas/RotaList";
@@ -176,6 +178,10 @@ const App = () => {
                 path={ROUTES.MANAGER.ROTAS.DASHBOARD}
                 element={<RotaDashboard />}
               />
+              <Route
+                path={ROUTES.MANAGER.ATTENDANCE}
+                element={<ManagerAttendanceList />}
+              />
             </Route>
 
             {/* Sub-Manager Flow */}
@@ -193,6 +199,10 @@ const App = () => {
               <Route
                 path={ROUTES.SUB_MANAGER.ROTAS.LIST}
                 element={<RotaView />}
+              />
+              <Route
+                path={ROUTES.SUB_MANAGER.ATTENDANCE}
+                element={<SubManagerAttendanceList />}
               />
             </Route>
 

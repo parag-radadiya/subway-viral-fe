@@ -37,12 +37,14 @@ export const ROUTES = {
       PLANNER: "/manager/rotas/planner",
       DASHBOARD: "/manager/rotas/dashboard",
     },
+    ATTENDANCE: "/manager/attendance",
   },
   SUB_MANAGER: {
     DASHBOARD: "/sub-manager/dashboard",
     ROTAS: {
       LIST: "/sub-manager/rotas",
     },
+    ATTENDANCE: "/sub-manager/attendance",
   },
   STAFF: {
     DASHBOARD: "/staff/dashboard",
