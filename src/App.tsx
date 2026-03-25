@@ -22,56 +22,13 @@ import {
   SubManagerLayout,
 } from "./components/layout/DummyLayouts";
 
-import ShopList from "./screen/admin/shops/ShopList";
-import ShopDetail from "./screen/admin/shops/ShopDetail";
-import ShopForm from "./screen/admin/shops/ShopForm";
-import UserList from "./screen/admin/users/UserList";
-import UserDetail from "./screen/admin/users/UserDetail";
-import UserForm from "./screen/admin/users/UserForm";
-import PunchInOut from "./screen/staff/attendance/PunchInOut";
-import MyAttendance from "./screen/staff/attendance/MyAttendance";
-import ManagerAttendanceList from "./screen/manager/attendance/AttendanceList";
-import ManagerPunchInPage from "./screen/manager/attendance/PunchInPage";
-import SubManagerAttendanceList from "./screen/sub-manager/attendance/AttendanceList";
-import SubManagerPunchInPage from "./screen/sub-manager/attendance/PunchInPage";
-import AttendanceList from "./screen/admin/attendance/AttendanceList";
-
-// Rota Screens - Admin
-import RotaList from "./screen/admin/rotas/RotaList";
-import RotaDetail from "./screen/admin/rotas/RotaDetail";
-import RotaForm from "./screen/admin/rotas/RotaForm";
-
-// Rota Screens - Manager
-import ManagerRotaList from "./screen/manager/rotas/RotaList";
-import ManagerRotaDetail from "./screen/manager/rotas/RotaDetail";
-import ManagerRotaForm from "./screen/manager/rotas/RotaForm";
-
-// Rota Screens - Sub-Manager
-import SubManagerRotaList from "./screen/sub-manager/rotas/RotaList";
-import SubManagerRotaDetail from "./screen/sub-manager/rotas/RotaDetail";
-import SubManagerRotaForm from "./screen/sub-manager/rotas/RotaForm";
-
-import WeeklyPlanner from "./screen/manager/rotas/WeeklyPlanner";
-import RotaDashboard from "./screen/manager/rotas/RotaDashboard";
-import MyRota from "./screen/staff/rotas/MyRota";
-
-// Inventory Screens
-import InventoryList from "./screen/admin/inventory/InventoryList";
-import InventoryForm from "./screen/admin/inventory/InventoryForm";
-import InventoryDetail from "./screen/admin/inventory/InventoryDetail";
-import QueryList from "./screen/admin/inventory/QueryList";
-import QueryDetail from "./screen/admin/inventory/QueryDetail";
-import AuditLogList from "./screen/admin/inventory/AuditLogList";
-
 // Pages
 import LoginPage from "./screen/auth/LoginPage";
-import {
-  RootDashboard,
-  AdminDashboard,
-  ManagerDashboard,
-  SubManagerDashboard,
-  StaffDashboard,
-} from "./screen/DummyDashboards";
+import RootRoutes from "./screen/root";
+import AdminRoutes from "./screen/admin";
+import ManagerRoutes from "./screen/manager";
+import SubManagerRoutes from "./screen/sub-manager";
+import StaffRoutes from "./screen/staff";
 
 // Role-based Redirector
 const RoleRedirector = () => {
@@ -127,7 +84,7 @@ const App = () => {
                 </RootLayout>
               }
             >
-              <Route path={ROUTES.ROOT.DASHBOARD} element={<RootDashboard />} />
+              {RootRoutes}
             </Route>
 
             {/* Admin Flow */}
@@ -138,51 +95,7 @@ const App = () => {
                 </AdminLayout>
               }
             >
-              <Route
-                path={ROUTES.ADMIN.DASHBOARD}
-                element={<AdminDashboard />}
-              />
-              <Route path={ROUTES.ADMIN.SHOPS.LIST} element={<ShopList />} />
-              <Route path={ROUTES.ADMIN.SHOPS.CREATE} element={<ShopForm />} />
-              <Route
-                path={ROUTES.ADMIN.SHOPS.EDIT(":id")}
-                element={<ShopForm />}
-              />
-              <Route
-                path={ROUTES.ADMIN.SHOPS.DETAILS(":id")}
-                element={<ShopDetail />}
-              />
-              <Route path={ROUTES.ADMIN.USERS.LIST} element={<UserList />} />
-              <Route path={ROUTES.ADMIN.USERS.CREATE} element={<UserForm />} />
-              <Route
-                path={ROUTES.ADMIN.USERS.EDIT(":id")}
-                element={<UserForm />}
-              />
-              <Route
-                path={ROUTES.ADMIN.USERS.DETAILS(":id")}
-                element={<UserDetail />}
-              />
-              <Route path={ROUTES.ADMIN.ROTAS.LIST} element={<RotaList />} />
-              <Route path={ROUTES.ADMIN.ROTAS.CREATE} element={<RotaForm />} />
-              <Route
-                path={ROUTES.ADMIN.ROTAS.EDIT(":id")}
-                element={<RotaForm />}
-              />
-              <Route
-                path={ROUTES.ADMIN.ROTAS.DETAILS(":id")}
-                element={<RotaDetail />}
-              />
-              <Route
-                path={ROUTES.ADMIN.ATTENDANCE}
-                element={<AttendanceList />}
-              />
-              <Route path={ROUTES.ADMIN.INVENTORY.LIST} element={<InventoryList />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.CREATE} element={<InventoryForm />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.QUERIES} element={<QueryList />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
-              <Route path={ROUTES.ADMIN.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
+              {AdminRoutes}
             </Route>
 
             {/* Manager Flow */}
@@ -193,49 +106,7 @@ const App = () => {
                 </ManagerLayout>
               }
             >
-              <Route
-                path={ROUTES.MANAGER.DASHBOARD}
-                element={<ManagerDashboard />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.LIST}
-                element={<ManagerRotaList />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.CREATE}
-                element={<ManagerRotaForm />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.EDIT(":id")}
-                element={<ManagerRotaForm />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.DETAILS(":id")}
-                element={<ManagerRotaDetail />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.PLANNER}
-                element={<WeeklyPlanner />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ROTAS.DASHBOARD}
-                element={<RotaDashboard />}
-              />
-              <Route
-                path={ROUTES.MANAGER.ATTENDANCE}
-                element={<ManagerAttendanceList />}
-              />
-              <Route
-                path={ROUTES.MANAGER.PUNCH_IN_OUT}
-                element={<ManagerPunchInPage />}
-              />
-              <Route path={ROUTES.MANAGER.INVENTORY.LIST} element={<InventoryList />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.QUERIES} element={<QueryList />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
-              <Route path={ROUTES.MANAGER.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
+              {ManagerRoutes}
             </Route>
 
             {/* Sub-Manager Flow */}
@@ -246,41 +117,7 @@ const App = () => {
                 </SubManagerLayout>
               }
             >
-              <Route
-                path={ROUTES.SUB_MANAGER.DASHBOARD}
-                element={<SubManagerDashboard />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.ROTAS.LIST}
-                element={<SubManagerRotaList />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.ROTAS.CREATE}
-                element={<SubManagerRotaForm />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.ROTAS.EDIT(":id")}
-                element={<SubManagerRotaForm />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.ROTAS.DETAILS(":id")}
-                element={<SubManagerRotaDetail />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.ATTENDANCE}
-                element={<SubManagerAttendanceList />}
-              />
-              <Route
-                path={ROUTES.SUB_MANAGER.PUNCH_IN_OUT}
-                element={<SubManagerPunchInPage />}
-              />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.LIST} element={<InventoryList />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.CREATE} element={<InventoryForm />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.EDIT(":id")} element={<InventoryForm />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.DETAILS(":id")} element={<InventoryDetail />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.QUERIES} element={<QueryList />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.QUERY_DETAILS(":id")} element={<QueryDetail />} />
-              <Route path={ROUTES.SUB_MANAGER.INVENTORY.AUDIT_LOGS} element={<AuditLogList />} />
+              {SubManagerRoutes}
             </Route>
 
             {/* Staff Flow */}
@@ -291,19 +128,7 @@ const App = () => {
                 </StaffLayout>
               }
             >
-              <Route
-                path={ROUTES.STAFF.DASHBOARD}
-                element={<StaffDashboard />}
-              />
-              <Route
-                path={ROUTES.STAFF.MANAGE_ATTENDANCE}
-                element={<PunchInOut />}
-              />
-              <Route
-                path={ROUTES.STAFF.ATTENDANCE}
-                element={<MyAttendance />}
-              />
-              <Route path={ROUTES.STAFF.MY_ROTA} element={<MyRota />} />
+              {StaffRoutes}
             </Route>
           </Route>
 

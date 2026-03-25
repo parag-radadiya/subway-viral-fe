@@ -47,7 +47,6 @@ export const ROUTES = {
       CREATE: "/manager/rotas/create",
       EDIT: (id: string) => `/manager/rotas/${id}/edit`,
       DETAILS: (id: string) => `/manager/rotas/${id}`,
-      PLANNER: "/manager/rotas/planner",
       DASHBOARD: "/manager/rotas/dashboard",
     },
     ATTENDANCE: "/manager/attendance",
