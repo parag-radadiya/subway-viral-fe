@@ -1,15 +1,8 @@
-import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
-import AttendancePunchCard from "../../../components/attendance/AttendancePunchCard";
+import PunchInContainer from "../../../components/attendance/PunchInContainer";
 
-const ManagerPunchInPage = () => {
-  const navigate = useNavigate();
-
-  const handleSuccess = () => {
-    navigate(ROUTES.MANAGER.ATTENDANCE);
-  };
-
-  return <AttendancePunchCard onSuccess={handleSuccess} />;
+const PunchInPage = () => {
+  return <PunchInContainer onSuccessRoute={ROUTES.MANAGER.DASHBOARD} />;
 };
 
-export default ManagerPunchInPage;
+export default PunchInPage;

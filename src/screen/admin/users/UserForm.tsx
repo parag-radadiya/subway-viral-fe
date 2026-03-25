@@ -115,6 +115,8 @@ const UserForm = () => {
       .catch((err) => {
         console.error(err);
         toast.error(err.message || "Failed to save user");
+      })
+      .finally(() => {
         setSubmitting(false);
       });
   };

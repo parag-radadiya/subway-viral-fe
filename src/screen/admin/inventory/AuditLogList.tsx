@@ -9,6 +9,7 @@ import {
   AlertCircle,
   CheckCircle2,
   User,
+  Loader2,
 } from "lucide-react";
 import { inventoryApi } from "../../../config/inventoryApi";
 import { InventoryAuditLog } from "../../../utils/types";
@@ -23,8 +24,10 @@ const AuditLogList = () => {
   const [actionFilter, setActionFilter] = useState<string>("");
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const fetchLogs = () => {
+    setLoading(true);
     inventoryApi
       .getAuditLogs({
         page,
@@ -39,6 +42,9 @@ const AuditLogList = () => {
       })
       .catch((error: any) => {
         toast.error(error.message || "Failed to fetch audit logs");
+      })
+      .finally(() => {
+        setLoading(false); // Set loading to false after API call
       });
   };
 
@@ -144,6 +150,15 @@ const AuditLogList = () => {
       ),
     },
   ];
+
+  if (loading && logs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+        <Loader2 className="animate-spin mb-4" size={32} />
+        <p className="text-sm font-medium">Synchronizing maintenance logs...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

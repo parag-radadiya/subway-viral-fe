@@ -47,6 +47,9 @@ const InventoryForm = () => {
         })
         .catch((err) => {
           toast.error(err.message || "Failed to load shops");
+        })
+        .finally(() => {
+          // No specific loading state here, but finally included for consistency
         });
     };
 
