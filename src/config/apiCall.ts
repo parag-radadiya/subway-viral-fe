@@ -81,8 +81,11 @@ export const attendanceApi = {
   manualPunchIn: (data: Record<string, unknown>) =>
     api.post("/attendance/manual-punch-in", data),
 
-  eligibleRotas: (shop_id: string) =>
-    api.get(`/attendance/eligible-rotas?shop_id=${shop_id}`),
+  eligibleRotas: (shop_id: string, user_id?: string) => {
+    const params = new URLSearchParams({ shop_id });
+    if (user_id) params.append("user_id", user_id);
+    return api.get(`/attendance/eligible-rotas?${params.toString()}`);
+  },
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────

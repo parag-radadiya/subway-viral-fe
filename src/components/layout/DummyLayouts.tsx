@@ -52,11 +52,6 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         icon: Package,
       },
       {
-        label: "Rota Planner",
-        path: ROUTES.MANAGER.ROTAS.PLANNER,
-        icon: Calendar,
-      },
-      {
         label: "Rota Stats",
         path: ROUTES.MANAGER.ROTAS.DASHBOARD,
         icon: BarChart3,
