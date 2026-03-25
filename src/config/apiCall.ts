@@ -73,12 +73,16 @@ export const attendanceApi = {
     shop_id: string;
     location_token: string;
     biometric_verified: boolean;
+    rota_id?: string;
   }) => api.post("/attendance/punch-in", data),
 
   punchOut: (id: string) => api.put(`/attendance/${id}/punch-out`, {}),
 
   manualPunchIn: (data: Record<string, unknown>) =>
     api.post("/attendance/manual-punch-in", data),
+
+  eligibleRotas: (shop_id: string) =>
+    api.get(`/attendance/eligible-rotas?shop_id=${shop_id}`),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────

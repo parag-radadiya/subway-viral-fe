@@ -70,6 +70,7 @@ export default function RotaForm() {
       .finally(() => setInitLoading(false));
   }, [editItemId]);
 
+  console.log("🚀 - handleSubmit - err:", err);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (
@@ -114,6 +115,7 @@ export default function RotaForm() {
       }
       navigate(ROUTES.ADMIN.ROTAS.LIST);
     } catch (err) {
+      console.log("🚀 - handleSubmit - editItemId:", err);
       toast.error(
         editItemId ? "Failed to update shift" : "Failed to create shift",
       );

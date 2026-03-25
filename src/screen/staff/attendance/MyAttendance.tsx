@@ -16,6 +16,9 @@ interface AttendanceRecord {
   status: string;
   biometric_verified_in: boolean;
   biometric_verified_out: boolean;
+  rota_id?: any;
+  auto_punch_out_at?: string;
+  punch_out_source?: "Manual" | "Auto";
 }
 
 const MyAttendance = () => {
@@ -46,8 +49,8 @@ const MyAttendance = () => {
     }
   }, [user?.id]);
 
-  const filteredRecords = records.filter((rec) => 
-    (rec.shop_id?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecords = records.filter((rec) =>
+    (rec.shop_id?.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -83,7 +86,7 @@ const MyAttendance = () => {
             {filteredRecords.length} Sessions Logged
           </p>
         </div>
-        
+
         <div className="p-4">
           <Table
             columns={[
@@ -119,6 +122,43 @@ const MyAttendance = () => {
                       <span className="text-sm font-medium text-slate-700">
                         {shopName}
                       </span>
+                    </div>
+                  );
+                },
+              },
+              {
+                header: "Shift",
+                render: (record) => {
+                  if (!record.rota_id)
+                    return (
+                      <span className="text-xs text-slate-400">No Shift</span>
+                    );
+                  const rota = record.rota_id;
+                  const startTime = rota.shift_start
+                    ? new Date(rota.shift_start).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : "";
+                  const endTime = rota.shift_end
+                    ? new Date(rota.shift_end).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : "";
+
+                  return (
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-700">
+                        {startTime} - {endTime}
+                      </span>
+                      {rota.role_id?.name && (
+                        <span className="text-[9px] text-slate-400 uppercase font-black tracking-tighter">
+                          {rota.role_id.name}
+                        </span>
+                      )}
                     </div>
                   );
                 },
@@ -169,6 +209,30 @@ const MyAttendance = () => {
                 },
               },
               {
+                header: "Deadline",
+                render: (record) => {
+                  if (!record.auto_punch_out_at || record.punch_out)
+                    return <span className="text-xs text-slate-400">-</span>;
+                  return (
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-danger-600 uppercase">
+                        Auto Off At
+                      </span>
+                      <span className="text-sm font-mono font-bold text-danger-500">
+                        {new Date(record.auto_punch_out_at).toLocaleTimeString(
+                          "en-US",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          },
+                        )}
+                      </span>
+                    </div>
+                  );
+                },
+              },
+              {
                 header: "Duration",
                 align: "center",
                 render: (record) => {
@@ -189,23 +253,23 @@ const MyAttendance = () => {
                 },
               },
               {
-                header: "Status",
+                header: "Source",
                 align: "right",
-                render: (record) => (
-                  record.status === "Present" ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
-                      Present
+                render: (record) =>
+                  record.punch_out_source === "Auto" ? (
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-50 text-red-600 border border-red-100">
+                        Auto
+                      </span>
+                      <span className="text-[9px] text-slate-400 italic">
+                        Auto closed by system
+                      </span>
+                    </div>
+                  ) : record.punch_out_source === "Manual" ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                      Manual
                     </span>
-                  ) : record.status === "Late" ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100">
-                      Late
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-50 text-slate-600 border border-slate-100">
-                      {record.status || "Completed"}
-                    </span>
-                  )
-                ),
+                  ) : null,
               },
             ]}
             data={filteredRecords}
