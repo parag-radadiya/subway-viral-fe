@@ -79,8 +79,8 @@ const LoginPage = () => {
             navigate("/");
           }
         })
-        .catch((err: Error) => {
-          toast.error(err.message);
+        .catch((err: any) => {
+          toast.error(err.message || "Login failed");
         })
         .finally(() => {
           dispatch(setLoading(false));
@@ -101,8 +101,8 @@ const LoginPage = () => {
             dispatch(setCredentials(tempCredentials?.response));
             navigate("/");
           })
-          .catch((err: Error) => {
-            toast.error(err.message);
+          .catch((err: any) => {
+            toast.error(err.message || "Failed to change password");
           })
           .finally(() => {
             dispatch(setLoading(false));

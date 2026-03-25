@@ -17,23 +17,26 @@ const QueryList = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
 
-  const fetchQueries = async () => {
-    try {
-      setLoading(true);
-      const data = await inventoryApi.getQueries({
+  const fetchQueries = () => {
+    setLoading(true);
+    inventoryApi
+      .getQueries({
         page,
         limit: 10,
         status: statusFilter || undefined,
         sort_by: "createdAt",
         sort_order: "desc",
+      })
+      .then((data) => {
+        setQueries(data.queries);
+        setTotal(data.total);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to fetch queries");
+      })
+      .finally(() => {
+        setLoading(false);
       });
-      setQueries(data.queries);
-      setTotal(data.total);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to fetch queries");
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {

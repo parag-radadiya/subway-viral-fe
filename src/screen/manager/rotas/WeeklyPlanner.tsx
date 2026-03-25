@@ -120,9 +120,9 @@ const WeeklyPlanner = () => {
   }, []);
 
   // Initial Fetch & Refresh on date/shop change
-  const fetchPlannerData = async () => {
+  const fetchPlannerData = () => {
     const mappedShifts: ShiftCell[] = allRotas
-      .filter((r: any) => r.shop_id._id === activeShopId)
+      .filter((r: any) => r.shop_id?._id === activeShopId)
       .map((r: any) => {
         const rUserId = r.user_id?._id;
         const shiftStart = new Date(r.shift_start);
@@ -152,7 +152,7 @@ const WeeklyPlanner = () => {
   }, [activeShopId, allRotas]);
 
   // Handle Bulk Publish
-  const handlePublish = async () => {
+  const handlePublish = () => {
     if (shifts.length === 0) return;
     setPublishing(true);
     setConflicts([]);
@@ -172,22 +172,25 @@ const WeeklyPlanner = () => {
         })),
     };
 
-    try {
-      const res = await rotasApi.bulkCreate(payload);
-      if (res.data?.data?.conflicts?.length > 0) {
-        setConflicts(res.data.data.conflicts);
-        toast.warning(
-          `Published with ${res.data.data.conflicts.length} conflicts.`,
-        );
-      } else {
-        toast.success("Rota published successfully!");
-        fetchPlannerData(); // Refresh the grid with the rotas api
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to publish rota.");
-    } finally {
-      setPublishing(false);
-    }
+    rotasApi
+      .bulkCreate(payload)
+      .then((res) => {
+        if (res.data?.data?.conflicts?.length > 0) {
+          setConflicts(res.data.data.conflicts);
+          toast.warning(
+            `Published with ${res.data.data.conflicts.length} conflicts.`,
+          );
+        } else {
+          toast.success("Rota published successfully!");
+          fetchPlannerData(); // Refresh the grid with the rotas api
+        }
+      })
+      .catch((err: any) => {
+        toast.error(err.message || "Failed to publish rota.");
+      })
+      .finally(() => {
+        setPublishing(false);
+      });
   };
 
   const toggleWeek = (dir: "next" | "prev") => {
@@ -232,20 +235,24 @@ const WeeklyPlanner = () => {
     setModalData(null);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (!shiftToDelete) return;
     if (shiftToDelete._id) {
-      try {
-        await rotasApi.remove(shiftToDelete._id);
-        toast.success("Shift removed");
-      } catch {
-        toast.error("Failed to remove shift");
-        setShiftToDelete(null);
-        return;
-      }
+      rotasApi
+        .remove(shiftToDelete._id)
+        .then(() => {
+          toast.success("Shift removed");
+          setShifts((prev) => prev.filter((s) => s !== shiftToDelete));
+          setShiftToDelete(null);
+        })
+        .catch((err) => {
+          toast.error(err.message || "Failed to remove shift");
+          setShiftToDelete(null);
+        });
+    } else {
+      setShifts((prev) => prev.filter((s) => s !== shiftToDelete));
+      setShiftToDelete(null);
     }
-    setShifts((prev) => prev.filter((s) => s !== shiftToDelete));
-    setShiftToDelete(null);
   };
 
   const filteredStaff = useMemo(() => {

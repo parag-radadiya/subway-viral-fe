@@ -24,20 +24,22 @@ const AuditLogList = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
 
-  const fetchLogs = async () => {
-    try {
-      const data = await inventoryApi.getAuditLogs({
+  const fetchLogs = () => {
+    inventoryApi
+      .getAuditLogs({
         page,
         limit: 20,
         action: actionFilter || undefined,
         sort_by: "createdAt",
         sort_order: "desc",
+      })
+      .then((data) => {
+        setLogs(data.logs);
+        setTotal(data.total);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to fetch audit logs");
       });
-      setLogs(data.logs);
-      setTotal(data.total);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to fetch audit logs");
-    }
   };
 
   useEffect(() => {

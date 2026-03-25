@@ -48,7 +48,7 @@ const MyRota = () => {
         })
         .catch((err) => {
           console.error("Error fetching rotas:", err);
-          toast.error("Failed to load your rota schedule.");
+          toast.error(err.message || "Failed to load your rota schedule.");
         })
         .finally(() => setLoading(false));
     }

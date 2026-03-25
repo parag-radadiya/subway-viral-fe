@@ -28,8 +28,8 @@ const ShopList = () => {
       .then((res) => {
         setShops(res.data.data.shops);
       })
-      .catch(() => {
-        toast.error("Failed to fetch shops. Please try again.");
+      .catch((err: any) => {
+        toast.error(err.message || "Failed to fetch shops");
       })
       .finally(() => setLoading(false));
   }, []);

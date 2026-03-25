@@ -44,63 +44,72 @@ const InventoryList = () => {
   const [issueNote, setIssueNote] = useState("");
   const [isReporting, setIsReporting] = useState(false);
 
-  const fetchItems = async () => {
-    try {
-      setLoading(true);
-      const data = await inventoryApi.getItems({
+  const fetchItems = () => {
+    setLoading(true);
+    inventoryApi
+      .getItems({
         page,
         limit: 10,
         status: statusFilter || undefined,
         sort_by: "item_name",
         sort_order: "asc",
+      })
+      .then((data) => {
+        setItems(data.items);
+        setTotal(data.total);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to fetch inventory items");
+      })
+      .finally(() => {
+        setLoading(false);
       });
-      setItems(data.items);
-      setTotal(data.total);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to fetch inventory items");
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
     fetchItems();
   }, [page, statusFilter]);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTargetId) return;
     setIsDeleting(true);
-    try {
-      await inventoryApi.deleteItem(deleteTargetId);
-      toast.success("Item deleted successfully");
-      setDeleteTargetId(null);
-      fetchItems();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete item");
-    } finally {
-      setIsDeleting(false);
-    }
+    inventoryApi
+      .deleteItem(deleteTargetId)
+      .then(() => {
+        toast.success("Item deleted successfully");
+        setDeleteTargetId(null);
+        fetchItems();
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to delete item");
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
   };
 
-  const handleOpenIssue = async () => {
+  const handleOpenIssue = () => {
     if (!reportIssueItemId || !issueNote.trim()) return;
     setIsReporting(true);
-    try {
-      await inventoryApi.openQuery({
+    inventoryApi
+      .openQuery({
         item_id: reportIssueItemId,
         issue_note: issueNote,
+      })
+      .then(() => {
+        toast.success(
+          "Issue reported successfully. Item status moved to Damaged.",
+        );
+        setReportIssueItemId(null);
+        setIssueNote("");
+        fetchItems();
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to report issue");
+      })
+      .finally(() => {
+        setIsReporting(false);
       });
-      toast.success(
-        "Issue reported successfully. Item status moved to Damaged.",
-      );
-      setReportIssueItemId(null);
-      setIssueNote("");
-      fetchItems();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to report issue");
-    } finally {
-      setIsReporting(false);
-    }
   };
 
   const filteredItems = items.filter((item) =>

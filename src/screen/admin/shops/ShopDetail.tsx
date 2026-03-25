@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
+import { toast } from "react-toastify";
 
 interface Shop {
   _id: string;
@@ -33,7 +34,10 @@ const ShopDetail = () => {
       shopsApi
         .getById(id)
         .then((res) => setShop(res.data.data.shop))
-        .catch(console.error)
+        .catch((err: any) => {
+          toast.error(err.message || "Failed to load shop details");
+          console.error(err);
+        })
         .finally(() => setLoading(false));
     }
   }, [id]);

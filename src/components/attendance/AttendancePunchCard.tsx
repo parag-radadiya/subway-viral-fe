@@ -54,45 +54,51 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
-  const fetchEligibleRotas = useCallback(async () => {
+  const fetchEligibleRotas = useCallback(() => {
     if (!user?.shop_id) return;
     setIsFetchingRotas(true);
-    try {
-      const res = await attendanceApi.eligibleRotas(user.shop_id);
-      const rotas = res.data.data.rotas || [];
-      const count = res.data.data.count || 0;
-      setEligibleRotas(rotas);
-      if (count === 1) {
-        setSelectedRotaId(rotas[0]._id);
-      } else {
-        setSelectedRotaId(null);
-      }
-    } catch (err) {
-      console.error("Error fetching eligible rotas:", err);
-      toast.error("Failed to fetch eligible shifts.");
-    } finally {
-      setIsFetchingRotas(false);
-    }
+    attendanceApi
+      .eligibleRotas(user.shop_id)
+      .then((res) => {
+        const rotas = res.data.data.rotas || [];
+        const count = res.data.data.count || 0;
+        setEligibleRotas(rotas);
+        if (count === 1) {
+          setSelectedRotaId(rotas[0]._id);
+        } else {
+          setSelectedRotaId(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching eligible rotas:", err);
+        toast.error(err.message || "Failed to fetch eligible shifts.");
+      })
+      .finally(() => {
+        setIsFetchingRotas(false);
+      });
   }, [user?.shop_id]);
 
-  const fetchCurrentStatus = useCallback(async () => {
+  const fetchCurrentStatus = useCallback(() => {
     setLoadingStatus(true);
-    try {
-      const res = await attendanceApi.list();
-      const records = res.data.data.records || [];
-      const active = records.find((rec: any) => !rec.punch_out);
-      setActiveAttendance(active);
-      if (active) {
-        setActiveTab("out");
-      } else {
-        setActiveTab("in");
-        fetchEligibleRotas();
-      }
-    } catch (err) {
-      console.error("Error fetching attendance status:", err);
-    } finally {
-      setLoadingStatus(false);
-    }
+    attendanceApi
+      .list()
+      .then((res) => {
+        const records = res.data.data.records || [];
+        const active = records.find((rec: any) => !rec.punch_out);
+        setActiveAttendance(active);
+        if (active) {
+          setActiveTab("out");
+        } else {
+          setActiveTab("in");
+          fetchEligibleRotas();
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching attendance status:", err);
+      })
+      .finally(() => {
+        setLoadingStatus(false);
+      });
   }, [user?.id, fetchEligibleRotas]);
 
   useEffect(() => {
@@ -102,7 +108,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     };
   }, [fetchCurrentStatus]);
 
-  const handleVerifyLocation = async () => {
+  const handleVerifyLocation = () => {
     if (!user?.shop_id) {
       toast.error("No shop assigned to your profile.");
       return;
@@ -117,39 +123,39 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const res = await attendanceApi.verifyLocation({
+      (position) => {
+        attendanceApi
+          .verifyLocation({
             shop_id: user.shop_id,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
+          })
+          .then((res) => {
+            if (res.data.status === 200) {
+              setLocationToken(res.data.data.location_token);
+              setLocationVerified(true);
+              toast.success("Location verified successfully!");
+              setTimeLeft(300);
+              if (timerRef.current) clearInterval(timerRef.current);
+              timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => {
+                  if (prev === null || prev <= 1) {
+                    resetVerification();
+                    return null;
+                  }
+                  return prev - 1;
+                });
+              }, 1000);
+            } else {
+              toast.error(res.data.message || "Location verification failed.");
+            }
+          })
+          .catch((err: any) => {
+            toast.error(err.message || "Location verification failed.");
+          })
+          .finally(() => {
+            setIsVerifying(false);
           });
-
-          if (res.data.status === 200) {
-            setLocationToken(res.data.data.location_token);
-            setLocationVerified(true);
-            toast.success("Location verified successfully!");
-            setTimeLeft(300);
-            if (timerRef.current) clearInterval(timerRef.current);
-            timerRef.current = setInterval(() => {
-              setTimeLeft((prev) => {
-                if (prev === null || prev <= 1) {
-                  resetVerification();
-                  return null;
-                }
-                return prev - 1;
-              });
-            }, 1000);
-          } else {
-            toast.error(res.data.message || "Location verification failed.");
-          }
-        } catch (err: any) {
-          toast.error(
-            err.response?.data?.message || "Location verification failed.",
-          );
-        } finally {
-          setIsVerifying(false);
-        }
       },
       (error) => {
         toast.error("Error obtaining location: " + error.message);
@@ -159,34 +165,44 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     );
   };
 
-  const executePunch = async () => {
+  const executePunch = () => {
     setPunching(true);
-    try {
-      if (activeTab === "in") {
-        await attendanceApi.punchIn({
-          shop_id: user?.shop_id || "",
-          location_token: locationToken || "",
-          biometric_verified: true,
-          rota_id: selectedRotaId || undefined,
-        });
-        toast.success("Punched In Successfully!");
-        resetVerification();
-        onSuccess();
-      } else {
-        if (!activeAttendance?._id) {
-          setPunching(false);
-          toast.error("No active attendance record found to punch out.");
-          return;
-        }
-        await attendanceApi.punchOut(activeAttendance._id);
-        toast.success("Punched Out Successfully!");
-        resetVerification();
-        onSuccess();
+    const punchCall =
+      activeTab === "in"
+        ? attendanceApi.punchIn({
+            shop_id: user?.shop_id || "",
+            location_token: locationToken || "",
+            biometric_verified: true,
+            rota_id: selectedRotaId || undefined,
+          })
+        : activeAttendance?._id
+          ? attendanceApi.punchOut(activeAttendance._id)
+          : null;
+
+    if (!punchCall) {
+      setPunching(false);
+      if (activeTab === "out") {
+        toast.error("No active attendance record found to punch out.");
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Punch action failed.");
+      return;
     }
-    setPunching(false);
+
+    punchCall
+      .then(() => {
+        toast.success(
+          activeTab === "in"
+            ? "Punched In Successfully!"
+            : "Punched Out Successfully!",
+        );
+        resetVerification();
+        onSuccess();
+      })
+      .catch((err: any) => {
+        toast.error(err.message || "Punch action failed.");
+      })
+      .finally(() => {
+        setPunching(false);
+      });
   };
 
   const handleSuccess = () => {

@@ -14,6 +14,7 @@ import {
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
 import Input from "../../../components/common/Input";
+import { toast } from "react-toastify";
 
 interface ShopFormData {
   name: string;
@@ -77,7 +78,10 @@ const ShopForm = () => {
         .then((res) => {
           reset(res.data.data.shop);
         })
-        .catch(console.error)
+        .catch((err: any) => {
+          toast.error(err.message || "Failed to load shop details");
+          console.error(err);
+        })
         .finally(() => setLoading(false));
     }
   }, [id, isEdit, reset]);
@@ -89,13 +93,19 @@ const ShopForm = () => {
       : shopsApi.create(data as any);
 
     apiCall
-      .then(() => {
-        navigate(ROUTES.ADMIN.SHOPS.LIST);
-      })
-      .catch((err) => {
-        console.error(err);
-        setSubmitting(false);
-      });
+       .then(() => {
+         toast.success(
+           isEdit ? "Shop updated successfully" : "Shop registered successfully",
+         );
+         navigate(ROUTES.ADMIN.SHOPS.LIST);
+       })
+       .catch((err: any) => {
+         toast.error(err.message || "Failed to save shop");
+         console.error(err);
+       })
+       .finally(() => {
+         setSubmitting(false);
+       });
   };
 
   if (loading) {

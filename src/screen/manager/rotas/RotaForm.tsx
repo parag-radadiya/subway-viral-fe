@@ -99,28 +99,28 @@ export default function RotaForm() {
     };
 
     setLoading(true);
-    try {
-      if (editItemId) {
-        const updatePayload = {
+    const apiCall = editItemId
+      ? rotasApi.update(editItemId, {
           shift_start: shiftStart,
           shift_end: shiftEnd,
           note: formData.note,
-        };
-        await rotasApi.update(editItemId, updatePayload);
-        toast.success("Shift updated successfully");
-      } else {
-        await rotasApi.create(payload);
-        toast.success("Shift created successfully");
-      }
-      navigate(ROUTES.MANAGER.ROTAS.LIST);
-    } catch (err) {
-      toast.error(
-        editItemId ? "Failed to update shift" : "Failed to create shift",
-      );
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+        })
+      : rotasApi.create(payload);
+
+    apiCall
+      .then(() => {
+        toast.success(
+          editItemId ? "Shift updated successfully" : "Shift created successfully",
+        );
+        navigate(ROUTES.MANAGER.ROTAS.LIST);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to save shift");
+        console.error(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   if (initLoading) {

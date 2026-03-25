@@ -39,65 +39,74 @@ const InventoryForm = () => {
   const [isLoading, setIsLoading] = useState(isEdit);
 
   useEffect(() => {
-    const fetchShops = async () => {
-      try {
-        const response = await api.get<ApiResponse<{ shops: any[] }>>("/shops");
-        setShops(response.data.data.shops);
-      } catch (error) {
-        toast.error("Failed to load shops");
-      }
+    const fetchShops = () => {
+      api
+        .get<ApiResponse<{ shops: any[] }>>("/shops")
+        .then((response) => {
+          setShops(response.data.data.shops);
+        })
+        .catch((err) => {
+          toast.error(err.message || "Failed to load shops");
+        });
     };
 
-    const fetchItem = async () => {
+    const fetchItem = () => {
       if (!id) return;
-      try {
-        const item = await inventoryApi.getItemById(id);
-        setFormData({
-          item_name: item.item_name,
-          shop_id:
-            typeof item.shop_id === "object" ? item.shop_id._id : item.shop_id,
-          purchase_date: new Date(item.purchase_date)
-            .toISOString()
-            .split("T")[0],
-          expiry_date: item.expiry_date
-            ? new Date(item.expiry_date).toISOString().split("T")[0]
-            : null,
-          status: item.status,
+      inventoryApi
+        .getItemById(id)
+        .then((item) => {
+          setFormData({
+            item_name: item.item_name,
+            shop_id:
+              typeof item.shop_id === "object" ? item.shop_id._id : item.shop_id,
+            purchase_date: new Date(item.purchase_date)
+              .toISOString()
+              .split("T")[0],
+            expiry_date: item.expiry_date
+              ? new Date(item.expiry_date).toISOString().split("T")[0]
+              : null,
+            status: item.status,
+          });
+        })
+        .catch((error: any) => {
+          toast.error(error.message || "Failed to load item details");
+          navigate(ROUTES.ADMIN.INVENTORY.LIST);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
-      } catch (error: any) {
-        toast.error(error.message || "Failed to load item details");
-        navigate(ROUTES.ADMIN.INVENTORY.LIST);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
     fetchShops();
     fetchItem();
   }, [id, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.item_name || !formData.shop_id || !formData.purchase_date) {
       toast.warning("Please fill in all required fields");
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      if (isEdit && id) {
-        await inventoryApi.updateItem(id, formData);
-        toast.success("Item updated successfully");
-      } else {
-        await inventoryApi.createItem(formData);
-        toast.success("Item created successfully");
-      }
-      navigate(ROUTES.ADMIN.INVENTORY.LIST);
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(true);
+    const apiCall =
+      isEdit && id
+        ? inventoryApi.updateItem(id, formData)
+        : inventoryApi.createItem(formData);
+
+    apiCall
+      .then(() => {
+        toast.success(
+          isEdit ? "Item updated successfully" : "Item created successfully",
+        );
+        navigate(ROUTES.ADMIN.INVENTORY.LIST);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Something went wrong");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   if (isLoading) {

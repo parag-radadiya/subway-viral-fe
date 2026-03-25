@@ -40,44 +40,50 @@ const QueryDetail = () => {
   const [resolveNote, setResolveNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchQuery = async () => {
+  const fetchQuery = () => {
     if (!id) return;
-    try {
-      setIsLoading(true);
-      const data = await inventoryApi.getQueryById(id);
-      setQuery(data);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to load ticket details");
-      navigate(ROUTES.ADMIN.INVENTORY.QUERIES);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    inventoryApi
+      .getQueryById(id)
+      .then((data) => {
+        setQuery(data);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to load ticket details");
+        navigate(ROUTES.ADMIN.INVENTORY.QUERIES);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchQuery();
   }, [id]);
 
-  const handleCloseTicket = async () => {
+  const handleCloseTicket = () => {
     if (!id || !resolveNote.trim()) {
       toast.warning("Please provide a resolution note.");
       return;
     }
-    try {
-      setIsSubmitting(true);
-      await inventoryApi.closeQuery(id, {
+    setIsSubmitting(true);
+    inventoryApi
+      .closeQuery(id, {
         repair_cost: parseFloat(repairCost) || 0,
         resolve_note: resolveNote,
+      })
+      .then(() => {
+        toast.success(
+          "Ticket resolved successfully. Item status will be updated.",
+        );
+        fetchQuery(); // Refresh details
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to close ticket");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
-      toast.success(
-        "Ticket resolved successfully. Item status will be updated.",
-      );
-      fetchQuery(); // Refresh details
-    } catch (error: any) {
-      toast.error(error.message || "Failed to close ticket");
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   if (isLoading || !query) {

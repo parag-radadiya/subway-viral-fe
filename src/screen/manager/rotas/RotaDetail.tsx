@@ -40,20 +40,23 @@ export default function RotaDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!id) return;
     setIsDeleting(true);
-    try {
-      await rotasApi.remove(id);
-      toast.success("Shift deleted successfully");
-      navigate(ROUTES.MANAGER.ROTAS.LIST);
-    } catch (err) {
-      toast.error("Failed to delete shift");
-      console.error(err);
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteModalOpen(false);
-    }
+    rotasApi
+      .remove(id)
+      .then(() => {
+        toast.success("Shift deleted successfully");
+        navigate(ROUTES.MANAGER.ROTAS.LIST);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to delete shift");
+        console.error(err);
+      })
+      .finally(() => {
+        setIsDeleting(false);
+        setIsDeleteModalOpen(false);
+      });
   };
 
   if (loading) {

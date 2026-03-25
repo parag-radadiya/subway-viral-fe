@@ -12,19 +12,27 @@ const RotaView = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchRotas = async () => {
-      try {
-        const res = await rotasApi.list();
-        // Sub-manager sees all shifts or filtered by shop
-        const allRotas = res.data.data.rotas || [];
-        setRotas(allRotas.sort((a: any, b: any) => 
-          new Date(a.shift_date).getTime() - new Date(b.shift_date).getTime()
-        ));
-      } catch (err) {
-        toast.error("Failed to load shop rotas.");
-      } finally {
-        setLoading(false);
-      }
+    const fetchRotas = () => {
+      setLoading(true);
+      rotasApi
+        .list()
+        .then((res) => {
+          // Sub-manager sees all shifts or filtered by shop
+          const allRotas = res.data.data.rotas || [];
+          setRotas(
+            allRotas.sort(
+              (a: any, b: any) =>
+                new Date(a.shift_date).getTime() -
+                new Date(b.shift_date).getTime(),
+            ),
+          );
+        })
+        .catch((err) => {
+          toast.error(err.message || "Failed to load shop rotas.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     };
     fetchRotas();
   }, []);

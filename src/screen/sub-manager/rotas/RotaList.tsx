@@ -50,41 +50,40 @@ const RotaList = () => {
   });
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [shopsRes, usersRes] = await Promise.all([
-          shopsApi.list(),
-          usersApi.list(),
-        ]);
-        setShops(shopsRes.data.data.shops || []);
-        setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
-      } catch (err) {
-        console.error(err);
-      }
+    const fetchInitialData = () => {
+      Promise.all([shopsApi.list(), usersApi.list()])
+        .then(([shopsRes, usersRes]) => {
+          setShops(shopsRes.data.data.shops || []);
+          setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     };
     fetchInitialData();
   }, []);
 
   useEffect(() => {
     if (activeTab === "all") {
-      const fetchRotas = async () => {
-        try {
-          setLoading(true);
-          const query: Record<string, string> = {};
-          if (activeFilters.shop_id !== "all")
-            query.shop_id = activeFilters.shop_id;
-          if (activeFilters.user_id !== "all")
-            query.user_id = activeFilters.user_id;
+      const fetchRotas = () => {
+        setLoading(true);
+        const query: Record<string, string> = {};
+        if (activeFilters.shop_id !== "all")
+          query.shop_id = activeFilters.shop_id;
+        if (activeFilters.user_id !== "all")
+          query.user_id = activeFilters.user_id;
 
-          const res = await rotasApi.list(
-            Object.keys(query).length > 0 ? query : undefined,
-          );
-          setRotas(res.data.data.rotas || []);
-        } catch (err) {
-          toast.error("Failed to load rota data.");
-        } finally {
-          setLoading(false);
-        }
+        rotasApi
+          .list(Object.keys(query).length > 0 ? query : undefined)
+          .then((res) => {
+            setRotas(res.data.data.rotas || []);
+          })
+          .catch((err) => {
+            toast.error(err.message || "Failed to load rota data.");
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       };
       fetchRotas();
     }
@@ -103,26 +102,28 @@ const RotaList = () => {
     }
   }, [activeTab, selectedWeek, selectedWeeklyShop]);
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!deleteTargetId) return;
-    try {
-      await rotasApi.remove(deleteTargetId);
-
-      if (activeTab === "all") {
-        setRotas((prev) => prev.filter((r) => r._id !== deleteTargetId));
-      } else {
-        if (selectedWeek && selectedWeeklyShop) {
-          rotasApi
-            .week({ week_start: selectedWeek, shop_id: selectedWeeklyShop })
-            .then(({ data }) => setWeekData(data.data || data));
+    rotasApi
+      .remove(deleteTargetId)
+      .then(() => {
+        if (activeTab === "all") {
+          setRotas((prev) => prev.filter((r) => r._id !== deleteTargetId));
+        } else {
+          if (selectedWeek && selectedWeeklyShop) {
+            rotasApi
+              .week({ week_start: selectedWeek, shop_id: selectedWeeklyShop })
+              .then(({ data }) => setWeekData(data.data || data));
+          }
         }
-      }
-      toast.success("Shift deleted successfully.");
-    } catch {
-      toast.error("Failed to delete shift.");
-    } finally {
-      setDeleteTargetId(null);
-    }
+        toast.success("Shift deleted successfully.");
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to delete shift.");
+      })
+      .finally(() => {
+        setDeleteTargetId(null);
+      });
   };
 
   // Date/Time Formatters

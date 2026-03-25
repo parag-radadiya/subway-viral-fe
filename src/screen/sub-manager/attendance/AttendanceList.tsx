@@ -28,46 +28,47 @@ const AttendanceList = () => {
   });
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [shopsRes, usersRes] = await Promise.all([
-          shopsApi.list(),
-          usersApi.list(),
-        ]);
-        setShops(shopsRes.data.data.shops || []);
-        setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
-      } catch (err) {
-        console.error("Error fetching filters data:", err);
-      }
+    const fetchInitialData = () => {
+      Promise.all([shopsApi.list(), usersApi.list()])
+        .then(([shopsRes, usersRes]) => {
+          setShops(shopsRes.data.data.shops || []);
+          setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
+        })
+        .catch((err) => {
+          console.error("Error fetching filters data:", err);
+          toast.error(err.message || "Failed to load filters data");
+        });
     };
     fetchInitialData();
   }, []);
 
   useEffect(() => {
-    const fetchAttendance = async () => {
-      try {
-        setLoading(true);
-        const query: Record<string, string> = {};
-        if (activeFilters.shop_id !== "all")
-          query.shop_id = activeFilters.shop_id;
-        if (activeFilters.user_id !== "all")
-          query.user_id = activeFilters.user_id;
+    const fetchAttendance = () => {
+      setLoading(true);
+      const query: Record<string, string> = {};
+      if (activeFilters.shop_id !== "all")
+        query.shop_id = activeFilters.shop_id;
+      if (activeFilters.user_id !== "all")
+        query.user_id = activeFilters.user_id;
 
-        const { data } = await attendanceApi.list(query);
-        const fetchedRecords = data.data.records || [];
-
-        setRecords(
-          fetchedRecords.sort(
-            (a: any, b: any) =>
-              new Date(b.punch_in).getTime() - new Date(a.punch_in).getTime(),
-          ),
-        );
-      } catch (err) {
-        console.error("Error fetching attendance:", err);
-        toast.error("Failed to load attendance records.");
-      } finally {
-        setLoading(false);
-      }
+      attendanceApi
+        .list(query)
+        .then(({ data }) => {
+          const fetchedRecords = data.data.records || [];
+          setRecords(
+            fetchedRecords.sort(
+              (a: any, b: any) =>
+                new Date(b.punch_in).getTime() - new Date(a.punch_in).getTime(),
+            ),
+          );
+        })
+        .catch((err: any) => {
+          console.error("Error fetching attendance:", err);
+          toast.error(err.message || "Failed to load attendance records");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     };
     fetchAttendance();
   }, [activeFilters]);

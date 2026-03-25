@@ -36,8 +36,8 @@ const UserList = () => {
         setUsers(data.data.users);
       })
       .catch((err) => {
-        toast.error("Failed to fetch users. Please try again.");
         console.error(err);
+        toast.error(err.message || "Failed to fetch users");
       })
       .finally(() => setLoading(false));
   }, []);

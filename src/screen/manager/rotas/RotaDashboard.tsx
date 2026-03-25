@@ -24,18 +24,19 @@ const RotaDashboard = () => {
   const [currentDate] = useState(new Date());
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchStats = () => {
       setLoading(true);
-      try {
-        const weekStart = new Date(currentDate);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-        const res = await rotasApi.dashboard(); // Using dashboard endpoint
-        setStats(res.data.data);
-      } catch (err) {
-        toast.error("Failed to load rota analytics.");
-      } finally {
-        setLoading(false);
-      }
+      rotasApi
+        .dashboard()
+        .then((res) => {
+          setStats(res.data.data);
+        })
+        .catch((err) => {
+          toast.error(err.message || "Failed to load rota analytics.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     };
     fetchStats();
   }, [currentDate]);

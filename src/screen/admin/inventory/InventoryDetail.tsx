@@ -41,44 +41,49 @@ const InventoryDetail = () => {
   const [issueNote, setIssueNote] = useState("");
   const [isSubmittingDetail, setIsSubmittingDetail] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = () => {
     if (!id) return;
-    try {
-      setIsLoading(true);
-      const [itemData, queriesData] = await Promise.all([
-        inventoryApi.getItemById(id),
-        inventoryApi.getQueries({ item_id: id }),
-      ]);
-      setItem(itemData);
-      setQueries(queriesData.queries);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to load item details");
-      navigate(ROUTES.ADMIN.INVENTORY.LIST);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    Promise.all([
+      inventoryApi.getItemById(id),
+      inventoryApi.getQueries({ item_id: id }),
+    ])
+      .then(([itemData, queriesData]) => {
+        setItem(itemData);
+        setQueries(queriesData.queries);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to load item details");
+        navigate(ROUTES.ADMIN.INVENTORY.LIST);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchData();
   }, [id]);
 
-  const handleOpenIssue = async () => {
+  const handleOpenIssue = () => {
     if (!id || !issueNote.trim()) return;
-    try {
-      setIsSubmittingDetail(true);
-      await inventoryApi.openQuery({ item_id: id, issue_note: issueNote });
-      toast.success(
-        "Issue reported successfully. Item status updated to Damaged.",
-      );
-      setIsDialogOpen(false);
-      setIssueNote("");
-      fetchData(); // Refresh data
-    } catch (error: any) {
-      toast.error(error.message || "Failed to open issue");
-    } finally {
-      setIsSubmittingDetail(false);
-    }
+    setIsSubmittingDetail(true);
+    inventoryApi
+      .openQuery({ item_id: id, issue_note: issueNote })
+      .then(() => {
+        toast.success(
+          "Issue reported successfully. Item status updated to Damaged.",
+        );
+        setIsDialogOpen(false);
+        setIssueNote("");
+        fetchData(); // Refresh data
+      })
+      .catch((error: any) => {
+        toast.error(error.message || "Failed to open issue");
+      })
+      .finally(() => {
+        setIsSubmittingDetail(false);
+      });
   };
 
   if (isLoading) {

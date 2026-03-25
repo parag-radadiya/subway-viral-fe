@@ -54,34 +54,38 @@ const UserForm = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [rolesRes, shopsRes] = await Promise.all([
-          rolesApi.list(),
-          shopsApi.list(),
-        ]);
-        setRoles(rolesRes.data.data.roles);
-        setShops(shopsRes.data.data.shops);
+    const fetchData = () => {
+      Promise.all([rolesApi.list(), shopsApi.list()])
+        .then(([rolesRes, shopsRes]) => {
+          setRoles(rolesRes.data.data.roles);
+          setShops(shopsRes.data.data.shops);
 
-        if (isEdit && id) {
-          const userRes = await usersApi.getById(id);
-          const userData = userRes.data.data.user;
-          reset({
-            name: userData.name,
-            email: userData.email,
-            phone_code: userData.phone_code,
-            phone_num: userData.phone_num,
-            role_id: userData.role_id._id,
-            active_shop_id: userData.shop_id._id,
-            assigned_shop_ids: userData.assigned_shop_ids,
-          });
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load form data");
-      } finally {
-        setLoading(false);
-      }
+          if (isEdit && id) {
+            return usersApi.getById(id);
+          }
+          return null;
+        })
+        .then((userRes) => {
+          if (userRes) {
+            const userData = userRes.data.data.user;
+            reset({
+              name: userData.name,
+              email: userData.email,
+              phone_code: userData.phone_code,
+              phone_num: userData.phone_num,
+              role_id: userData.role_id._id,
+              active_shop_id: userData.shop_id._id,
+              assigned_shop_ids: userData.assigned_shop_ids,
+            });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error(err.message || "Failed to load form data");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     };
 
     fetchData();
@@ -110,7 +114,7 @@ const UserForm = () => {
       })
       .catch((err) => {
         console.error(err);
-        toast.error(err.response?.data?.message || "Failed to save user");
+        toast.error(err.message || "Failed to save user");
         setSubmitting(false);
       });
   };
