@@ -8,7 +8,7 @@ import {
   Store,
   AlertCircle,
 } from "lucide-react";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import api from "../../../config/api";
 import {
   InventoryItem,

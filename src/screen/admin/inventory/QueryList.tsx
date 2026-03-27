@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Select from "../../../components/common/Select";
 import Table from "../../../components/common/Table";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import { ROUTES } from "../../../utils/routes";
 import { InventoryQuery, QueryStatus } from "../../../utils/types";
 

@@ -116,6 +116,7 @@ export interface InventoryAuditLog {
 
 export interface AuthState {
   token: string | null;
+  refresh_token: string | null;
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -143,6 +144,8 @@ export interface ApiResponse<T> {
 
 export interface LoginResponse {
   token: string;
+  refresh_token: string;
+  refresh_token_expires_at: string;
   must_change_password: boolean;
   user: User;
 }

@@ -21,7 +21,7 @@ import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import { ROUTES } from "../../../utils/routes";
 import {
   InventoryItem,

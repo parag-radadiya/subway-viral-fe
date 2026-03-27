@@ -20,7 +20,7 @@ import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Dialog from "../../../components/common/Dialog";
 import Table from "../../../components/common/Table";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import { ROUTES } from "../../../utils/routes";
 import {
   InventoryItem,

@@ -5,6 +5,7 @@ import { useAppDispatch } from "../../store";
 import { logout } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils/routes";
+import { authApi } from "../../config/apiCall";
 
 interface RoleLayoutProps {
   children: ReactNode;
@@ -18,9 +19,16 @@ const RoleLayout = ({ children, roleTitle, navItems }: RoleLayoutProps) => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate(ROUTES.LOGIN);
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      await authApi.logout({ refresh_token: refreshToken || "" });
+    } catch (err) {
+      console.error("Logout API error:", err);
+    } finally {
+      dispatch(logout());
+      navigate(ROUTES.LOGIN);
+    }
   };
 
   const closeSidebar = () => setIsSidebarOpen(false);
@@ -141,4 +149,3 @@ const RoleLayout = ({ children, roleTitle, navItems }: RoleLayoutProps) => {
 };
 
 export default RoleLayout;
-

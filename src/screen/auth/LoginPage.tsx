@@ -59,7 +59,12 @@ const LoginPage = () => {
         .then((res) => {
           const response = res.data.data;
           const role = response.user.role.role_name;
-          localStorage.setItem("auth_token", response.token);
+          // Store both standard and legacy token names as fallback
+          const accessToken = response.access_token || response.token;
+          localStorage.setItem("auth_token", accessToken);
+          if (response.refresh_token) {
+            localStorage.setItem("refresh_token", response.refresh_token);
+          }
           if (response.must_change_password) {
             setTempCredentials({
               email: data.email,
@@ -74,7 +79,11 @@ const LoginPage = () => {
             dispatch(setAuthenticated(true));
 
             dispatch(
-              setCredentials({ token: response.token, user: response.user }),
+              setCredentials({ 
+                token: accessToken, 
+                refresh_token: response.refresh_token,
+                user: response.user 
+              }),
             );
             navigate("/");
           }

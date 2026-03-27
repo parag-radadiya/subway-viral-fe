@@ -11,7 +11,7 @@ import {
   User,
   Loader2,
 } from "lucide-react";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import { InventoryAuditLog } from "../../../utils/types";
 import Table from "../../../components/common/Table";
 import Select from "../../../components/common/Select";

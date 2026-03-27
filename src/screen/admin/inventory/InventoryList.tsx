@@ -20,7 +20,7 @@ import Dialog from "../../../components/common/Dialog";
 import Input from "../../../components/common/Input";
 import Select from "../../../components/common/Select";
 import Table from "../../../components/common/Table";
-import { inventoryApi } from "../../../config/inventoryApi";
+import { inventoryApi } from "../../../config/apiCall";
 import { ROUTES } from "../../../utils/routes";
 import { InventoryItem, InventoryStatus } from "../../../utils/types";
 
