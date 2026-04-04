@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { attendanceApi } from "../../../config/apiCall";
-import { MapPin, Loader2, Clock } from "lucide-react";
+import { MapPin, Loader2, Clock, SlidersHorizontal } from "lucide-react";
 import { toast } from "react-toastify";
 import Table from "../../../components/common/Table";
+import Button from "../../../components/common/Button";
+import { UserAdjustHoursModal } from "./UserAdjustHoursModal";
 
 interface AttendanceRecord {
   _id: string;
@@ -14,9 +16,16 @@ interface AttendanceRecord {
   status: string;
 }
 
-export const UserAttendanceSection = ({ userId }: { userId: string }) => {
+export const UserAttendanceSection = ({
+  userId,
+  userName,
+}: {
+  userId: string;
+  userName?: string;
+}) => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adjustModalOpen, setAdjustModalOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -88,6 +97,14 @@ export const UserAttendanceSection = ({ userId }: { userId: string }) => {
             </p>
           </div>
         </div>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => setAdjustModalOpen(true)}
+        >
+          <SlidersHorizontal size={14} className="mr-1.5" />
+          Adjust Hours
+        </Button>
       </div>
 
       <div className="p-4">
@@ -201,6 +218,13 @@ export const UserAttendanceSection = ({ userId }: { userId: string }) => {
           />
         )}
       </div>
+
+      <UserAdjustHoursModal
+        isOpen={adjustModalOpen}
+        onClose={() => setAdjustModalOpen(false)}
+        userId={userId}
+        userName={userName}
+      />
     </div>
   );
 };

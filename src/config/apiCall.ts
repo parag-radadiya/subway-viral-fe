@@ -209,6 +209,23 @@ export const attendanceApi = {
     api.get(
       `/attendance/adjust-hours/unchanged-users?${new URLSearchParams(params).toString()}`,
     ),
+
+  adjustHoursPreview: (data: {
+    user_id: string;
+    shop_id?: string;
+    from_date: string;
+    to_date: string;
+    target_hours: number;
+  }) => api.post("/attendance/adjust-hours/preview", data),
+
+  adjustHoursApply: (data: {
+    user_id: string;
+    shop_id?: string;
+    from_date: string;
+    to_date: string;
+    target_hours: number;
+    note?: string;
+  }) => api.post("/attendance/adjust-hours/apply", data),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────
