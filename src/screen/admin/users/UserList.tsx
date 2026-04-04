@@ -1,6 +1,5 @@
 import {
   Edit,
-  Edit2,
   Eye,
   Loader2,
   MapPin,

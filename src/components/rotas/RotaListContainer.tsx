@@ -1,28 +1,27 @@
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { rotasApi, shopsApi, usersApi } from "../../config/apiCall";
 import {
-  Calendar,
-  Store,
-  Clock,
-  Loader2,
   BarChart3,
-  Trash2,
-  Edit2,
-  Eye,
-  Plus,
-  User,
+  Calendar,
+  Clock,
   Edit,
+  Eye,
+  Loader2,
+  Plus,
+  Store,
+  Trash2,
+  User,
 } from "lucide-react";
-import { Rota } from "../../utils/types";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Table from "../common/Table";
+import { rotasApi, shopsApi, usersApi } from "../../config/apiCall";
+import { Rota } from "../../utils/types";
+import WeeklyScheduleGrid from "../admin/rotas/WeeklyScheduleGrid";
+import Button from "../common/Button";
+import Dialog from "../common/Dialog";
 import Input from "../common/Input";
 import Select from "../common/Select";
-import Dialog from "../common/Dialog";
+import Table from "../common/Table";
 import Tabs from "../common/Tabs";
-import Button from "../common/Button";
-import WeeklyScheduleGrid from "../admin/rotas/WeeklyScheduleGrid";
 
 interface RotaListContainerProps {
   title: string;

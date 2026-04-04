@@ -3,7 +3,6 @@ import {
   AlertCircle,
   Calendar,
   Edit,
-  Edit2,
   Eye,
   Loader2,
   MessageSquare,
