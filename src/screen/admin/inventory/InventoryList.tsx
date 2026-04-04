@@ -2,6 +2,7 @@ import {
   Activity,
   AlertCircle,
   Calendar,
+  Edit,
   Edit2,
   Eye,
   Loader2,
@@ -180,28 +181,28 @@ const InventoryList = () => {
         <div className="flex items-center justify-end gap-1">
           <button
             onClick={() => navigate(ROUTES.ADMIN.INVENTORY.DETAILS(item._id))}
-            className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors"
+            className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
             title="View Details"
           >
             <Eye size={16} />
           </button>
           <button
             onClick={() => setReportIssueItemId(item._id)}
-            className="p-2 hover:bg-amber-50 text-amber-500 rounded-lg transition-colors"
+            className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
             title="Report Issue"
           >
             <MessageSquare size={16} />
           </button>
           <button
             onClick={() => navigate(ROUTES.ADMIN.INVENTORY.EDIT(item._id))}
-            className="p-2 hover:bg-slate-50 text-slate-500 rounded-lg transition-colors"
+            className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
             title="Edit Item"
           >
-            <Edit2 size={16} />
+            <Edit size={16} />
           </button>
           <button
             onClick={() => setDeleteTargetId(item._id)}
-            className="p-2 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors"
+            className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
             title="Delete Item"
           >
             <Trash2 size={16} />

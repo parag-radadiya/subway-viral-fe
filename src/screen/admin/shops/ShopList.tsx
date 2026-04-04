@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { shopsApi } from "../../../config/apiCall";
-import { Store, Plus, Search, MapPin, Loader2, Eye } from "lucide-react";
+import { Store, Plus, Search, MapPin, Loader2, Eye, Clock, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
@@ -14,6 +14,8 @@ interface Shop {
   latitude: number;
   longitude: number;
   geofence_radius_m: number;
+  opening_time?: string;
+  closing_time?: string;
 }
 
 const ShopList = () => {
@@ -126,18 +128,40 @@ const ShopList = () => {
                 ),
               },
               {
+                header: "Operating Hours",
+                align: "center",
+                render: (shop) =>
+                  shop.opening_time && shop.closing_time ? (
+                    <div className="flex items-center justify-center gap-1.5 text-slate-600">
+                      <Clock size={12} className="text-slate-400" />
+                      <span className="text-xs font-mono font-semibold">
+                        {shop.opening_time} – {shop.closing_time}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-300">—</span>
+                  ),
+              },
+              {
                 header: "Actions",
                 align: "right",
                 render: (shop) => (
-                  <button
-                    onClick={() =>
-                      navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))
-                    }
-                    className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
-                    title="View Details"
-                  >
-                    <Eye size={16} />
-                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => navigate(ROUTES.ADMIN.SHOPS.EDIT(shop._id))}
+                      className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
+                      title="Edit Shop"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))}
+                      className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  </div>
                 ),
               },
             ]}

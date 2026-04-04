@@ -12,6 +12,7 @@ import {
   Eye,
   Plus,
   User,
+  Edit,
 } from "lucide-react";
 import { Rota } from "../../utils/types";
 import { toast } from "react-toastify";
@@ -226,10 +227,10 @@ const RotaListContainer = ({
             </button>
             <button
               onClick={() => navigate(routes.edit(rota._id))}
-              className="p-2 hover:bg-slate-50 text-slate-500 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
               title="Edit Shift"
             >
-              <Edit2 size={16} />
+              <Edit size={16} />
             </button>
             <button
               onClick={() => setDeleteTargetId(rota._id)}

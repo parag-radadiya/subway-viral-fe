@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Loader2,
   Radius,
+  Clock,
 } from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
@@ -22,6 +23,8 @@ interface Shop {
   latitude: number;
   longitude: number;
   geofence_radius_m: number;
+  opening_time?: string;
+  closing_time?: string;
 }
 
 const ShopDetail = () => {
@@ -143,6 +146,34 @@ const ShopDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Operating hours row */}
+        {(shop.opening_time || shop.closing_time) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 pt-6 pb-6 border-b border-slate-100">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+                Opening Time
+              </p>
+              <div className="flex items-end gap-2 text-slate-800">
+                <Clock size={20} className="text-green-500 mb-1" />
+                <span className="text-xl font-mono font-bold tracking-tighter">
+                  {shop.opening_time || "—"}
+                </span>
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+                Closing Time
+              </p>
+              <div className="flex items-end gap-2 text-slate-800">
+                <Clock size={20} className="text-orange-400 mb-1" />
+                <span className="text-xl font-mono font-bold tracking-tighter">
+                  {shop.closing_time || "—"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-8 bg-slate-50/30 flex justify-between items-center text-[10px] text-slate-400 font-medium">
           <p>Created: Mar 10, 2026</p>

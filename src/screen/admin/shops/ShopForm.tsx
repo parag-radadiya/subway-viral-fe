@@ -7,9 +7,10 @@ import {
   Navigation,
   ArrowLeft,
   Loader2,
-  Save,
   Radius,
   MapPin,
+  Clock,
+  Save,
 } from "lucide-react";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
@@ -21,6 +22,8 @@ interface ShopFormData {
   latitude: number;
   longitude: number;
   geofence_radius_m: number;
+  opening_time: string;
+  closing_time: string;
 }
 
 const ShopForm = () => {
@@ -192,6 +195,27 @@ const ShopForm = () => {
             {...register("longitude", {
               required: "Longitude is required",
               valueAsNumber: true,
+            })}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Opening Time"
+            type="time"
+            leftIcon={<Clock size={16} />}
+            error={errors.opening_time?.message}
+            {...register("opening_time", {
+              required: "Opening time is required",
+            })}
+          />
+          <Input
+            label="Closing Time"
+            type="time"
+            leftIcon={<Clock size={16} />}
+            error={errors.closing_time?.message}
+            {...register("closing_time", {
+              required: "Closing time is required",
             })}
           />
         </div>

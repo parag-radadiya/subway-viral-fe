@@ -16,6 +16,7 @@ import {
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
 import { toast } from "react-toastify";
+import { UserAttendanceSection } from "./UserAttendanceSection";
 
 interface User {
   _id: string;
@@ -227,6 +228,8 @@ const UserDetail = () => {
           )}
         </div>
       </div>
+
+      <UserAttendanceSection userId={user._id} />
     </div>
   );
 };

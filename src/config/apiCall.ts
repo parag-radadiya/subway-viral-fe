@@ -55,7 +55,7 @@ export const usersApi = {
 
 export const inventoryApi = {
   // ─── Items ─────────────────────────────────────────────────────────────────
-  
+
   getItems: async (params?: {
     shop_id?: string;
     status?: string;
@@ -64,16 +64,15 @@ export const inventoryApi = {
     sort_by?: string;
     sort_order?: string;
   }) => {
-    const response = await api.get<ApiResponse<{ items: InventoryItem[]; total: number }>>(
-      "/inventory/items",
-      { params }
-    );
+    const response = await api.get<
+      ApiResponse<{ items: InventoryItem[]; total: number }>
+    >("/inventory/items", { params });
     return response.data.data;
   },
 
   getItemById: async (id: string) => {
     const response = await api.get<ApiResponse<{ item: InventoryItem }>>(
-      `/inventory/items/${id}`
+      `/inventory/items/${id}`,
     );
     return response.data.data.item;
   },
@@ -81,7 +80,7 @@ export const inventoryApi = {
   createItem: async (data: Partial<InventoryItem>) => {
     const response = await api.post<ApiResponse<{ item: InventoryItem }>>(
       "/inventory/items",
-      data
+      data,
     );
     return response.data.data.item;
   },
@@ -89,13 +88,15 @@ export const inventoryApi = {
   updateItem: async (id: string, data: Partial<InventoryItem>) => {
     const response = await api.put<ApiResponse<{ item: InventoryItem }>>(
       `/inventory/items/${id}`,
-      data
+      data,
     );
     return response.data.data.item;
   },
 
   deleteItem: async (id: string) => {
-    const response = await api.delete<ApiResponse<null>>(`/inventory/items/${id}`);
+    const response = await api.delete<ApiResponse<null>>(
+      `/inventory/items/${id}`,
+    );
     return response.data;
   },
 
@@ -110,16 +111,15 @@ export const inventoryApi = {
     sort_by?: string;
     sort_order?: string;
   }) => {
-    const response = await api.get<ApiResponse<{ queries: InventoryQuery[]; total: number }>>(
-      "/inventory/queries",
-      { params }
-    );
+    const response = await api.get<
+      ApiResponse<{ queries: InventoryQuery[]; total: number }>
+    >("/inventory/queries", { params });
     return response.data.data;
   },
 
   getQueryById: async (id: string) => {
     const response = await api.get<ApiResponse<{ query: InventoryQuery }>>(
-      `/inventory/queries/${id}`
+      `/inventory/queries/${id}`,
     );
     return response.data.data.query;
   },
@@ -127,18 +127,18 @@ export const inventoryApi = {
   openQuery: async (data: { item_id: string; issue_note: string }) => {
     const response = await api.post<ApiResponse<{ query: InventoryQuery }>>(
       "/inventory/queries",
-      data
+      data,
     );
     return response.data.data.query;
   },
 
   closeQuery: async (
     id: string,
-    data: { repair_cost: number; resolve_note: string }
+    data: { repair_cost: number; resolve_note: string },
   ) => {
     const response = await api.put<ApiResponse<{ query: InventoryQuery }>>(
       `/inventory/queries/${id}/close`,
-      data
+      data,
     );
     return response.data.data.query;
   },
@@ -155,10 +155,9 @@ export const inventoryApi = {
     sort_by?: string;
     sort_order?: string;
   }) => {
-    const response = await api.get<ApiResponse<{ logs: InventoryAuditLog[]; total: number }>>(
-      "/inventory/audit-logs",
-      { params }
-    );
+    const response = await api.get<
+      ApiResponse<{ logs: InventoryAuditLog[]; total: number }>
+    >("/inventory/audit-logs", { params });
     return response.data.data;
   },
 };
@@ -168,6 +167,8 @@ export const inventoryApi = {
 export const attendanceApi = {
   list: (query?: Record<string, string>) =>
     api.get(`/attendance?${new URLSearchParams(query)}`),
+  getUsersSummary: (query?: Record<string, string>) =>
+    api.get(`/attendance/summary-by-user?${new URLSearchParams(query)}`),
 
   verifyLocation: (data: {
     shop_id: string;
@@ -204,19 +205,24 @@ export const attendanceApi = {
     shop_id: string;
     from_date: string;
     to_date: string;
-  }) => api.get(`/attendance/adjust-hours/unchanged-users?${new URLSearchParams(params).toString()}`),
+  }) =>
+    api.get(
+      `/attendance/adjust-hours/unchanged-users?${new URLSearchParams(params).toString()}`,
+    ),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────
 
 export const rotasApi = {
   list: (query?: Record<string, string>) => {
-    const q = query && Object.keys(query).length > 0 
-      ? new URLSearchParams(query).toString() 
-      : "week_start=2026-03-16";
+    const q =
+      query && Object.keys(query).length > 0
+        ? new URLSearchParams(query).toString()
+        : "week_start=2026-03-16";
     return api.get(`/rotas?${q}`);
   },
-  week: (query: Record<string, string>) => api.get(`/rotas/week?${new URLSearchParams(query).toString()}`),
+  week: (query: Record<string, string>) =>
+    api.get(`/rotas/week?${new URLSearchParams(query).toString()}`),
   dashboard: () => api.get("/rotas/dashboard?week_start=2026-03-16"),
   getById: (id: string) => api.get(`/rotas/${id}`),
   create: (data: Record<string, unknown>) => api.post("/rotas", data),

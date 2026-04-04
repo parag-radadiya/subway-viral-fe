@@ -1,4 +1,5 @@
 import {
+  Edit,
   Edit2,
   Eye,
   Loader2,
@@ -6,6 +7,7 @@ import {
   Plus,
   Search,
   Shield,
+  User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -124,13 +126,18 @@ const UserList = () => {
               {
                 header: "Name & Email",
                 render: (userItem) => (
-                  <div>
-                    <p className="text-sm font-semibold text-slate-700">
-                      {userItem.name}
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-medium">
-                      {userItem.email}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                      <User size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">
+                        {userItem.name}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium">
+                        {userItem.email}
+                      </p>
+                    </div>
                   </div>
                 ),
               },
@@ -184,9 +191,10 @@ const UserList = () => {
                       onClick={() =>
                         navigate(ROUTES.ADMIN.USERS.EDIT(userItem._id))
                       }
-                      className="p-2 hover:bg-accent-50 text-accent-500 rounded-lg transition-colors"
+                      className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
+                      title="Edit User"
                     >
-                      <Edit2 size={16} />
+                      <Edit size={16} />
                     </button>
                     <button
                       onClick={() =>
