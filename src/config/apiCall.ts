@@ -44,6 +44,11 @@ export const usersApi = {
 
   assignedShopsStaffSummary: () =>
     api.get("/users/assigned-shops/staff-summary"),
+
+  getStaffByShop: (shop_id: string, params?: Record<string, string>) => {
+    const q = params ? `?${new URLSearchParams(params).toString()}` : "";
+    return api.get(`/users/by-shop/${shop_id}/staff${q}`);
+  },
 };
 
 // ─── Inventory API ────────────────────────────────────────────────────────────
@@ -187,6 +192,19 @@ export const attendanceApi = {
     if (user_id) params.append("user_id", user_id);
     return api.get(`/attendance/eligible-rotas?${params.toString()}`);
   },
+
+  bulkAdjustHours: (data: {
+    shop_id: string;
+    from_date: string;
+    to_date: string;
+    adjustments: { user_id: string; target_hours: number }[];
+  }) => api.post("/attendance/adjust-hours/bulk-by-shop", data),
+
+  getUnchangedUsers: (params: {
+    shop_id: string;
+    from_date: string;
+    to_date: string;
+  }) => api.get(`/attendance/adjust-hours/unchanged-users?${new URLSearchParams(params).toString()}`),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────

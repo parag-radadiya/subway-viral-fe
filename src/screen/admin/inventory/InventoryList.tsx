@@ -30,8 +30,10 @@ const InventoryList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Delete confirm state
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -49,14 +51,15 @@ const InventoryList = () => {
     inventoryApi
       .getItems({
         page,
-        limit: 10,
+        limit,
         status: statusFilter || undefined,
         sort_by: "item_name",
         sort_order: "asc",
       })
-      .then((data) => {
-        setItems(data.items);
-        setTotal(data.total);
+      .then((data: any) => {
+        setItems(data.items || data.data || []);
+        setTotal(data.total || 0);
+        setTotalPages(data.total_pages || data.totalPages || 1);
       })
       .catch((error: any) => {
         toast.error(error.message || "Failed to fetch inventory items");
@@ -68,7 +71,7 @@ const InventoryList = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [page, statusFilter]);
+  }, [page, limit, statusFilter]);
 
   const handleDelete = () => {
     if (!deleteTargetId) return;
@@ -280,36 +283,18 @@ const InventoryList = () => {
             data={filteredItems}
             keyExtractor={(item) => item._id}
             emptyStateMessage="No inventory items found matching your filters."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
-
-          {total > 10 && (
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30 -mx-4 -mb-4">
-              <p className="text-xs text-slate-500">
-                Showing{" "}
-                <span className="font-bold text-slate-900">{items.length}</span>{" "}
-                of <span className="font-bold text-slate-900">{total}</span>{" "}
-                items
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page * 10 >= total}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

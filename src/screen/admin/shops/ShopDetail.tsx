@@ -14,6 +14,7 @@ import {
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
 import { toast } from "react-toastify";
+import { ShopStaffSection } from "./ShopStaffSection";
 
 interface Shop {
   _id: string;
@@ -174,6 +175,8 @@ const ShopDetail = () => {
           </p>
         </div>
       </div>
+
+      <ShopStaffSection shopId={shop._id} />
     </div>
   );
 };

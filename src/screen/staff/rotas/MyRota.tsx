@@ -16,12 +16,17 @@ const MyRota = () => {
   const [selectedWeek, setSelectedWeek] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     if (user?.id) {
       setLoading(true);
       const fetchCall = selectedWeek
         ? rotasApi.week({ week_start: selectedWeek })
-        : rotasApi.list();
+        : rotasApi.list({ user_id: user.id, page: page.toString(), limit: limit.toString() });
 
       fetchCall
         .then(({ data }) => {
@@ -30,20 +35,18 @@ const MyRota = () => {
             setRotas([]);
           } else {
             setWeekData(null);
-            let allRotas = data.data.rotas || [];
-            const myRotas = allRotas.filter((r: any) => {
-              const rUserId =
-                typeof r.user_id === "string" ? r.user_id : r.user_id?._id;
-              return rUserId === user.id;
-            });
-
+            const resultData = data.data;
+            const allRotas = resultData.rotas || resultData.items || resultData.data || [];
+            
             setRotas(
-              myRotas.sort(
+              allRotas.sort(
                 (a: any, b: any) =>
                   new Date(b.shift_date).getTime() -
                   new Date(a.shift_date).getTime(),
               ),
             );
+            setTotal(resultData.total || 0);
+            setTotalPages(resultData.total_pages || resultData.totalPages || 1);
           }
         })
         .catch((err) => {
@@ -52,7 +55,7 @@ const MyRota = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [user?.id, selectedWeek]);
+  }, [user?.id, selectedWeek, page, limit]);
 
   const filteredRotas = rotas.filter((rota) => {
     const shopName = typeof rota.shop_id === 'string' ? rota.shop_id : rota.shop_id?.name || "";
@@ -235,6 +238,17 @@ const MyRota = () => {
                   No upcoming shifts found matching your filter.
                 </span>
               }
+              pagination={{
+                page,
+                limit,
+                total,
+                totalPages,
+                onPageChange: setPage,
+                onLimitChange: (newLimit) => {
+                  setLimit(newLimit);
+                  setPage(1);
+                },
+              }}
             />
           </div>
         </div>

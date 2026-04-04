@@ -24,6 +24,8 @@ const AuditLogList = () => {
   const [actionFilter, setActionFilter] = useState<string>("");
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const fetchLogs = () => {
@@ -31,14 +33,15 @@ const AuditLogList = () => {
     inventoryApi
       .getAuditLogs({
         page,
-        limit: 20,
+        limit,
         action: actionFilter || undefined,
         sort_by: "createdAt",
         sort_order: "desc",
       })
-      .then((data) => {
-        setLogs(data.logs);
-        setTotal(data.total);
+      .then((data: any) => {
+        setLogs(data.logs || data.data || []);
+        setTotal(data.total || 0);
+        setTotalPages(data.total_pages || data.totalPages || 1);
       })
       .catch((error: any) => {
         toast.error(error.message || "Failed to fetch audit logs");
@@ -50,7 +53,7 @@ const AuditLogList = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [page, actionFilter]);
+  }, [page, limit, actionFilter]);
 
   const getActionInfo = (action: string) => {
     switch (action) {
@@ -204,36 +207,18 @@ const AuditLogList = () => {
           data={logs}
           keyExtractor={(log) => log._id}
           emptyStateMessage="No audit logs found."
+          pagination={{
+            page,
+            limit,
+            total,
+            totalPages,
+            onPageChange: setPage,
+            onLimitChange: (newLimit) => {
+              setLimit(newLimit);
+              setPage(1);
+            },
+          }}
         />
-
-        {total > 20 && (
-          <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white">
-            <p className="text-sm text-slate-500">
-              Showing{" "}
-              <span className="font-medium text-slate-900">{logs.length}</span>{" "}
-              of <span className="font-medium text-slate-900">{total}</span>{" "}
-              logs
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={page * 20 >= total}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
       </Card>
     </div>
   );

@@ -22,6 +22,8 @@ type FinalUser = {
   email: string;
   assigned_shop_ids: string[];
   role_id: { role_name: string };
+  phone_code: string;
+  phone_num: string;
 };
 const UserList = () => {
   const navigate = useNavigate();
@@ -29,18 +31,27 @@ const UserList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
+    setLoading(true);
     usersApi
-      .list()
+      .list({ page: page.toString(), limit: limit.toString() })
       .then(({ data }) => {
-        setUsers(data.data.users);
+        const resultData = data.data;
+        setUsers(resultData.users || []);
+        setTotal(resultData.total || 0);
+        setTotalPages(resultData.total_pages || resultData.totalPages || 1);
       })
       .catch((err) => {
         console.error(err);
         toast.error(err.message || "Failed to fetch users");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [page, limit]);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -124,6 +135,15 @@ const UserList = () => {
                 ),
               },
               {
+                header: "Phone",
+                render: (userItem) => (
+                  <p className="text-sm text-slate-600">
+                    {`${userItem.phone_code} ${userItem.phone_num}`.trim() ||
+                      "-"}
+                  </p>
+                ),
+              },
+              {
                 header: "Role",
                 align: "center",
                 render: (userItem) => (
@@ -184,6 +204,17 @@ const UserList = () => {
             data={filteredUsers}
             keyExtractor={(u) => u._id}
             emptyStateMessage="No personnel found."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
         </div>
       </div>

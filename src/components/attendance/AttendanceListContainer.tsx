@@ -35,6 +35,11 @@ const AttendanceListContainer = ({
     user_id: "all",
   });
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     const fetchInitialData = () => {
       Promise.all([shopsApi.list(), usersApi.list()])
@@ -53,7 +58,10 @@ const AttendanceListContainer = ({
   useEffect(() => {
     const fetchAttendance = () => {
       setLoading(true);
-      const query: Record<string, string> = {};
+      const query: Record<string, string> = {
+        page: page.toString(),
+        limit: limit.toString(),
+      };
       if (activeFilters.shop_id !== "all")
         query.shop_id = activeFilters.shop_id;
       if (activeFilters.user_id !== "all")
@@ -62,13 +70,16 @@ const AttendanceListContainer = ({
       attendanceApi
         .list(query)
         .then(({ data }) => {
-          const fetchedRecords = data.data.records || [];
+          const resultData = data.data;
+          const fetchedRecords = resultData.records || resultData.data || [];
           setRecords(
             fetchedRecords.sort(
               (a: any, b: any) =>
                 new Date(b.punch_in).getTime() - new Date(a.punch_in).getTime(),
             ),
           );
+          setTotal(resultData.total || 0);
+          setTotalPages(resultData.total_pages || resultData.totalPages || 1);
         })
         .catch((err) => {
           console.error("Error fetching attendance:", err);
@@ -79,7 +90,7 @@ const AttendanceListContainer = ({
         });
     };
     fetchAttendance();
-  }, [activeFilters]);
+  }, [activeFilters, page, limit]);
 
   const hasActiveFilters =
     activeFilters.shop_id !== "all" || activeFilters.user_id !== "all";
@@ -280,6 +291,17 @@ const AttendanceListContainer = ({
             data={records}
             keyExtractor={(record) => record._id}
             emptyStateMessage="No attendance records found."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
         </div>
       </div>

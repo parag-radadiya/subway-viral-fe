@@ -10,15 +10,21 @@ const RotaView = () => {
   const [rotas, setRotas] = useState<Rota[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchRotas = () => {
       setLoading(true);
       rotasApi
-        .list()
+        .list({ page: page.toString(), limit: limit.toString() })
         .then((res) => {
           // Sub-manager sees all shifts or filtered by shop
-          const allRotas = res.data.data.rotas || [];
+          const resultData = res.data.data;
+          const allRotas = resultData.rotas || resultData.items || resultData.data || [];
           setRotas(
             allRotas.sort(
               (a: any, b: any) =>
@@ -26,6 +32,8 @@ const RotaView = () => {
                 new Date(b.shift_date).getTime(),
             ),
           );
+          setTotal(resultData.total || 0);
+          setTotalPages(resultData.total_pages || resultData.totalPages || 1);
         })
         .catch((err) => {
           toast.error(err.message || "Failed to load shop rotas.");
@@ -35,7 +43,7 @@ const RotaView = () => {
         });
     };
     fetchRotas();
-  }, []);
+  }, [page, limit]);
 
   const filteredRotas = rotas.filter((r: Rota) => {
     const userName = typeof r.user_id === 'string' ? r.user_id : r.user_id?.name || "";
@@ -119,6 +127,17 @@ const RotaView = () => {
         data={filteredRotas}
         keyExtractor={(rota) => rota._id}
         emptyStateMessage={<span className="italic">No shifts found matching your search.</span>}
+        pagination={{
+          page,
+          limit,
+          total,
+          totalPages,
+          onPageChange: setPage,
+          onLimitChange: (newLimit) => {
+            setLimit(newLimit);
+            setPage(1);
+          },
+        }}
       />
     </div>
   );

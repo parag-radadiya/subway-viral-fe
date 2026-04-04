@@ -34,7 +34,11 @@ interface RotaListContainerProps {
   };
 }
 
-const RotaListContainer = ({ title, subtitle, routes }: RotaListContainerProps) => {
+const RotaListContainer = ({
+  title,
+  subtitle,
+  routes,
+}: RotaListContainerProps) => {
   const [rotas, setRotas] = useState<Rota[]>([]);
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -59,6 +63,12 @@ const RotaListContainer = ({ title, subtitle, routes }: RotaListContainerProps) 
     user_id: "all",
   });
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     const fetchInitialData = () => {
       Promise.all([shopsApi.list(), usersApi.list()])
@@ -78,16 +88,22 @@ const RotaListContainer = ({ title, subtitle, routes }: RotaListContainerProps) 
     if (activeTab === "all") {
       const fetchRotas = () => {
         setLoading(true);
-        const query: Record<string, string> = {};
+        const query: Record<string, string> = {
+          page: page.toString(),
+          limit: limit.toString(),
+        };
         if (activeFilters.shop_id !== "all")
           query.shop_id = activeFilters.shop_id;
         if (activeFilters.user_id !== "all")
           query.user_id = activeFilters.user_id;
 
         rotasApi
-          .list(Object.keys(query).length > 0 ? query : undefined)
+          .list(query)
           .then((res) => {
-            setRotas(res.data.data.rotas || []);
+            const data = res.data.data;
+            setRotas(data.rotas || data.items || data.data || []);
+            setTotal(data.total || 0);
+            setTotalPages(data.total_pages || data.totalPages || 1);
           })
           .catch((err) => {
             toast.error(err.message || "Failed to load rota data.");
@@ -98,7 +114,7 @@ const RotaListContainer = ({ title, subtitle, routes }: RotaListContainerProps) 
       };
       fetchRotas();
     }
-  }, [activeFilters, activeTab]);
+  }, [activeFilters, activeTab, page, limit]);
 
   useEffect(() => {
     if (activeTab === "weekly" && selectedWeek && selectedWeeklyShop) {
@@ -346,6 +362,17 @@ const RotaListContainer = ({ title, subtitle, routes }: RotaListContainerProps) 
                   data={rotas}
                   keyExtractor={(rota) => rota._id}
                   emptyStateMessage="No rotas found matching filters."
+                  pagination={{
+                    page,
+                    limit,
+                    total,
+                    totalPages,
+                    onPageChange: setPage,
+                    onLimitChange: (newLimit) => {
+                      setLimit(newLimit);
+                      setPage(1);
+                    },
+                  }}
                 />
               ) : (
                 <div className="space-y-8 min-h-[400px]">

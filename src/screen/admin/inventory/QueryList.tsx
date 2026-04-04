@@ -2,7 +2,6 @@ import { ArrowLeft, Calendar, Eye, Loader2, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Button from "../../../components/common/Button";
 import Select from "../../../components/common/Select";
 import Table from "../../../components/common/Table";
 import { inventoryApi } from "../../../config/apiCall";
@@ -16,20 +15,23 @@ const QueryList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchQueries = () => {
     setLoading(true);
     inventoryApi
       .getQueries({
         page,
-        limit: 10,
+        limit,
         status: statusFilter || undefined,
         sort_by: "createdAt",
         sort_order: "desc",
       })
-      .then((data) => {
-        setQueries(data.queries);
-        setTotal(data.total);
+      .then((data: any) => {
+        setQueries(data.queries || data.data || []);
+        setTotal(data.total || 0);
+        setTotalPages(data.total_pages || data.totalPages || 1);
       })
       .catch((error: any) => {
         toast.error(error.message || "Failed to fetch queries");
@@ -41,7 +43,7 @@ const QueryList = () => {
 
   useEffect(() => {
     fetchQueries();
-  }, [page, statusFilter]);
+  }, [page, limit, statusFilter]);
 
   const columns = [
     {
@@ -182,38 +184,18 @@ const QueryList = () => {
             data={queries}
             keyExtractor={(q) => q._id}
             emptyStateMessage="No maintenance tickets found matching your filters."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
-
-          {total > 10 && (
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30 -mx-4 -mb-4">
-              <p className="text-xs text-slate-500">
-                Showing{" "}
-                <span className="font-bold text-slate-900">
-                  {queries.length}
-                </span>{" "}
-                of <span className="font-bold text-slate-900">{total}</span>{" "}
-                tickets
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page * 10 >= total}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

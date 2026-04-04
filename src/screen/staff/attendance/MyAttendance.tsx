@@ -27,12 +27,18 @@ const MyAttendance = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     if (user?.id) {
       attendanceApi
-        .list({ user_id: user.id })
+        .list({ user_id: user.id, page: page.toString(), limit: limit.toString() })
         .then(({ data }) => {
-          const fetchedRecords = data.data.records || [];
+          const resultData = data.data;
+          const fetchedRecords = resultData.records || resultData.data || [];
           setRecords(
             fetchedRecords.sort(
               (a: any, b: any) =>
@@ -40,6 +46,8 @@ const MyAttendance = () => {
                 new Date(a.createdAt).getTime(),
             ),
           );
+          setTotal(resultData.total || 0);
+          setTotalPages(resultData.total_pages || resultData.totalPages || 1);
         })
         .catch((err) => {
           console.error("Error fetching attendance:", err);
@@ -47,7 +55,7 @@ const MyAttendance = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [user?.id]);
+  }, [user?.id, page, limit]);
 
   const filteredRecords = records.filter((rec) =>
     (rec.shop_id?.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
@@ -275,6 +283,17 @@ const MyAttendance = () => {
             data={filteredRecords}
             keyExtractor={(record) => record._id}
             emptyStateMessage="No attendance sessions found."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
         </div>
       </div>

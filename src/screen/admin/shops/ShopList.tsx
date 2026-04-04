@@ -22,17 +22,26 @@ const ShopList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
+    setLoading(true);
     shopsApi
-      .list()
-      .then((res) => {
-        setShops(res.data.data.shops);
+      .list() // assuming shopsApi doesn't support query yet, if it did it would act like others
+      .then((res: any) => {
+        const data = res.data.data;
+        setShops(data.shops || data.data || []);
+        setTotal(data.total || data.shops?.length || 0);
+        setTotalPages(data.total_pages || data.totalPages || 1);
       })
       .catch((err: any) => {
         toast.error(err.message || "Failed to fetch shops");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [page, limit]);
 
   const filteredShops = shops.filter((shop) =>
     shop.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -135,6 +144,17 @@ const ShopList = () => {
             data={filteredShops}
             keyExtractor={(shop) => shop._id}
             emptyStateMessage="No shops found matching your search."
+            pagination={{
+              page,
+              limit,
+              total,
+              totalPages,
+              onPageChange: setPage,
+              onLimitChange: (newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              },
+            }}
           />
         </div>
       </div>

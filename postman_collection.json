@@ -17,6 +17,16 @@
       "type": "string"
     },
     {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "user_id",
       "value": "",
       "type": "string"
@@ -90,6 +100,21 @@
       "key": "audit_action",
       "value": "QUERY_CLOSED",
       "type": "string"
+    },
+    {
+      "key": "from_date",
+      "value": "2026-03-01",
+      "type": "string"
+    },
+    {
+      "key": "to_date",
+      "value": "2026-03-31",
+      "type": "string"
+    },
+    {
+      "key": "target_hours",
+      "value": "8",
+      "type": "string"
     }
   ],
   "auth": {
@@ -115,7 +140,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
                   "  pm.collectionVariables.set('user_id', json.data.user.id);",
                   "  pm.collectionVariables.set('shop_id', json.data.user.shop_id || '');",
                   "  pm.collectionVariables.set('active_shop_id', json.data.user.active_shop_id || json.data.user.shop_id || '');",
@@ -157,7 +184,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
                   "  pm.collectionVariables.set('user_id', json.data.user.id);",
                   "  pm.collectionVariables.set('shop_id', json.data.user.shop_id || '');",
                   "  pm.collectionVariables.set('active_shop_id', json.data.user.active_shop_id || json.data.user.shop_id || '');",
@@ -198,7 +227,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
                   "  pm.collectionVariables.set('user_id', json.data.user.id);",
                   "  pm.collectionVariables.set('shop_id', json.data.user.shop_id || '');",
                   "  pm.collectionVariables.set('active_shop_id', json.data.user.active_shop_id || json.data.user.shop_id || '');",
@@ -239,7 +270,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
                   "  pm.collectionVariables.set('user_id', json.data.user.id);",
                   "  pm.collectionVariables.set('shop_id', json.data.user.shop_id || '');",
                   "  pm.collectionVariables.set('active_shop_id', json.data.user.active_shop_id || json.data.user.shop_id || '');",
@@ -280,7 +313,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
                   "  pm.collectionVariables.set('user_id', json.data.user.id);",
                   "  pm.collectionVariables.set('shop_id', json.data.user.shop_id || '');",
                   "  pm.collectionVariables.set('active_shop_id', json.data.user.active_shop_id || json.data.user.shop_id || '');",
@@ -309,6 +344,71 @@
               "raw": "{{base_url}}/api/auth/login",
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('token', json.data.access_token || json.data.token);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refresh_token || '');",
+                  "  pm.collectionVariables.set('refresh_token_expires_at', json.data.refresh_token_expires_at || '');",
+                  "  console.log('✅ Access/refresh tokens rotated');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Logout (Revoke Refresh Token)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
             }
           }
         }
@@ -423,6 +523,17 @@
               "raw": "{{base_url}}/api/users/me/password",
               "host": ["{{base_url}}"],
               "path": ["api", "users", "me", "password"]
+            }
+          }
+        },
+        {
+          "name": "Get Users by Shop (Exclude Root/Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/by-shop/{{shop_id}}/staff",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "by-shop", "{{shop_id}}", "staff"]
             }
           }
         }
@@ -590,6 +701,38 @@
               "raw": "{{base_url}}/api/shops/{{shop_id}}",
               "host": ["{{base_url}}"],
               "path": ["api", "shops", "{{shop_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Shop Hours (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opening_time\": \"09:00\",\n  \"closing_time\": \"21:00\",\n  \"note\": \"Seasonal timing update\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shops/{{shop_id}}/hours",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shops", "{{shop_id}}", "hours"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Hours History (Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/shops/{{shop_id}}/hours-history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shops", "{{shop_id}}", "hours-history"]
             }
           }
         }
@@ -854,12 +997,29 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"shop_id\": \"{{shop_id}}\",\n  \"location_token\": \"{{location_token}}\",\n  \"biometric_verified\": true\n}"
+              "raw": "{\n  \"shop_id\": \"{{shop_id}}\",\n  \"location_token\": \"{{location_token}}\",\n  \"biometric_verified\": true,\n  \"rota_id\": \"{{rota_id}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/attendance/punch-in",
               "host": ["{{base_url}}"],
               "path": ["api", "attendance", "punch-in"]
+            }
+          }
+        },
+        {
+          "name": "Get Eligible Rotas (Current User)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/attendance/eligible-rotas?shop_id={{shop_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "eligible-rotas"],
+              "query": [
+                {
+                  "key": "shop_id",
+                  "value": "{{shop_id}}"
+                }
+              ]
             }
           }
         },
@@ -899,7 +1059,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shop_id\": \"{{shop_id}}\"\n}"
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shop_id\": \"{{shop_id}}\",\n  \"rota_id\": \"{{rota_id}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/attendance/manual-punch-in",
@@ -909,7 +1069,49 @@
           }
         },
         {
-          "name": "Get Attendance (Admin/Root - all)",
+          "name": "Reconcile Self Overdue Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/reconcile-self",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "reconcile-self"]
+            }
+          }
+        },
+        {
+          "name": "Reconcile Overdue Attendance (Admin/Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/reconcile-overdue",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "reconcile-overdue"]
+            }
+          }
+        },
+        {
+          "name": "Get Attendance (Root - all users, raw punch times)",
           "request": {
             "method": "GET",
             "url": {
@@ -920,7 +1122,7 @@
           }
         },
         {
-          "name": "Get Attendance (Manager/Sub-Manager - assigned shop filter)",
+          "name": "Get Attendance (Non-root scoped, effective time view, 30-day cap)",
           "request": {
             "method": "GET",
             "url": {
@@ -948,6 +1150,94 @@
                 {
                   "key": "user_id",
                   "value": "{{user_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Preview Attendance Adjust Hours (Single User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shop_id\": \"{{shop_id}}\",\n  \"from_date\": \"{{from_date}}\",\n  \"to_date\": \"{{to_date}}\",\n  \"target_hours\": {{target_hours}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/adjust-hours/preview",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "adjust-hours", "preview"]
+            }
+          }
+        },
+        {
+          "name": "Apply Attendance Adjust Hours (Single User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shop_id\": \"{{shop_id}}\",\n  \"from_date\": \"{{from_date}}\",\n  \"to_date\": \"{{to_date}}\",\n  \"target_hours\": {{target_hours}},\n  \"note\": \"Payroll adjustment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/adjust-hours/apply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "adjust-hours", "apply"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Attendance Adjust Hours by Shop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop_id\": \"{{shop_id}}\",\n  \"from_date\": \"{{from_date}}\",\n  \"to_date\": \"{{to_date}}\",\n  \"adjustments\": [\n    {\n      \"user_id\": \"{{user_id}}\",\n      \"target_hours\": {{target_hours}}\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/adjust-hours/bulk-by-shop",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "adjust-hours", "bulk-by-shop"]
+            }
+          }
+        },
+        {
+          "name": "Get Unchanged Users (Attendance Adjust Helper)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/attendance/adjust-hours/unchanged-users?shop_id={{shop_id}}&from_date={{from_date}}&to_date={{to_date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "adjust-hours", "unchanged-users"],
+              "query": [
+                {
+                  "key": "shop_id",
+                  "value": "{{shop_id}}"
+                },
+                {
+                  "key": "from_date",
+                  "value": "{{from_date}}"
+                },
+                {
+                  "key": "to_date",
+                  "value": "{{to_date}}"
                 }
               ]
             }
