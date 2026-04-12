@@ -1,32 +1,34 @@
 import { Route } from "react-router-dom";
 import { ROUTES } from "../../utils/routes";
-import { AdminDashboard } from "../DummyDashboards";
 
 // Import Admin screens
-import ShopList from "./shops/ShopList";
-import ShopDetail from "./shops/ShopDetail";
-import ShopForm from "./shops/ShopForm";
-import UserList from "./users/UserList";
-import UserDetail from "./users/UserDetail";
-import UserForm from "./users/UserForm";
-import RotaList from "./rotas/RotaList";
+import AttendanceList from "./attendance/AttendanceList";
+import AuditLogList from "./inventory/AuditLogList";
+import InventoryDetail from "./inventory/InventoryDetail";
+import InventoryForm from "./inventory/InventoryForm";
+import InventoryList from "./inventory/InventoryList";
+import QueryDetail from "./inventory/QueryDetail";
+import QueryList from "./inventory/QueryList";
 import RotaDetail from "./rotas/RotaDetail";
 import RotaForm from "./rotas/RotaForm";
-import AttendanceList from "./attendance/AttendanceList";
-import InventoryList from "./inventory/InventoryList";
-import InventoryForm from "./inventory/InventoryForm";
-import InventoryDetail from "./inventory/InventoryDetail";
-import QueryList from "./inventory/QueryList";
-import QueryDetail from "./inventory/QueryDetail";
-import AuditLogList from "./inventory/AuditLogList";
+import RotaList from "./rotas/RotaList";
+import ShopDetail from "./shops/ShopDetail";
+import ShopForm from "./shops/ShopForm";
+import ShopList from "./shops/ShopList";
+import UserDetail from "./users/UserDetail";
+import UserForm from "./users/UserForm";
+import UserList from "./users/UserList";
 
 // Import Financials screens
 import FinancialsList from "./financials/FinancialsList";
 import FinancialsUpload from "./financials/FinancialsUpload";
 
+// Import Analytics screens
+import AnalyticsDashboard from "./dashboard/AnalyticsDashboard";
+
 const AdminRoutes = (
   <>
-    <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminDashboard />} />
+    <Route path={ROUTES.ADMIN.DASHBOARD} element={<AnalyticsDashboard />} />
 
     {/* Shops */}
     <Route path={ROUTES.ADMIN.SHOPS.LIST} element={<ShopList />} />
@@ -72,7 +74,10 @@ const AdminRoutes = (
 
     {/* Financials */}
     <Route path={ROUTES.ADMIN.FINANCIALS.LIST} element={<FinancialsList />} />
-    <Route path={ROUTES.ADMIN.FINANCIALS.UPLOAD} element={<FinancialsUpload />} />
+    <Route
+      path={ROUTES.ADMIN.FINANCIALS.UPLOAD}
+      element={<FinancialsUpload />}
+    />
   </>
 );
 
