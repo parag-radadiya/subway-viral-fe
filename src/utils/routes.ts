@@ -43,6 +43,9 @@ export const ROUTES = {
       LIST: "/admin/financials",
       UPLOAD: "/admin/financials/upload",
     },
+    ANALYTICS: {
+      DASHBOARD: "/admin/analytics/dashboard",
+    },
   },
   MANAGER: {
     DASHBOARD: "/manager/dashboard",

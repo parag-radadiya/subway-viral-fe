@@ -1,15 +1,15 @@
-import type { ReactNode } from "react";
-import RoleLayout from "./RoleLayout";
 import {
-  LayoutDashboard,
-  Store,
-  Users,
   Calendar,
   Clock,
-  Package,
   DollarSign,
+  LayoutDashboard,
+  Package,
+  Store,
+  Users,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { ROUTES } from "../../utils/routes";
+import RoleLayout from "./RoleLayout";
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
   const navItems = [
@@ -19,7 +19,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { label: "Rotas", path: ROUTES.ADMIN.ROTAS.LIST, icon: Calendar },
     { label: "Attendance", path: ROUTES.ADMIN.ATTENDANCE, icon: Clock },
     { label: "Inventory", path: ROUTES.ADMIN.INVENTORY.LIST, icon: Package },
-    { label: "Financials", path: ROUTES.ADMIN.FINANCIALS.LIST, icon: DollarSign },
+    {
+      label: "Financials",
+      path: ROUTES.ADMIN.FINANCIALS.LIST,
+      icon: DollarSign,
+    },
   ];
 
   return (
