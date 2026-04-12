@@ -270,3 +270,13 @@ export const rolesApi = {
     api.put(`/roles/${id}`, data),
   remove: (id: string) => api.delete(`/roles/${id}`),
 };
+
+// ─── Financials API ───────────────────────────────────────────────────────────
+
+export const financialsApi = {
+  submitWeeklyReport: (data: Record<string, unknown>) =>
+    api.post("/store-reports/admin-weekly", data),
+
+  list: (query?: string) => api.get(`/store-reports/table?${query}`),
+  getById: (id: string) => api.get(`/financials/${id}`),
+};

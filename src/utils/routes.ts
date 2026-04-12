@@ -39,6 +39,10 @@ export const ROUTES = {
       QUERY_DETAILS: (id: string) => `/admin/inventory/queries/${id}`,
       AUDIT_LOGS: "/admin/inventory/audit-logs",
     },
+    FINANCIALS: {
+      LIST: "/admin/financials",
+      UPLOAD: "/admin/financials/upload",
+    },
   },
   MANAGER: {
     DASHBOARD: "/manager/dashboard",

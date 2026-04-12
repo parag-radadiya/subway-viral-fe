@@ -1,4 +1,9 @@
-import { forwardRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  useState,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "../../utils";
 
@@ -11,19 +16,19 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, leftIcon, startIcon, hint, className, type, id, ...rest }, ref) => {
+  (
+    { label, error, leftIcon, startIcon, hint, className, type, id, ...rest },
+    ref,
+  ) => {
     const icon = leftIcon || startIcon;
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     return (
-      <div className="flex flex-col gap-1.5 w-full">
+      <div className="flex flex-col gap-1 w-full">
         {label && (
-          <label
-            htmlFor={id}
-            className="text-sm font-medium text-primary-700"
-          >
+          <label htmlFor={id} className="text-xs font-medium text-primary-700">
             {label}
           </label>
         )}
@@ -47,7 +52,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               error
                 ? "border-danger-500 focus:ring-danger-100"
                 : "border-slate-200 hover:border-slate-300",
-              className
+              className,
             )}
             {...rest}
           />
@@ -67,12 +72,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <span>⚠</span> {error}
           </p>
         )}
-        {hint && !error && (
-          <p className="text-xs text-slate-400">{hint}</p>
-        )}
+        {hint && !error && <p className="text-xs text-slate-400">{hint}</p>}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

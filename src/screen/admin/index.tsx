@@ -20,6 +20,10 @@ import QueryList from "./inventory/QueryList";
 import QueryDetail from "./inventory/QueryDetail";
 import AuditLogList from "./inventory/AuditLogList";
 
+// Import Financials screens
+import FinancialsList from "./financials/FinancialsList";
+import FinancialsUpload from "./financials/FinancialsUpload";
+
 const AdminRoutes = (
   <>
     <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminDashboard />} />
@@ -65,6 +69,10 @@ const AdminRoutes = (
       path={ROUTES.ADMIN.INVENTORY.AUDIT_LOGS}
       element={<AuditLogList />}
     />
+
+    {/* Financials */}
+    <Route path={ROUTES.ADMIN.FINANCIALS.LIST} element={<FinancialsList />} />
+    <Route path={ROUTES.ADMIN.FINANCIALS.UPLOAD} element={<FinancialsUpload />} />
   </>
 );
 

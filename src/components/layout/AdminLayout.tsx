@@ -7,6 +7,7 @@ import {
   Calendar,
   Clock,
   Package,
+  DollarSign,
 } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
@@ -18,6 +19,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { label: "Rotas", path: ROUTES.ADMIN.ROTAS.LIST, icon: Calendar },
     { label: "Attendance", path: ROUTES.ADMIN.ATTENDANCE, icon: Clock },
     { label: "Inventory", path: ROUTES.ADMIN.INVENTORY.LIST, icon: Package },
+    { label: "Financials", path: ROUTES.ADMIN.FINANCIALS.LIST, icon: DollarSign },
   ];
 
   return (
