@@ -1,4 +1,10 @@
-import { endOfISOWeek, format, getISOWeek, setISOWeek, startOfISOWeek } from "date-fns";
+import {
+  endOfISOWeek,
+  format,
+  getISOWeek,
+  setISOWeek,
+  startOfISOWeek,
+} from "date-fns";
 import {
   ChevronDown,
   DollarSign,
@@ -29,11 +35,11 @@ export function WeekCardComponent({
 }) {
   const usedShopIds = week.shops.map((s) => s.shopId).filter(Boolean);
 
-  const onUpdateDates = (field: "startDate" | "endDate", val: string) => {
-    setWeeks((prev) =>
-      prev.map((w) => (w.id === week.id ? { ...w, [field]: val } : w)),
-    );
-  };
+  // const onUpdateDates = (field: "startDate" | "endDate", val: string) => {
+  //   setWeeks((prev) =>
+  //     prev.map((w) => (w.id === week.id ? { ...w, [field]: val } : w)),
+  //   );
+  // };
 
   const onRemoveWeek = () => {
     setWeeks((prev) => {
@@ -117,7 +123,9 @@ export function WeekCardComponent({
                 if (val === "") {
                   setWeeks((prev) =>
                     prev.map((w) =>
-                      w.id === week.id ? { ...w, startDate: "", endDate: "" } : w,
+                      w.id === week.id
+                        ? { ...w, startDate: "", endDate: "" }
+                        : w,
                     ),
                   );
                 } else if (!isNaN(wn) && wn >= 1 && wn <= 53) {
@@ -144,12 +152,7 @@ export function WeekCardComponent({
               value={week.startDate}
               disabled
             />
-            <Input
-              label="Week End"
-              type="date"
-              value={week.endDate}
-              disabled
-            />
+            <Input label="Week End" type="date" value={week.endDate} disabled />
           </div>
 
           {/* Shop entries */}

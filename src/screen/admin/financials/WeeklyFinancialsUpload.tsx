@@ -9,7 +9,6 @@ import {
   BarChart3,
   CheckCircle2,
   ChevronDown,
-  Loader2,
   Plus,
   Trash2,
   X,
@@ -18,9 +17,9 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import Input from "../../../components/common/Input";
+import Select from "../../../components/common/Select";
 import { financialsApi, shopsApi } from "../../../config/apiCall";
 import { Shop } from "./components/types";
-import Select from "../../../components/common/Select";
 
 interface RowData {
   id: string;

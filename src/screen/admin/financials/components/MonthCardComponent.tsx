@@ -1,11 +1,7 @@
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import Input from "../../../../components/common/Input";
-import {
-  MonthCard,
-  MonthlyShopMetricsForm,
-  newMonthlyShopEntry,
-} from "./MonthlyShopMetricsForm";
+import { MonthCard, MonthlyShopMetricsForm } from "./MonthlyShopMetricsForm";
 
 export function MonthCardComponent({
   month,
@@ -29,7 +25,9 @@ export function MonthCardComponent({
     const m = parseInt(val, 10);
     if (val === "" || (!isNaN(m) && m >= 1 && m <= 12)) {
       setMonths((prev) =>
-        prev.map((mc) => (mc.id === month.id ? { ...mc, monthNumber: val } : mc)),
+        prev.map((mc) =>
+          mc.id === month.id ? { ...mc, monthNumber: val } : mc,
+        ),
       );
     }
   };
@@ -75,7 +73,10 @@ export function MonthCardComponent({
     "December",
   ];
   const mIndex = parseInt(month.monthNumber, 10);
-  const mName = !isNaN(mIndex) && mIndex >= 1 && mIndex <= 12 ? monthNames[mIndex - 1] : "Unknown";
+  const mName =
+    !isNaN(mIndex) && mIndex >= 1 && mIndex <= 12
+      ? monthNames[mIndex - 1]
+      : "Unknown";
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -92,7 +93,9 @@ export function MonthCardComponent({
             {month.year ? month.year : "Year not set"}
           </p>
           <p className="text-sm font-bold">
-            {month.monthNumber ? `${mName} (Month ${month.monthNumber})` : "Set month below"}
+            {month.monthNumber
+              ? `${mName} (Month ${month.monthNumber})`
+              : "Set month below"}
           </p>
         </div>
         <span
