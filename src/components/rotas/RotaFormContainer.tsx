@@ -11,14 +11,16 @@ interface RotaFormContainerProps {
   onSuccessRoute: string;
 }
 
-export default function RotaFormContainer({ onSuccessRoute }: RotaFormContainerProps) {
+export default function RotaFormContainer({
+  onSuccessRoute,
+}: RotaFormContainerProps) {
   const { id: editItemId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
+  const [loadingUser, setLoadingUsers] = useState(false);
   const [formData, setFormData] = useState({
     user_id: "",
     shop_id: "",
@@ -35,16 +37,15 @@ export default function RotaFormContainer({ onSuccessRoute }: RotaFormContainerP
   useEffect(() => {
     setInitLoading(true);
 
-    const promises: Promise<any>[] = [shopsApi.list(), usersApi.list()];
+    const promises: Promise<any>[] = [shopsApi.list()];
 
     if (editItemId) {
       promises.push(rotasApi.getById(editItemId));
     }
 
     Promise.all(promises)
-      .then(([shopsRes, usersRes, rotaRes]) => {
+      .then(([shopsRes, rotaRes]) => {
         setShops(shopsRes.data.data.shops || []);
-        setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
 
         if (editItemId && rotaRes) {
           const rota = rotaRes.data.data?.rota || rotaRes.data.rota;
@@ -72,6 +73,23 @@ export default function RotaFormContainer({ onSuccessRoute }: RotaFormContainerP
       })
       .finally(() => setInitLoading(false));
   }, [editItemId]);
+
+  useEffect(() => {
+    if (!formData?.shop_id) return;
+    setUsers([]);
+    setLoadingUsers(true);
+    usersApi
+      .getStaffByShop(formData?.shop_id, {
+        page: "1",
+        limit: "100",
+      })
+      .then((res) => {
+        const data = res.data.data;
+        setUsers(data.users || []);
+      })
+      .catch(() => toast.error("Failed to load staff assigned to this shop"))
+      .finally(() => setLoadingUsers(false));
+  }, [formData?.shop_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +131,9 @@ export default function RotaFormContainer({ onSuccessRoute }: RotaFormContainerP
     apiCall
       .then(() => {
         toast.success(
-          editItemId ? "Shift updated successfully" : "Shift created successfully",
+          editItemId
+            ? "Shift updated successfully"
+            : "Shift created successfully",
         );
         navigate(onSuccessRoute);
       })
@@ -183,6 +203,7 @@ export default function RotaFormContainer({ onSuccessRoute }: RotaFormContainerP
           shopId={formData.shop_id}
           setShopId={(id) => setFormData((prev) => ({ ...prev, shop_id: id }))}
           shops={shops}
+          loadingUser={loadingUser}
           users={users}
           onSuccess={() => navigate(onSuccessRoute)}
         />

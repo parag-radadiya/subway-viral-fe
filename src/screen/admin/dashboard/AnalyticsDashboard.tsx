@@ -750,13 +750,16 @@ const AnalyticsDashboard = () => {
                 </div>
 
                 {/* Channel Performance Cards */}
-                {comp.channels && (
+                {(!!comp.channels?.justeat?.current ||
+                  !!comp.channels?.ubereat?.current ||
+                  !!comp.channels?.deliveroo?.current ||
+                  !!comp.channels?.instore?.current) && (
                   <div className="mt-8">
                     <h3 className="text-lg font-bold text-slate-800 mb-4 tracking-tight">
                       Channel Performance
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                      {comp.channels?.justeat?.current && (
+                      {!!comp.channels?.justeat?.current && (
                         <KpiCard
                           title="Just Eat"
                           prefix="£"
@@ -768,7 +771,7 @@ const AnalyticsDashboard = () => {
                           changePct={comp.channels.justeat.changePct}
                         />
                       )}
-                      {comp.channels?.ubereat?.current && (
+                      {!!comp.channels?.ubereat?.current && (
                         <KpiCard
                           title="Uber Eats"
                           prefix="£"
@@ -780,7 +783,7 @@ const AnalyticsDashboard = () => {
                           changePct={comp.channels.ubereat.changePct}
                         />
                       )}
-                      {comp.channels?.deliveroo?.current && (
+                      {!!comp.channels?.deliveroo?.current && (
                         <KpiCard
                           title="Deliveroo"
                           prefix="£"
@@ -794,7 +797,7 @@ const AnalyticsDashboard = () => {
                           changePct={comp.channels.deliveroo.changePct}
                         />
                       )}
-                      {comp.channels?.instore?.current && (
+                      {!!comp.channels?.instore?.current && (
                         <KpiCard
                           title="In Store / POS"
                           prefix="£"

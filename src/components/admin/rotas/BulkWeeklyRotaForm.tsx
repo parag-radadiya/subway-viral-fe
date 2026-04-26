@@ -32,6 +32,7 @@ interface BulkWeeklyRotaFormProps {
   setShopId: (id: string) => void;
   shops: any[];
   users: any[];
+  loadingUser: boolean;
   onSuccess: () => void;
 }
 
@@ -41,6 +42,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   shops,
   users,
   onSuccess,
+  loadingUser,
 }) => {
   const [bulkShifts, setBulkShifts] = useState<ShiftCell[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -154,7 +156,14 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                 d.setDate(d.getDate() - 7);
                 setCurrentDate(d);
               }}
-              className="p-2 hover:bg-white rounded-lg transition-all"
+              disabled={
+                weekStart.getTime() <= getWeekStart(new Date()).getTime()
+              }
+              className={`p-2 rounded-lg transition-all ${
+                weekStart.getTime() <= getWeekStart(new Date()).getTime()
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-white"
+              }`}
             >
               <ChevronLeft size={16} />
             </button>
@@ -248,6 +257,19 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
+            {!filteredStaff.length && (
+              <tr>
+                <td colSpan={8} className="text-center py-8">
+                  <p className="text-slate-400 text-sm">
+                    {!shopId
+                      ? "Select a shop to see users"
+                      : loadingUser
+                        ? "Loading staff..."
+                        : "No staff found"}
+                  </p>
+                </td>
+              </tr>
+            )}
             {filteredStaff.map((member) => (
               <tr
                 key={member._id}
