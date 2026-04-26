@@ -498,7 +498,7 @@ export function ShopMetricsForm({
                       className="text-sm  cursor-not-allowed"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
                       <Input
                         label="Labour Hours"
@@ -513,12 +513,24 @@ export function ShopMetricsForm({
                     </div>
                     <div>
                       <Input
-                        label="Labour Cost (×£11.50)"
+                        label="Rate (£/hr)"
+                        type="number"
+                        placeholder="11.50"
+                        value={m.labourRate}
+                        onChange={(e) =>
+                          onMetricChange("labourRate", e.target.value)
+                        }
+                        className="text-sm"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Input
+                        label={`Cost (×£${m.labourRate || 0})`}
                         type="text"
                         value={fmtNum(d.labourCost)}
                         disabled
                         readOnly
-                        className="text-sm  cursor-not-allowed"
+                        className="text-sm cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -576,7 +588,7 @@ export function ShopMetricsForm({
                   title="Instore & Bidfood"
                   accent="text-rose-700"
                 />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div>
                     <Input
                       label="Instore Food Cost"
@@ -611,7 +623,7 @@ export function ShopMetricsForm({
                       className="text-sm  cursor-not-allowed"
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <Input
                       label="Bidfood Previous Week"
                       type="number"
@@ -622,7 +634,7 @@ export function ShopMetricsForm({
                       }
                       className="text-sm"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

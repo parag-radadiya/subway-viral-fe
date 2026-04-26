@@ -21,6 +21,7 @@ export const emptyMetrics = (): ShopMetrics => ({
   deliverooBankReceived: "",
   deliverooVariance: "",
   labourHours: "",
+  labourRate: "11.50",
   bidFood: "",
   instoreFoodCost: "",
   instoreLabourCost: "",
@@ -73,7 +74,8 @@ export function calcDerived(m: ShopMetrics) {
   const deliveryChargesTotal = justCharge + uberEatCharge + deliverooCharge;
 
   const labourHours = n(m.labourHours);
-  const labourCost = labourHours * 11.5;
+  const labourRate = parseFloat(m.labourRate) || 0;
+  const labourCost = labourHours * labourRate;
   const bidFood = n(m.bidFood);
   const bidfoodPreviousWeek = n(m.bidfoodPreviousWeek);
   const bidfoodTotal = bidFood - bidfoodPreviousWeek;

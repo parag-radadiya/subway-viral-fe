@@ -277,6 +277,18 @@ export const financialsApi = {
   submitWeeklyReport: (data: Record<string, unknown>) =>
     api.post("/store-reports/admin-weekly", data),
 
-  list: (query?: string) => api.get(`/store-reports/table?${query}`),
+  submitWeekly: (data: Record<string, unknown>) =>
+    api.post("/store-reports/weekly", data),
+
+  submitMonthlySale: (data: Record<string, unknown>) =>
+    api.post("/store-reports/monthly-sale", data),
+
+  getMonthlySale: (query?: string) =>
+    api.get(`/store-reports/monthly-sale?${query || ""}`),
+
+  getWeekly: (query?: string) =>
+    api.get(`/store-reports/weekly?${query || ""}`),
+
+  list: (query?: string) => api.get(`/store-reports/table?${query || ""}`),
   getById: (id: string) => api.get(`/financials/${id}`),
 };

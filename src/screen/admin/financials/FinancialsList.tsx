@@ -4,11 +4,16 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import { ROUTES } from "../../../utils/routes";
 import { MonthlyFinancialView } from "./components/MonthlyFinancialView";
+import { StorewiseWeeklyFinancialView } from "./components/StorewiseWeeklyFinancialView";
 import { WeeklyFinancialView } from "./components/WeeklyFinancialView";
 
-type ReportType = "weekly_financial" | "monthly_store_kpi";
+type ReportType =
+  | "storewise_weekly_financial"
+  | "weekly_financial"
+  | "monthly_store_kpi";
 
 const TABS: { label: string; value: ReportType }[] = [
+  { label: "Storewise Weekly", value: "storewise_weekly_financial" },
   { label: "Weekly", value: "weekly_financial" },
   { label: "Monthly", value: "monthly_store_kpi" },
 ];
@@ -53,11 +58,12 @@ const FinancialsList = () => {
       </div>
 
       {/* Tab content */}
-      {activeTab === "weekly_financial" ? (
-        <WeeklyFinancialView />
-      ) : (
-        <MonthlyFinancialView />
+
+      {activeTab === "storewise_weekly_financial" && (
+        <StorewiseWeeklyFinancialView />
       )}
+      {activeTab === "weekly_financial" && <WeeklyFinancialView />}
+      {activeTab === "monthly_store_kpi" && <MonthlyFinancialView />}
     </div>
   );
 };

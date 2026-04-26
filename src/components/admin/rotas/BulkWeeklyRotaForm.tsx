@@ -1,3 +1,4 @@
+import { startOfISOWeek } from "date-fns";
 import {
   AlertTriangle,
   ChevronLeft,
@@ -36,6 +37,29 @@ interface BulkWeeklyRotaFormProps {
   onSuccess: () => void;
 }
 
+const UserWeeklyTotal = React.memo(
+  ({ memberId, bulkShifts }: { memberId: string; bulkShifts: ShiftCell[] }) => {
+    const totalString = useMemo(() => {
+      const userShifts = bulkShifts.filter((s) => s.user_id === memberId);
+      let totalMins = 0;
+      userShifts.forEach((s) => {
+        const start = new Date(s.shift_start).getTime();
+        const end = new Date(s.shift_end).getTime();
+        if (!isNaN(start) && !isNaN(end) && end > start) {
+          totalMins += (end - start) / 60000;
+        }
+      });
+      const hours = Math.floor(totalMins / 60);
+      const mins = Math.round(totalMins % 60);
+      return hours > 0 || mins > 0
+        ? `${hours}h ${mins > 0 ? `${mins}m` : ""}`.trim()
+        : "---";
+    }, [bulkShifts, memberId]);
+
+    return <>{totalString}</>;
+  },
+);
+
 const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   shopId,
   setShopId,
@@ -58,15 +82,14 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   } | null>(null);
 
   const getWeekStart = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
+    return startOfISOWeek(new Date(date));
   };
 
   const weekStart = getWeekStart(currentDate);
+  console.log("🚀 - BulkWeeklyRotaForm - weekStart:", {
+    weekStart,
+    currentDate,
+  });
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -99,6 +122,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
       return;
     }
     setPublishing(true);
+    console.log("🚀 - handlePublish - weekStart:", { weekStart });
     try {
       const payload = {
         shop_id: shopId,
@@ -254,12 +278,15 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                   </p>
                 </th>
               ))}
+              <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center border-l border-slate-100 min-w-[80px]">
+                Total
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {!filteredStaff.length && (
               <tr>
-                <td colSpan={8} className="text-center py-8">
+                <td colSpan={9} className="text-center py-8">
                   <p className="text-slate-400 text-sm">
                     {!shopId
                       ? "Select a shop to see users"
@@ -347,6 +374,12 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                     </td>
                   );
                 })}
+                <td className="p-4 border-l border-slate-100 text-center bg-slate-50/50 font-bold text-slate-700 text-sm">
+                  <UserWeeklyTotal
+                    memberId={member._id}
+                    bulkShifts={bulkShifts}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

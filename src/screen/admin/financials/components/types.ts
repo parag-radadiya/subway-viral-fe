@@ -24,6 +24,7 @@ export interface ShopMetrics {
   deliverooBankReceived: string;
   deliverooVariance: string;
   labourHours: string;
+  labourRate: string;
   bidFood: string;
   instoreFoodCost: string;
   instoreLabourCost: string;

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfISOWeek, format, getISOWeek, setISOWeek, startOfISOWeek } from "date-fns";
 import {
   ChevronDown,
   DollarSign,
@@ -106,18 +106,49 @@ export function WeekCardComponent({
           {/* Date range row */}
           <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-3 items-end">
             <Input
+              label="Week Number"
+              type="number"
+              min={1}
+              max={53}
+              value={week.startDate ? getISOWeek(new Date(week.startDate)) : ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const val = e.target.value;
+                const wn = parseInt(val, 10);
+                if (val === "") {
+                  setWeeks((prev) =>
+                    prev.map((w) =>
+                      w.id === week.id ? { ...w, startDate: "", endDate: "" } : w,
+                    ),
+                  );
+                } else if (!isNaN(wn) && wn >= 1 && wn <= 53) {
+                  const dateInWeek = setISOWeek(new Date(), wn);
+                  const start = startOfISOWeek(dateInWeek);
+                  const end = endOfISOWeek(dateInWeek);
+                  setWeeks((prev) =>
+                    prev.map((w) =>
+                      w.id === week.id
+                        ? {
+                            ...w,
+                            startDate: format(start, "yyyy-MM-dd"),
+                            endDate: format(end, "yyyy-MM-dd"),
+                          }
+                        : w,
+                    ),
+                  );
+                }
+              }}
+            />
+            <Input
               label="Week Start"
               type="date"
-              max={new Date().toISOString().split("T")[0]}
               value={week.startDate}
-              onChange={(e) => onUpdateDates("startDate", e.target.value)}
+              disabled
             />
             <Input
               label="Week End"
               type="date"
               value={week.endDate}
-              max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => onUpdateDates("endDate", e.target.value)}
+              disabled
             />
           </div>
 

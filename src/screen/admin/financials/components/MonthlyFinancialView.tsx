@@ -16,9 +16,13 @@ export function MonthlyFinancialView() {
   const [shopId, setShopId] = useState("all");
   const [monthNumber, setMonthNumber] = useState("");
   const [year, setYear] = useState("");
-  
+
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [draft, setDraft] = useState({ shopId: "all", monthNumber: "", year: "" });
+  const [draft, setDraft] = useState({
+    shopId: "all",
+    monthNumber: "",
+    year: "",
+  });
 
   const hasFilters = shopId !== "all" || monthNumber !== "" || year !== "";
 
@@ -74,7 +78,7 @@ export function MonthlyFinancialView() {
     if (year.trim()) raw.year = year.trim();
 
     financialsApi
-      .list(new URLSearchParams(raw).toString())
+      .getMonthlySale(new URLSearchParams(raw).toString())
       .then(({ data }: any) => {
         const d = data.data;
         setList(d.rows ?? d.data ?? []);
@@ -282,7 +286,16 @@ export function MonthlyFinancialView() {
               header: "Shop",
               render: (r) => (
                 <span className="text-xs font-medium text-slate-600">
-                  {r.shopName ?? r.store_name ?? "—"}
+                  {r.shop_id?.name ?? r.store_name ?? "—"}
+                </span>
+              ),
+            },
+            {
+              header: "Gross Sales",
+              align: "right",
+              render: (r) => (
+                <span className="text-xs font-semibold text-slate-700">
+                  £{fmtNum(n(r.metrics?.grossSale))}
                 </span>
               ),
             },
@@ -291,65 +304,63 @@ export function MonthlyFinancialView() {
               align: "right",
               render: (r) => (
                 <span className="text-xs font-bold text-emerald-700">
-                  £{fmtNum(n(r.metrics?.["NET SALES"]))}
+                  £{fmtNum(n(r.metrics?.netSale))}
                 </span>
               ),
             },
             {
-              header: "Total 3PD",
+              header: "Customer Count",
+              align: "right",
+              render: (r) => (
+                <span className="text-xs font-semibold text-blue-700">
+                  {fmtNum(n(r.metrics?.customerCount))}
+                </span>
+              ),
+            },
+            {
+              header: "VAT",
               align: "right",
               render: (r) => (
                 <span className="text-xs font-semibold text-slate-700">
-                  £{fmtNum(n(r.metrics?.["Total 3PD Sale"]))}
+                  £{fmtNum(n(r.metrics?.vat))}
                 </span>
               ),
             },
             {
-              header: "Delivery %",
-              align: "center",
-              render: (r) => (
-                <span className="text-xs font-semibold text-blue-700">
-                  {fmtPct(n(r.metrics?.["Delivery %"]))}
-                </span>
-              ),
-            },
-            {
-              header: "Labour %",
-              align: "center",
-              render: (r) => (
-                <span className="text-xs font-semibold text-violet-700">
-                  {fmtPct(n(r.metrics?.["Labour cost %"]))}
-                </span>
-              ),
-            },
-            {
-              header: "Food Cost %",
-              align: "center",
+              header: "Bidfood",
+              align: "right",
               render: (r) => (
                 <span className="text-xs font-semibold text-orange-700">
-                  {fmtPct(n(r.metrics?.["Food cost %"]))}
+                  £{fmtNum(n(r.metrics?.bidfood))}
                 </span>
               ),
             },
             {
-              header: "Total Cost %",
+              header: "Labour Hour",
+              align: "right",
+              render: (r) => (
+                <span className="text-xs font-semibold text-violet-700">
+                  {fmtNum(n(r.metrics?.labourHour))}
+                </span>
+              ),
+            },
+            {
+              header: "Kiosk %",
               align: "center",
-              render: (r) => {
-                const pct = n(r.metrics?.["TOTAL COST %"]);
-                const colour =
-                  pct > 70
-                    ? "text-rose-700 bg-rose-50 border-rose-200"
-                    : pct > 55
-                      ? "text-amber-700 bg-amber-50 border-amber-200"
-                      : "text-emerald-700 bg-emerald-50 border-emerald-200";
-                return (
-                  <span
-                    className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${colour}`}
-                  >
-                    {fmtPct(pct)}
-                  </span>
-                );
-              },
+              render: (r) => (
+                <span className="text-xs font-semibold text-teal-700">
+                  {fmtPct(n(r.metrics?.kioskPct))}
+                </span>
+              ),
+            },
+            {
+              header: "Rev Score Q1",
+              align: "center",
+              render: (r) => (
+                <span className="text-xs font-semibold text-slate-700">
+                  {fmtNum(n(r.metrics?.revScoreQ1))}
+                </span>
+              ),
             },
           ]}
           data={list}
