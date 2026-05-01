@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     allowedHosts: true,
   },
+    // Define the base path for the application
   build: {
     chunkSizeWarningLimit: 1000,
   },
