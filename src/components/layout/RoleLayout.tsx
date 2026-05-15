@@ -6,6 +6,7 @@ import { logout } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils/routes";
 import { authApi } from "../../config/apiCall";
+import NotificationBell from "../common/NotificationBell";
 
 interface RoleLayoutProps {
   children: ReactNode;
@@ -126,20 +127,23 @@ const RoleLayout = ({ children, roleTitle, navItems }: RoleLayoutProps) => {
               {roleTitle} Portal
             </h2>
           </div>
-          <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap hidden sm:block">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
-          <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap sm:hidden">
-            {new Date().toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
+          <div className="flex items-center gap-2">
+            <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap hidden sm:block">
+              {new Date().toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+            <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap sm:hidden">
+              {new Date().toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+            <NotificationBell />
           </div>
         </header>
         <div className="p-4 md:p-6 flex-1">{children}</div>

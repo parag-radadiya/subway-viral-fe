@@ -335,3 +335,36 @@ export const analyticsApi = {
     },
   ) => api.get("/store-reports/analytics/v2/trend", { params }),
 };
+
+// ─── Notifications API ────────────────────────────────────────────────────────
+
+export const notificationsApi = {
+  /** GET /notifications — paginated list with optional filters */
+  list: (params?: {
+    category?: string;
+    severity?: string;
+    read?: boolean;
+    shop_id?: string;
+    page?: number;
+    limit?: number;
+  }) => api.get("/notifications", { params }),
+
+  /** GET /notifications/unread-count — total + per-category counts */
+  unreadCount: () => api.get("/notifications/unread-count"),
+
+  /** GET /notifications/summary — unread count + 3 recent per category */
+  summary: () => api.get("/notifications/summary"),
+
+  /** GET /notifications/categories — enum constants */
+  categories: () => api.get("/notifications/categories"),
+
+  /** PATCH /notifications/:id/read — mark single notification read */
+  markRead: (id: string) => api.patch(`/notifications/${id}/read`),
+
+  /** POST /notifications/mark-all-read — mark all (or by category) read */
+  markAllRead: (category?: string) =>
+    api.post("/notifications/mark-all-read", category ? { category } : {}),
+
+  /** DELETE /notifications/:id — soft-delete / archive */
+  archive: (id: string) => api.delete(`/notifications/${id}`),
+};
