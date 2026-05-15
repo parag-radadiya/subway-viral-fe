@@ -1,3 +1,4 @@
+import { format, parseISO } from "date-fns";
 import {
   BarChart3,
   Calendar,
@@ -156,11 +157,7 @@ const RotaListContainer = ({
   // Date/Time Formatters
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "TBA";
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return format(dateStr, "dd MMM yyyy");
   };
 
   const rotaColumns = useMemo(
@@ -195,7 +192,12 @@ const RotaListContainer = ({
         header: "Shift Time",
         render: (rota: Rota) => (
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-50 text-secondary-600 border border-secondary-100">
-            <Clock size={12} /> {rota.start_time} - {rota.end_time || "TBA"}
+            <Clock size={12} />{" "}
+            {rota.shift_start
+              ? format(new Date(rota.shift_start), "HH:mm")
+              : "TBA"}{" "}
+            -{" "}
+            {rota.shift_end ? format(new Date(rota.shift_end), "HH:mm") : "TBA"}
           </div>
         ),
       },

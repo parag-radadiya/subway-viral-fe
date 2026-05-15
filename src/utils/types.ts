@@ -129,8 +129,8 @@ export interface Rota {
   user_id: string | User;
   shop_id: string | { _id: string; name: string };
   shift_date: string;
-  start_time: string;
-  end_time?: string;
+  shift_start: string;
+  shift_end?: string;
   is_published?: boolean;
 }
 

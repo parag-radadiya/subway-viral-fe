@@ -292,3 +292,46 @@ export const financialsApi = {
   list: (query?: string) => api.get(`/store-reports/table?${query || ""}`),
   getById: (id: string) => api.get(`/financials/${id}`),
 };
+
+// ─── Analytics v2 API ─────────────────────────────────────────────────────────
+
+export interface AnalyticsBaseParams {
+  from_date?: string;
+  to_date?: string;
+  shop_ids?: string;
+  report_type?: "weekly_financial" | "monthly_store_kpi";
+  view?: "reconciled" | "excel_raw" | "admin_weekly";
+}
+
+export const analyticsApi = {
+  /** Endpoint 1 — KPI Matrix */
+  kpiMatrix: (params: AnalyticsBaseParams & { compare_from?: string; compare_to?: string }) =>
+    api.get("/store-reports/analytics/v2/kpi-matrix", { params }),
+
+  /** Endpoint 2 — Shop Compare */
+  shopCompare: (params: AnalyticsBaseParams & { metrics?: string }) =>
+    api.get("/store-reports/analytics/v2/shop-compare", { params }),
+
+  /** Endpoint 3 — Period Compare */
+  periodCompare: (
+    params: {
+      current_from: string;
+      current_to: string;
+      compare_from: string;
+      compare_to: string;
+      shop_ids?: string;
+      metrics?: string;
+      report_type?: string;
+      view?: string;
+    },
+  ) => api.get("/store-reports/analytics/v2/period-compare", { params }),
+
+  /** Endpoint 4 — Trend */
+  trend: (
+    params: AnalyticsBaseParams & {
+      metrics?: string;
+      granularity?: "week" | "month";
+      group_by?: "total" | "shop";
+    },
+  ) => api.get("/store-reports/analytics/v2/trend", { params }),
+};
