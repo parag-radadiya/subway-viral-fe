@@ -44,7 +44,7 @@ const Dialog = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 min-h-screen z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
         onClick={onClose}
@@ -53,7 +53,7 @@ const Dialog = ({
         className={cn(
           "bg-white rounded-3xl shadow-2xl relative z-10 w-full overflow-hidden animate-fade-in flex flex-col",
           maxWidthClasses[maxWidth],
-          className
+          className,
         )}
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-100">

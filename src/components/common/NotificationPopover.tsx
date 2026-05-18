@@ -67,7 +67,7 @@ const CategoryPill = ({
     {count > 0 && (
       <span
         className={cn(
-          "text-[10px] font-bold px-1 rounded-full leading-none",
+          "text-[8px] h-[14px] w-[14px] flex items-center justify-center font-bold px-1 rounded-full leading-none",
           active ? "bg-white/30 text-white" : "bg-accent-100 text-accent-700",
         )}
       >
@@ -172,7 +172,7 @@ const NotificationPopover = ({
               Notifications
             </span>
             {totalUnread > 0 && (
-              <span className="text-[10px] font-bold bg-danger-500 text-white px-1.5 py-0.5 rounded-full leading-none">
+              <span className="text-[8px] h-[14px] w-[14px] flex items-center justify-center font-bold bg-danger-500 text-white px-1.5 py-0.5 rounded-full leading-none">
                 {totalUnread > 99 ? "99+" : totalUnread}
               </span>
             )}
@@ -217,7 +217,7 @@ const NotificationPopover = ({
 
         {/* ── Category pills (filtered by role per V2 §2) ─────────────── */}
         <div
-          className="flex items-center gap-1 px-3 py-2 overflow-x-auto border-b border-slate-100 bg-slate-50/50"
+          className="flex items-center gap-1 px-3 py-2 overflow-x-auto border-b border-slate-100 bg-slate-50/50 min-h-[42px] h-[42px]"
           style={{ scrollbarWidth: "none" }}
         >
           {/* "All" pill — total across the role's visible categories only */}
