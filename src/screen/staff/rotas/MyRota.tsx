@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { rotasApi } from "../../../config/apiCall";
 import { useAppSelector } from "../../../store";
@@ -181,11 +182,7 @@ const MyRota = () => {
                         <Calendar size={16} />
                       </div>
                       <p className="text-sm font-semibold text-slate-700">
-                        {new Date(rota.shift_date).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {format(new Date(rota.shift_date), "dd MMM yyyy")}
                       </p>
                     </div>
                   ),

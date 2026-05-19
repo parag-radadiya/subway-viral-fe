@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import Button from "../../../components/common/Button";
 import Input from "../../../components/common/Input";
@@ -367,11 +368,7 @@ export const UserAdjustHoursModal = ({
                   {previewData.rows.map((row, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
                       <td className="px-3 py-2 text-slate-600 font-medium">
-                        {new Date(row.date).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {format(new Date(row.date), "dd MMM yyyy")}
                       </td>
                       <td className="px-3 py-2 text-right text-slate-400">
                         {row.original_hours}h

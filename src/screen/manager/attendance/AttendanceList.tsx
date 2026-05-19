@@ -4,6 +4,7 @@ import { MapPin, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import Table from "../../../components/common/Table";
 import Select from "../../../components/common/Select";
+import { format } from "date-fns";
 
 interface AttendanceRecord {
   _id: string;
@@ -91,19 +92,11 @@ const AttendanceList = () => {
   };
 
   const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return format(new Date(dateStr), "HH:mm");
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return format(dateStr, "dd MMM yyyy");
   };
 
   if (loading && records.length === 0) {
@@ -125,7 +118,8 @@ const AttendanceList = () => {
             Attendance Log
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Monitor and audit personnel punch records across your managed locations
+            Monitor and audit personnel punch records across your managed
+            locations
           </p>
         </div>
       </div>

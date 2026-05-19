@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Table from "../../../components/common/Table";
 import Button from "../../../components/common/Button";
 import { UserAdjustHoursModal } from "./UserAdjustHoursModal";
+import { format } from "date-fns";
 
 interface AttendanceRecord {
   _id: string;
@@ -66,19 +67,11 @@ export const UserAttendanceSection = ({
   };
 
   const formatTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return format(new Date(dateStr), "HH:mm");
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return format(dateStr, "dd MMM yyyy");
   };
 
   return (

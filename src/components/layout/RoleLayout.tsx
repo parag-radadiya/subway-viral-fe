@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useState, type ReactNode } from "react";
 import { useAppSelector } from "../../store";
 import { Store, User, LogOut, Menu, X } from "lucide-react";
@@ -129,19 +130,10 @@ const RoleLayout = ({ children, roleTitle, navItems }: RoleLayoutProps) => {
           </div>
           <div className="flex items-center gap-2">
             <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap hidden sm:block">
-              {new Date().toLocaleDateString(undefined, {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {format(new Date(), "EEEE, MMMM d, yyyy")}
             </div>
             <div className="text-[10px] text-slate-400 font-medium whitespace-nowrap sm:hidden">
-              {new Date().toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
+              {format(new Date(), "MMM d, yyyy")}
             </div>
             <NotificationBell />
           </div>

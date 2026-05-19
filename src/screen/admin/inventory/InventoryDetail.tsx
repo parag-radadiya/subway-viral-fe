@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import {
   Activity,
   AlertCircle,
@@ -136,7 +137,7 @@ const InventoryDetail = () => {
     },
     {
       header: "Opened At",
-      render: (q: InventoryQuery) => new Date(q.createdAt).toLocaleDateString(),
+      render: (q: InventoryQuery) => format(new Date(q.createdAt), "dd/MM/yyyy"),
     },
     {
       header: "Cost",
@@ -244,7 +245,7 @@ const InventoryDetail = () => {
             <div className="flex items-end gap-2 text-slate-800">
               <Calendar size={20} className="text-accent-500 mb-1" />
               <span className="text-xl font-mono font-bold tracking-tighter">
-                {new Date(item.purchase_date).toLocaleDateString()}
+                {format(new Date(item.purchase_date), "dd/MM/yyyy")}
               </span>
             </div>
           </div>
@@ -292,7 +293,7 @@ const InventoryDetail = () => {
               </div>
               <span className="font-bold">
                 {item.expiry_date
-                  ? new Date(item.expiry_date).toLocaleDateString()
+                  ? format(new Date(item.expiry_date), "dd/MM/yyyy")
                   : "None"}
               </span>
             </div>

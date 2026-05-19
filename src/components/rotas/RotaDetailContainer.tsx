@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { rotasApi } from "../../config/apiCall";
@@ -145,10 +146,7 @@ export default function RotaDetailContainer({ routes }: RotaDetailContainerProps
             <div className="flex items-end gap-2 text-slate-800">
               <Calendar size={20} className="text-primary-500 mb-1" />
               <span className="text-xl font-black">
-                {shiftDate.toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
+                {format(shiftDate, "MMM d")}
               </span>
               <span className="text-xs font-bold mb-1 ml-[-4px]">
                 {shiftDate.getFullYear()}

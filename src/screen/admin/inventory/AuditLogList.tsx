@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import {
   History,
@@ -136,7 +137,7 @@ const AuditLogList = () => {
       render: (log: InventoryAuditLog) => (
         <div className="flex flex-col text-xs text-slate-500">
           <span className="flex items-center gap-1">
-            <Clock size={10} /> {new Date(log.createdAt).toLocaleDateString()}
+            <Clock size={10} /> {format(new Date(log.createdAt), "dd/MM/yyyy")}
           </span>
           <span className="text-[10px] text-slate-400 pl-3.5">
             {new Date(log.createdAt).toLocaleTimeString()}

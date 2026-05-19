@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import {
   Activity,
   AlertCircle,
@@ -166,9 +167,7 @@ const InventoryList = () => {
         <div className="flex items-center gap-1.5 text-slate-500">
           <Calendar size={14} className="text-slate-400" />
           <span className="text-xs font-mono">
-            {new Date(item.purchase_date).toLocaleDateString(undefined, {
-              dateStyle: "medium",
-            })}
+            {format(new Date(item.purchase_date), "MMM d, yyyy")}
           </span>
         </div>
       ),

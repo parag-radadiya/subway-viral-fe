@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import {
   Activity,
   AlertCircle,
@@ -176,9 +177,7 @@ const QueryDetail = () => {
             </span>
             <span className="text-sm font-bold text-white flex items-center gap-2">
               <Calendar size={14} className="text-primary-400" />
-              {new Date(query.createdAt).toLocaleDateString(undefined, {
-                dateStyle: "long",
-              })}
+              {format(new Date(query.createdAt), "MMMM d, yyyy")}
             </span>
           </div>
           <div className="flex flex-col">
@@ -298,7 +297,7 @@ const QueryDetail = () => {
                     </p>
                     <p className="text-sm font-bold text-emerald-700 leading-none mt-1">
                       {query.resolved_at
-                        ? new Date(query.resolved_at).toLocaleDateString()
+                        ? format(new Date(query.resolved_at), "dd/MM/yyyy")
                         : "-"}
                     </p>
                   </div>
@@ -400,7 +399,7 @@ const QueryDetail = () => {
                 </span>
                 <span className="font-bold text-slate-800 uppercase tracking-tight">
                   {item?.purchase_date
-                    ? new Date(item.purchase_date).toLocaleDateString()
+                    ? format(new Date(item.purchase_date), "dd/MM/yyyy")
                     : "N/A"}
                 </span>
               </div>

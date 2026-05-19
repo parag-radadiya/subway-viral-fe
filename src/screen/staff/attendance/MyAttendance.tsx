@@ -5,6 +5,7 @@ import { Clock, MapPin, Loader2, Calendar, Search } from "lucide-react";
 import { toast } from "react-toastify";
 import Input from "../../../components/common/Input";
 import Table from "../../../components/common/Table";
+import { format } from "date-fns";
 
 interface AttendanceRecord {
   _id: string;
@@ -35,7 +36,11 @@ const MyAttendance = () => {
   useEffect(() => {
     if (user?.id) {
       attendanceApi
-        .list({ user_id: user.id, page: page.toString(), limit: limit.toString() })
+        .list({
+          user_id: user.id,
+          page: page.toString(),
+          limit: limit.toString(),
+        })
         .then(({ data }) => {
           const resultData = data.data;
           const fetchedRecords = resultData.records || resultData.data || [];
@@ -102,11 +107,7 @@ const MyAttendance = () => {
                 header: "Date",
                 render: (record) => {
                   const formatDate = (dateStr: string) => {
-                    return new Date(dateStr).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    });
+                    return format(new Date(dateStr), "dd MMM yyyy");
                   };
                   return (
                     <div className="flex items-center gap-3">
@@ -143,18 +144,10 @@ const MyAttendance = () => {
                     );
                   const rota = record.rota_id;
                   const startTime = rota.shift_start
-                    ? new Date(rota.shift_start).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })
+                    ? format(new Date(rota.shift_start), "HH:mm")
                     : "";
                   const endTime = rota.shift_end
-                    ? new Date(rota.shift_end).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })
+                    ? format(new Date(rota.shift_end), "HH:mm")
                     : "";
 
                   return (
@@ -175,11 +168,7 @@ const MyAttendance = () => {
                 header: "Punch In",
                 render: (record) => {
                   const formatTime = (dateStr: string) => {
-                    return new Date(dateStr).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    });
+                    return format(new Date(dateStr), "HH:mm");
                   };
                   return (
                     <div className="flex items-center gap-2">
@@ -196,11 +185,7 @@ const MyAttendance = () => {
                 render: (record) => {
                   const isPunchedOut = !!record.punch_out;
                   const formatTime = (dateStr: string) => {
-                    return new Date(dateStr).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    });
+                    return format(new Date(dateStr), "HH:mm");
                   };
                   return isPunchedOut && record.punch_out ? (
                     <div className="flex items-center gap-2">

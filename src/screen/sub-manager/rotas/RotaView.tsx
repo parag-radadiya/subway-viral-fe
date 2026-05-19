@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { rotasApi } from "../../../config/apiCall";
 import { Clock, MapPin, Loader2, Search } from "lucide-react";
@@ -91,7 +92,7 @@ const RotaView = () => {
             header: "Date",
             render: (rota) => (
               <p className="text-sm font-bold text-slate-600">
-                {new Date(rota.shift_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                {format(new Date(rota.shift_date), "EEE, MMM d")}
               </p>
             ),
           },

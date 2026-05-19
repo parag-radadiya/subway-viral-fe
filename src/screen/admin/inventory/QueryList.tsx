@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { ArrowLeft, Calendar, Eye, Loader2, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -92,7 +93,7 @@ const QueryList = () => {
           <Calendar size={14} className="text-slate-400" />
           <div className="flex flex-col">
             <span className="text-xs font-mono font-bold tracking-tight">
-              {new Date(q.createdAt).toLocaleDateString()}
+              {format(new Date(q.createdAt), "dd/MM/yyyy")}
             </span>
             <span className="text-[10px] text-slate-400 font-medium">
               {new Date(q.createdAt).toLocaleTimeString([], {

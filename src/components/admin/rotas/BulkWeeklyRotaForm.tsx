@@ -1,4 +1,4 @@
-import { startOfISOWeek } from "date-fns";
+import { format, startOfISOWeek } from "date-fns";
 import {
   AlertTriangle,
   ChevronLeft,
@@ -192,10 +192,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
               <ChevronLeft size={16} />
             </button>
             <div className="px-3 flex items-center text-xs font-bold text-slate-600 whitespace-nowrap">
-              {weekStart.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-              })}
+              {format(weekStart, "dd MMM")}
             </div>
             <button
               onClick={() => {
@@ -270,11 +267,11 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                   className="p-4 border-l border-slate-100 min-w-[140px]"
                 >
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
-                    {day.toLocaleDateString("en-GB", { weekday: "short" })}
+                    {format(day, "EEE")}
                   </p>
                   <p className="text-sm font-bold text-slate-700">
                     {day.getDate()}{" "}
-                    {day.toLocaleDateString("en-GB", { month: "short" })}
+                    {format(day, "MMM")}
                   </p>
                 </th>
               ))}
