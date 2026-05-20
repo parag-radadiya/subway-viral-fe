@@ -189,6 +189,12 @@ const UserForm = () => {
             error={errors.password?.message}
             {...register("password", {
               required: !isEdit && "Password is required",
+              minLength: !isEdit
+                ? {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  }
+                : undefined,
             })}
           />
 

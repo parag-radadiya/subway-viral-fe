@@ -25,7 +25,9 @@ interface RotaDetailContainerProps {
   };
 }
 
-export default function RotaDetailContainer({ routes }: RotaDetailContainerProps) {
+export default function RotaDetailContainer({
+  routes,
+}: RotaDetailContainerProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [rota, setRota] = useState<any>(null);
@@ -160,7 +162,10 @@ export default function RotaDetailContainer({ routes }: RotaDetailContainerProps
             <div className="flex items-end gap-2 text-slate-800">
               <Clock size={20} className="text-accent-500 mb-1" />
               <span className="text-xl font-mono font-bold tracking-tighter">
-                {rota.start_time} - {rota.end_time || "TBA"}
+                {format(new Date(rota.shift_start), "HH:mm")} -{" "}
+                {rota.shift_end
+                  ? format(new Date(rota.shift_end), "HH:mm")
+                  : "TBA"}
               </span>
             </div>
           </div>

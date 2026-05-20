@@ -270,8 +270,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                     {format(day, "EEE")}
                   </p>
                   <p className="text-sm font-bold text-slate-700">
-                    {day.getDate()}{" "}
-                    {format(day, "MMM")}
+                    {day.getDate()} {format(day, "MMM")}
                   </p>
                 </th>
               ))}
@@ -394,7 +393,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
 
       {modalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm animate-fade-in text-left">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5 animate-scale-up">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-5 animate-scale-up">
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-slate-800">Assign Shift</h3>
               <button
@@ -413,20 +412,23 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
-                    type="datetime-local"
-                    value={modalData.shift_start}
+                    type="time"
+                    value={modalData.shift_start.split("T")[1] || ""}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setModalData({
                         ...modalData,
-                        shift_start: e.target.value,
+                        shift_start: `${modalData.shift_start.split("T")[0]}T${e.target.value}`,
                       })
                     }
                   />
                   <Input
-                    type="datetime-local"
-                    value={modalData.shift_end}
+                    type="time"
+                    value={modalData.shift_end.split("T")[1] || ""}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setModalData({ ...modalData, shift_end: e.target.value })
+                      setModalData({
+                        ...modalData,
+                        shift_end: `${modalData.shift_end.split("T")[0]}T${e.target.value}`,
+                      })
                     }
                   />
                 </div>

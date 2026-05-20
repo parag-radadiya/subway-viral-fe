@@ -88,9 +88,9 @@ const ShopDetail = () => {
           >
             <Edit size={16} className="mr-2" /> Edit Shop
           </Button>
-          <Button variant="danger" size="sm">
+          {/* <Button variant="danger" size="sm">
             <Trash2 size={16} className="mr-2" /> Deactivate
-          </Button>
+          </Button> */}
         </div>
       </div>
 

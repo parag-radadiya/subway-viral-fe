@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock } from "lucide-react";
+import { format } from "date-fns";
 
 interface UserInfo {
   _id: string;
@@ -100,7 +101,10 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                           Shift Time
                         </p>
                         <p className="text-xs font-bold text-slate-800">
-                          {shift.start_time} - {shift.end_time || "TBA"}
+                          {format(new Date(shift.shift_start), "HH:mm")} -{" "}
+                          {shift.shift_end
+                            ? format(new Date(shift.shift_end), "HH:mm")
+                            : "TBA"}
                         </p>
                       </div>
                     </div>

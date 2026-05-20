@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { shopsApi } from "../../../config/apiCall";
-import { Store, Plus, Search, MapPin, Loader2, Eye, Clock, Edit } from "lucide-react";
+import {
+  Store,
+  Plus,
+  Search,
+  MapPin,
+  Loader2,
+  Eye,
+  Clock,
+  Edit,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../utils/routes";
 import Button from "../../../components/common/Button";
@@ -84,7 +93,10 @@ const ShopList = () => {
             placeholder="Search shops by name..."
             className="max-w-sm"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
             startIcon={<Search size={16} />}
           />
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto whitespace-nowrap">
@@ -148,14 +160,18 @@ const ShopList = () => {
                 render: (shop) => (
                   <div className="flex items-center justify-end gap-1">
                     <button
-                      onClick={() => navigate(ROUTES.ADMIN.SHOPS.EDIT(shop._id))}
+                      onClick={() =>
+                        navigate(ROUTES.ADMIN.SHOPS.EDIT(shop._id))
+                      }
                       className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
                       title="Edit Shop"
                     >
                       <Edit size={16} />
                     </button>
                     <button
-                      onClick={() => navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))}
+                      onClick={() =>
+                        navigate(ROUTES.ADMIN.SHOPS.DETAILS(shop._id))
+                      }
                       className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
                       title="View Details"
                     >

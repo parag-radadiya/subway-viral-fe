@@ -24,7 +24,7 @@ interface User {
   email: string;
   role_id: {
     _id: string;
-    name: string;
+    role_name: string;
     permissions: any;
   };
   assigned_shop_ids: string[];
@@ -93,9 +93,9 @@ const UserDetail = () => {
           >
             <Edit size={16} className="mr-2" /> Update Profile
           </Button>
-          <Button variant="danger" size="sm">
+          {/* <Button variant="danger" size="sm">
             <Power size={16} className="mr-2" /> Deactivate
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -115,7 +115,7 @@ const UserDetail = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-primary-50 text-primary-700 border border-primary-100">
-                {user.role_id.name}
+                {user.role_id.role_name}
               </span>
             </div>
           </div>
@@ -129,7 +129,7 @@ const UserDetail = () => {
             <div className="flex items-end gap-2 text-slate-800">
               <Shield size={20} className="text-primary-500 mb-1" />
               <span className="text-xl font-black capitalize">
-                {user.role_id.name}
+                {user.role_id.role_name}
               </span>
             </div>
           </div>
@@ -156,11 +156,6 @@ const UserDetail = () => {
               <span className="text-sm font-bold">Standard Auth</span>
             </div>
           </div>
-        </div>
-
-        <div className="p-8 bg-slate-50/30 flex justify-between items-center text-[10px] text-slate-400 font-medium tracking-tight">
-          <p>System User ID: {user._id}</p>
-          <p>Last Activity: Today, 21:14</p>
         </div>
       </div>
 

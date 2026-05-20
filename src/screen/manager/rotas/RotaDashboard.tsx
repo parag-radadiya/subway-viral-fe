@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import clsx from "clsx";
+import { format } from "date-fns";
 
 interface Stats {
   total_shifts: number;
@@ -72,9 +73,11 @@ const RotaDashboard = () => {
   if (stats?.by_employee) {
     stats.by_employee.forEach((emp: any) => {
       (emp.shifts || []).forEach((s: any) => {
-        if (s.start_time && s.end_time) {
-          const [sh, sm] = s.start_time.split(":").map(Number);
-          const [eh, em] = s.end_time.split(":").map(Number);
+        const start = format(new Date(s.shift_start), "HH:mm");
+        const end = format(new Date(s.shift_end), "HH:mm");
+        if (start && end) {
+          const [sh, sm] = start.split(":").map(Number);
+          const [eh, em] = end.split(":").map(Number);
           let hours = eh + em / 60 - (sh + sm / 60);
           if (hours < 0) hours += 24;
           totalHours += hours;
@@ -177,51 +180,51 @@ const RotaDashboard = () => {
             </h3>
           </div>
           <div className="space-y-3">
-            {(stats?.by_employee || [])
-              .slice(0, 6)
-              .map((empData: any) => {
-                const user = empData.user;
-                const shifts = empData.shifts || [];
-                let empHours = 0;
-                shifts.forEach((s: any) => {
-                  if (s.start_time && s.end_time) {
-                    const [sh, sm] = s.start_time.split(":").map(Number);
-                    const [eh, em] = s.end_time.split(":").map(Number);
-                    let hours = eh + em / 60 - (sh + sm / 60);
-                    if (hours < 0) hours += 24;
-                    empHours += hours;
-                  }
-                });
+            {(stats?.by_employee || []).slice(0, 6).map((empData: any) => {
+              const user = empData.user;
+              const shifts = empData.shifts || [];
+              let empHours = 0;
+              shifts.forEach((s: any) => {
+                const start = format(new Date(s.shift_start), "HH:mm");
+                const end = format(new Date(s.shift_end), "HH:mm");
+                if (start && end) {
+                  const [sh, sm] = start.split(":").map(Number);
+                  const [eh, em] = end.split(":").map(Number);
+                  let hours = eh + em / 60 - (sh + sm / 60);
+                  if (hours < 0) hours += 24;
+                  empHours += hours;
+                }
+              });
 
-                return (
-                  <div
-                    key={user._id}
-                    className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary-200 transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center text-[10px] font-black text-primary-600 border border-primary-100 transition-colors uppercase">
-                        {user.name?.slice(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-700 truncate">
-                          {user.name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-[120px]">
-                          {user.email}
-                        </p>
-                      </div>
+              return (
+                <div
+                  key={user._id}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary-200 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center text-[10px] font-black text-primary-600 border border-primary-100 transition-colors uppercase">
+                      {user.name?.slice(0, 2)}
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-black text-slate-800">
-                        {Math.round(empHours)}h
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-700 truncate">
+                        {user.name}
                       </p>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
-                        {shifts.length} Shifts
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-[120px]">
+                        {user.email}
                       </p>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-black text-slate-800">
+                      {Math.round(empHours)}h
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                      {shifts.length} Shifts
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

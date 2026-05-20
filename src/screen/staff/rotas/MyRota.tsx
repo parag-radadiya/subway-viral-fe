@@ -27,7 +27,11 @@ const MyRota = () => {
       setLoading(true);
       const fetchCall = selectedWeek
         ? rotasApi.week({ week_start: selectedWeek })
-        : rotasApi.list({ user_id: user.id, page: page.toString(), limit: limit.toString() });
+        : rotasApi.list({
+            user_id: user.id,
+            page: page.toString(),
+            limit: limit.toString(),
+          });
 
       fetchCall
         .then(({ data }) => {
@@ -37,8 +41,9 @@ const MyRota = () => {
           } else {
             setWeekData(null);
             const resultData = data.data;
-            const allRotas = resultData.rotas || resultData.items || resultData.data || [];
-            
+            const allRotas =
+              resultData.rotas || resultData.items || resultData.data || [];
+
             setRotas(
               allRotas.sort(
                 (a: any, b: any) =>
@@ -59,7 +64,10 @@ const MyRota = () => {
   }, [user?.id, selectedWeek, page, limit]);
 
   const filteredRotas = rotas.filter((rota) => {
-    const shopName = typeof rota.shop_id === 'string' ? rota.shop_id : rota.shop_id?.name || "";
+    const shopName =
+      typeof rota.shop_id === "string"
+        ? rota.shop_id
+        : rota.shop_id?.name || "";
     return shopName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
@@ -95,66 +103,88 @@ const MyRota = () => {
 
       {selectedWeek && weekData ? (
         <div className="space-y-6 animate-fade-in text-left">
-          {Object.entries(weekData.days || {}).map(([dayStr, shifts]: [string, any]) => {
-            const myShifts = shifts.filter((s: any) => {
-              const sUserId = typeof s.user_id === "string" ? s.user_id : s.user_id?._id;
-              return sUserId === user?.id;
-            });
+          {Object.entries(weekData.days || {}).map(
+            ([dayStr, shifts]: [string, any]) => {
+              const myShifts = shifts.filter((s: any) => {
+                const sUserId =
+                  typeof s.user_id === "string" ? s.user_id : s.user_id?._id;
+                return sUserId === user?.id;
+              });
 
-            return (
-              <div key={dayStr} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 font-bold text-slate-700 text-[10px] tracking-widest uppercase">
-                  {dayStr}
-                </div>
-                <div className="p-6">
-                  {myShifts.length === 0 ? (
-                    <p className="text-slate-400 text-xs italic py-2 text-center">No shifts assigned for this day.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {myShifts.map((shift: any) => (
-                        <div key={shift._id} className="border border-slate-100 rounded-xl p-4 bg-white hover:border-primary-200 hover:shadow-md transition-all group">
-                          <div className="flex justify-between items-start mb-4">
-                            {shift.is_published && (
-                               <span className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase ml-auto">
-                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Published
-                               </span>
+              return (
+                <div
+                  key={dayStr}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+                >
+                  <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 font-bold text-slate-700 text-[10px] tracking-widest uppercase">
+                    {dayStr}
+                  </div>
+                  <div className="p-6">
+                    {myShifts.length === 0 ? (
+                      <p className="text-slate-400 text-xs italic py-2 text-center">
+                        No shifts assigned for this day.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {myShifts.map((shift: any) => (
+                          <div
+                            key={shift._id}
+                            className="border border-slate-100 rounded-xl p-4 bg-white hover:border-primary-200 hover:shadow-md transition-all group"
+                          >
+                            <div className="flex justify-between items-start mb-4">
+                              {shift.is_published && (
+                                <span className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase ml-auto">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{" "}
+                                  Published
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                <Clock size={20} />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                  Shift Time
+                                </p>
+                                <p className="text-sm font-bold text-slate-700">
+                                  {format(new Date(shift.shift_start), "HH:mm")}{" "}
+                                  -{" "}
+                                  {shift.shift_end
+                                    ? format(new Date(shift.shift_end), "HH:mm")
+                                    : "TBA"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                <MapPin size={20} />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                  Location
+                                </p>
+                                <p className="text-sm font-bold text-slate-700">
+                                  {typeof shift.shop_id === "string"
+                                    ? shift.shop_id
+                                    : shift.shop_id?.name}
+                                </p>
+                              </div>
+                            </div>
+                            {shift.note && (
+                              <div className="mt-4 pt-3 border-t border-slate-50 text-[11px] text-slate-500 font-medium italic">
+                                Note: {shift.note}
+                              </div>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                              <Clock size={20} />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Shift Time</p>
-                              <p className="text-sm font-bold text-slate-700">
-                                {shift.start_time} - {shift.end_time || "TBA"}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors">
-                              <MapPin size={20} />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</p>
-                              <p className="text-sm font-bold text-slate-700">
-                                {typeof shift.shop_id === 'string' ? shift.shop_id : shift.shop_id?.name}
-                              </p>
-                            </div>
-                          </div>
-                          {shift.note && (
-                            <div className="mt-4 pt-3 border-t border-slate-50 text-[11px] text-slate-500 font-medium italic">
-                              Note: {shift.note}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            },
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -170,7 +200,7 @@ const MyRota = () => {
               {filteredRotas.length} Upcoming Shifts
             </p>
           </div>
-          
+
           <div className="p-4">
             <Table
               columns={[
@@ -191,10 +221,13 @@ const MyRota = () => {
                   header: "Shift Time",
                   render: (rota) => (
                     <div className="flex items-center gap-2">
-                       <Clock size={12} className="text-slate-300" />
-                       <span className="text-sm font-medium text-slate-600">
-                         {rota.start_time} - {rota.end_time || "TBA"}
-                       </span>
+                      <Clock size={12} className="text-slate-300" />
+                      <span className="text-sm font-medium text-slate-600">
+                        {format(new Date(rota.shift_start), "HH:mm")} -{" "}
+                        {rota.shift_end
+                          ? format(new Date(rota.shift_end), "HH:mm")
+                          : "TBA"}
+                      </span>
                     </div>
                   ),
                 },

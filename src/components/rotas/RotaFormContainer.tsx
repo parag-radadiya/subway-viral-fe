@@ -6,6 +6,7 @@ import Tabs from "../common/Tabs";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import SingleRotaForm from "../admin/rotas/SingleRotaForm";
 import BulkWeeklyRotaForm from "../admin/rotas/BulkWeeklyRotaForm";
+import { format } from "date-fns";
 
 interface RotaFormContainerProps {
   onSuccessRoute: string;
@@ -61,8 +62,8 @@ export default function RotaFormContainer({
                 ? rota.shop_id
                 : rota.shop_id?._id || "",
             shiftDate: dateStr,
-            startTime: rota.start_time || "09:00",
-            endTime: rota.end_time || "17:00",
+            startTime: format(new Date(rota.shift_start), "HH:mm") || "09:00",
+            endTime: format(new Date(rota.shift_end), "HH:mm") || "17:00",
             note: rota.note || "",
           });
         }
