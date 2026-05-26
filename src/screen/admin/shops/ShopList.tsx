@@ -41,7 +41,10 @@ const ShopList = () => {
   useEffect(() => {
     setLoading(true);
     shopsApi
-      .list() // assuming shopsApi doesn't support query yet, if it did it would act like others
+      .list({
+        page: `${page}`,
+        limit: `${limit}`,
+      })
       .then((res: any) => {
         const data = res.data.data;
         setShops(data.shops || data.data || []);

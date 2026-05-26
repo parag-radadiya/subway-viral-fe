@@ -252,7 +252,8 @@ export const rotasApi = {
 // ─── Shops API ────────────────────────────────────────────────────────────────
 
 export const shopsApi = {
-  list: () => api.get("/shops"),
+  list: (query?: Record<string, string>) =>
+    api.get(`/shops?${new URLSearchParams(query).toString()}`),
   getById: (id: string) => api.get(`/shops/${id}`),
   create: (data: Record<string, unknown>) => api.post("/shops", data),
   update: (id: string, data: Record<string, unknown>) =>
@@ -305,26 +306,28 @@ export interface AnalyticsBaseParams {
 
 export const analyticsApi = {
   /** Endpoint 1 — KPI Matrix */
-  kpiMatrix: (params: AnalyticsBaseParams & { compare_from?: string; compare_to?: string }) =>
-    api.get("/store-reports/analytics/v2/kpi-matrix", { params }),
+  kpiMatrix: (
+    params: AnalyticsBaseParams & {
+      compare_from?: string;
+      compare_to?: string;
+    },
+  ) => api.get("/store-reports/analytics/v2/kpi-matrix", { params }),
 
   /** Endpoint 2 — Shop Compare */
   shopCompare: (params: AnalyticsBaseParams & { metrics?: string }) =>
     api.get("/store-reports/analytics/v2/shop-compare", { params }),
 
   /** Endpoint 3 — Period Compare */
-  periodCompare: (
-    params: {
-      current_from: string;
-      current_to: string;
-      compare_from: string;
-      compare_to: string;
-      shop_ids?: string;
-      metrics?: string;
-      report_type?: string;
-      view?: string;
-    },
-  ) => api.get("/store-reports/analytics/v2/period-compare", { params }),
+  periodCompare: (params: {
+    current_from: string;
+    current_to: string;
+    compare_from: string;
+    compare_to: string;
+    shop_ids?: string;
+    metrics?: string;
+    report_type?: string;
+    view?: string;
+  }) => api.get("/store-reports/analytics/v2/period-compare", { params }),
 
   /** Endpoint 4 — Trend */
   trend: (

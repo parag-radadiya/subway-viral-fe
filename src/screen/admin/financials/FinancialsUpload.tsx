@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import Tabs from "../../../components/common/Tabs";
-import ShopwiseWeeklyFinancialsUpload from "./ShopwiseWeeklyFinancialsUpload";
-import MonthlyFinancialsUpload from "./MonthlyFinancialsUpload";
-import YearlyFinancialsUpload from "./YearlyFinancialsUpload";
-import WeeklyFinancialsUpload from "./WeeklyFinancialsUpload";
+import ShopwiseWeeklySheetView from "./ShopwiseWeeklySheetView";
+import WeeklySheetView from "./WeeklySheetView";
+import MonthlySheetView from "./MonthlySheetView";
+// import ShopwiseWeeklyFinancialsUpload from "./ShopwiseWeeklyFinancialsUpload"; // commented – replaced by sheet view
+// import MonthlyFinancialsUpload from "./MonthlyFinancialsUpload"; // commented – replaced by sheet view
+// import YearlyFinancialsUpload from "./YearlyFinancialsUpload"; // commented – replaced by sheet view
+// import WeeklyFinancialsUpload from "./WeeklyFinancialsUpload"; // commented – replaced by sheet view
+// import ShopwiseWeeklySheetView from "./ShopwiseWeeklySheetView";
+// import WeeklySheetView from "./WeeklySheetView";
+// import MonthlySheetView from "./MonthlySheetView";
 
 const FinancialsUpload: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
@@ -38,10 +44,16 @@ const FinancialsUpload: React.FC = () => {
       </div>
 
       <div className="pt-2">
-        {activeTab === "shopwise_week" && <ShopwiseWeeklyFinancialsUpload />}
-        {activeTab === "weekly" && <WeeklyFinancialsUpload />}
-        {activeTab === "month" && <MonthlyFinancialsUpload />}
-        {activeTab === "year" && <YearlyFinancialsUpload />}
+        {/* Old card-based components – commented out, replaced by sheet views */}
+        {/* {activeTab === "shopwise_week" && <ShopwiseWeeklyFinancialsUpload />} */}
+        {/* {activeTab === "weekly" && <WeeklyFinancialsUpload />} */}
+        {/* {activeTab === "month" && <MonthlyFinancialsUpload />} */}
+        {/* {activeTab === "year" && <YearlyFinancialsUpload />} */}
+
+        {/* New spreadsheet-style views */}
+        {activeTab === "shopwise_week" && <ShopwiseWeeklySheetView />}
+        {activeTab === "weekly" && <WeeklySheetView />}
+        {activeTab === "month" && <MonthlySheetView />}
       </div>
     </div>
   );
