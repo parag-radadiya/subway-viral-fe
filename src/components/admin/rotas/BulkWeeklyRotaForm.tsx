@@ -55,6 +55,7 @@ const UserWeeklyTotal = React.memo(
         ? `${hours}h ${mins > 0 ? `${mins}m` : ""}`.trim()
         : "---";
     }, [bulkShifts, memberId]);
+    console.log("🚀 - totalString:", bulkShifts, totalString);
 
     return <>{totalString}</>;
   },
@@ -460,15 +461,18 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                 variant="primary"
                 className="w-full"
                 onClick={() => {
+                  const start = new Date(modalData.shift_start);
+                  const end = new Date(modalData.shift_end);
+                  if (+end < +start) {
+                    end.setDate(end.getDate() + 1);
+                  }
                   setBulkShifts((prev) => [
                     ...prev,
                     {
                       user_id: modalData.user_id,
                       dayIndex: modalData.dayIndex,
-                      shift_start: new Date(
-                        modalData.shift_start,
-                      ).toISOString(),
-                      shift_end: new Date(modalData.shift_end).toISOString(),
+                      shift_start: start.toISOString(),
+                      shift_end: end.toISOString(),
                       note: modalData.note,
                       isNew: true,
                     },
