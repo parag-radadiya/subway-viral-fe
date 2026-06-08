@@ -17,7 +17,6 @@ Modules
 ---
 
 login (admin, staff, manager, sub-manager) // open seperate screen
-login (admin, staff, manager, sub-manager) // open seperate screen
 
 - add device id on forget password ✅
 
