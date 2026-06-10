@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { attendanceApi, shopsApi, usersApi } from "../../config/apiCall";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import Table from "../common/Table";
 import Select from "../common/Select";
+import Button from "../common/Button";
+import WorkedHoursScreen from "./WorkedHoursScreen";
 import { format } from "date-fns";
 
 interface AttendanceRecord {
@@ -29,6 +31,7 @@ const AttendanceListContainer = ({
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWorkedHours, setShowWorkedHours] = useState(false);
 
   // Filter state
   const [activeFilters, setActiveFilters] = useState({
@@ -108,6 +111,10 @@ const AttendanceListContainer = ({
     return format(dateStr, "dd MMM yyyy");
   };
 
+  if (showWorkedHours) {
+    return <WorkedHoursScreen onBack={() => setShowWorkedHours(false)} />;
+  }
+
   if (loading && records.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -128,6 +135,14 @@ const AttendanceListContainer = ({
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          leftIcon={<Clock size={14} />}
+          onClick={() => setShowWorkedHours(true)}
+        >
+          View Worked Hours
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

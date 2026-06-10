@@ -102,5 +102,4 @@ export interface DashboardFilters {
   compare_to: string;
   shop_ids: string;
   report_type: "weekly_financial" | "monthly_store_kpi";
-  granularity: "week" | "month";
 }
