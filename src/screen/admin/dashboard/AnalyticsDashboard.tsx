@@ -31,7 +31,6 @@ const defaultFilters = (): DashboardFilters => {
     compare_to: fmtD(cTo),
     shop_ids: "",
     report_type: "weekly_financial",
-    granularity: "week",
   };
 };
 
@@ -131,13 +130,11 @@ const AnalyticsDashboard = () => {
         analyticsApi.trend({
           ...base,
           metrics: "grossSales,netSales",
-          granularity: filters.granularity,
           group_by: "total",
         }),
         analyticsApi.trend({
           ...base,
           metrics: "labourPercent,foodCostPercent",
-          granularity: filters.granularity,
           group_by: "total",
         }),
       ]);
