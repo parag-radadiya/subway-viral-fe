@@ -63,7 +63,7 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
               </p>
             </div>
 
-            <div className="p-3 space-y-3 flex-1 overflow-auto max-h-[500px] grid grid-cols-4">
+            <div className="p-3  flex-1 overflow-auto max-h-[500px] grid grid-cols-2 lg:grid-cols-4 gap-4">
               {shifts.length === 0 ? (
                 <div className="h-20 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-xl">
                   <p className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">

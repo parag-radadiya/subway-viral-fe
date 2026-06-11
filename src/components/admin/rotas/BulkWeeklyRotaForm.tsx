@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Pencil,
   Plus,
   Save,
   Search,
@@ -26,7 +27,6 @@ interface ShiftCell {
   shift_end: string;
   note?: string;
   isNew?: boolean;
-  isOld?: boolean; // fetched from existing rotas — skipped on publish
   _id?: string;
 }
 
@@ -71,7 +71,6 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   loadingUser,
 }) => {
   const [bulkShifts, setBulkShifts] = useState<ShiftCell[]>([]);
-  console.log("🚀 - BulkWeeklyRotaForm - bulkShifts:", bulkShifts);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [publishing, setPublishing] = useState(false);
@@ -112,9 +111,8 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
     rotasApi
       .week({ week_start: weekStartStr, shop_id: shopId })
       .then(({ data }) => {
-        console.log("🚀 - BulkWeeklyRotaForm - data:", data);
         const rotas: any[] = Object.values(data?.data?.days).flat();
-        const oldShifts: ShiftCell[] = rotas.map((r: any) => {
+        const existingShifts: ShiftCell[] = rotas.map((r: any) => {
           const shiftDate = new Date(r.shift_date || r.shift_start);
           // dayIndex = ISO day 0-6 relative to week start
           const diffMs =
@@ -130,13 +128,13 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
             shift_start: r.shift_start,
             shift_end: r.shift_end,
             note: r.note || "",
-            isOld: true,
           };
         });
-        // Keep any brand-new shifts the user already added this session
+        const existingIds = new Set(existingShifts.map((s) => s._id));
         setBulkShifts((prev) => [
-          ...prev.filter((s) => !s.isOld),
-          ...oldShifts,
+          // keep new shifts added this session (no _id yet)
+          ...prev.filter((s) => !s._id || !existingIds.has(s._id)),
+          ...existingShifts,
         ]);
       })
       .catch(() => {
@@ -164,8 +162,8 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
       toast.error("Please select a shop first");
       return;
     }
-    // Only count new shifts the user added this session
-    const newShifts = bulkShifts.filter((s) => !s.isOld);
+    // Only publish shifts without an _id (i.e. new ones added this session)
+    const newShifts = bulkShifts.filter((s) => !s._id);
     if (newShifts.length === 0) {
       toast.error("No new shifts assigned to publish");
       return;
@@ -174,7 +172,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
     try {
       const payload = {
         shop_id: shopId,
-        week_start: weekStart,
+        week_start: format(weekStart, "yyyy-MM-dd"),
         days: [0, 1, 2, 3, 4, 5, 6],
         replace_existing: false,
         assignments: newShifts.map((s) => ({
@@ -256,23 +254,16 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          {loadingExisting && (
-            <span className="text-[10px] font-bold text-slate-400 italic">
-              Loading existing rotas…
-            </span>
-          )}
-          {bulkShifts.filter((s) => !s.isOld).length > 0 && (
+          {bulkShifts.length > 0 && (
             <button
               onClick={() => {
-                if (
-                  window.confirm("Clear all newly added shifts in the grid?")
-                ) {
-                  setBulkShifts((prev) => prev.filter((s) => s.isOld));
+                if (window.confirm("Clear all assigned shifts in the grid?")) {
+                  setBulkShifts([]);
                 }
               }}
               className="text-[10px] font-black text-danger-500 hover:text-danger-600 uppercase tracking-widest px-3 py-2 transition-colors whitespace-nowrap"
             >
-              Clear New Shifts
+              Clear Grid
             </button>
           )}
           <Input
@@ -379,58 +370,67 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                     >
                       {shift ? (
                         <div
-                          className={`p-3 rounded-xl border group/shift hover:shadow-md transition-all ${
-                            shift.isOld
-                              ? "bg-slate-50 border-slate-200"
-                              : "bg-primary-50 border-primary-100"
-                          }`}
+                          className="rounded-xl bg-primary-50 border border-primary-100 group/shift hover:shadow-md hover:border-primary-200 transition-all cursor-pointer overflow-hidden"
+                          onClick={() =>
+                            setModalData({
+                              user_id: shift.user_id,
+                              dayIndex: shift.dayIndex,
+                              shift_start: new Date(shift.shift_start)
+                                .toISOString()
+                                .slice(0, 16),
+                              shift_end: new Date(shift.shift_end)
+                                .toISOString()
+                                .slice(0, 16),
+                              note: shift.note ?? "",
+                            })
+                          }
                         >
-                          <div className="flex justify-between items-start mb-1">
-                            <Clock
-                              size={12}
-                              className={
-                                shift.isOld
-                                  ? "text-slate-400"
-                                  : "text-primary-600"
-                              }
-                            />
-                            {!shift.isOld && (
+                          {/* Header */}
+                          <div className="flex items-center justify-between px-2.5 pt-2 pb-0">
+                            <Clock size={11} className="text-primary-400" />
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover/shift:opacity-100 transition-all">
+                              <span
+                                className="p-0.5 hover:bg-primary-100 rounded text-primary-400 transition-all"
+                                title="Edit Shift"
+                              >
+                                <Pencil size={12} />
+                              </span>
                               <button
-                                onClick={() =>
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setBulkShifts((prev) =>
                                     prev.filter((s) => s !== shift),
-                                  )
-                                }
-                                className="opacity-0 group-hover/shift:opacity-100 p-1 hover:bg-danger-100 rounded-md text-danger-500 transition-all"
+                                  );
+                                }}
+                                className="p-0.5 hover:bg-danger-50 rounded text-danger-400 transition-all"
                                 title="Remove Shift"
                               >
                                 <Trash2 size={12} />
                               </button>
-                            )}
+                            </div>
                           </div>
-                          <p
-                            className={`text-xs font-black ${
-                              shift.isOld
-                                ? "text-slate-500"
-                                : "text-primary-700"
-                            }`}
-                          >
-                            {formatTimeGrid(shift.shift_start)}
-                          </p>
-                          <p
-                            className={`text-[9px] font-bold ${
-                              shift.isOld
-                                ? "text-slate-400"
-                                : "text-primary-400"
-                            }`}
-                          >
-                            {formatTimeGrid(shift.shift_end)}
-                          </p>
-                          {shift.isOld && (
-                            <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 mt-1">
-                              Existing
-                            </p>
-                          )}
+                          {/* Time block */}
+                          <div className="px-2.5 pt-1.5 pb-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[9px] font-bold text-primary-400 uppercase tracking-wide leading-none mb-0.5">
+                                  Start
+                                </p>
+                                <p className="text-[11px] font-black text-primary-700 tabular-nums leading-tight truncate">
+                                  {formatTimeGrid(shift.shift_start)}
+                                </p>
+                              </div>
+
+                              <div className="flex-1 min-w-0 text-right">
+                                <p className="text-[9px] font-bold text-primary-400 uppercase tracking-wide leading-none mb-0.5">
+                                  End
+                                </p>
+                                <p className="text-[11px] font-black text-primary-500 tabular-nums leading-tight truncate">
+                                  {formatTimeGrid(shift.shift_end)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <button
@@ -473,26 +473,24 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         <div className="flex items-center gap-2 text-slate-500 text-xs font-bold">
           <UsersIcon size={16} /> {filteredStaff.length} Employees Available
         </div>
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold">
-            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-slate-200 border border-slate-300" />
-            Existing
-          </span>
-          <span className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold">
-            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-primary-100 border border-primary-200" />
-            New
-          </span>
-          <p className="text-[10px] text-slate-400 font-medium italic">
-            New shifts are local until you Publish Week
-          </p>
-        </div>
+        <p className="text-[10px] text-slate-400 font-medium italic">
+          Changes are local until you Publish Week
+        </p>
       </div>
 
       {modalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm animate-fade-in text-left">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-5 animate-scale-up">
             <div className="flex justify-between items-center">
-              <h3 className="font-bold text-slate-800">Assign Shift</h3>
+              <h3 className="font-bold text-slate-800">
+                {bulkShifts.some(
+                  (s) =>
+                    s.user_id === modalData.user_id &&
+                    s.dayIndex === modalData.dayIndex,
+                )
+                  ? "Edit Shift"
+                  : "Assign Shift"}
+              </h3>
               <button
                 onClick={() => setModalData(null)}
                 className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
@@ -562,17 +560,35 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                   if (+end < +start) {
                     end.setDate(end.getDate() + 1);
                   }
-                  setBulkShifts((prev) => [
-                    ...prev,
-                    {
-                      user_id: modalData.user_id,
-                      dayIndex: modalData.dayIndex,
-                      shift_start: start.toISOString(),
-                      shift_end: end.toISOString(),
-                      note: modalData.note,
-                      isNew: true,
-                    },
-                  ]);
+                  setBulkShifts((prev) => {
+                    const idx = prev.findIndex(
+                      (s) =>
+                        s.user_id === modalData.user_id &&
+                        s.dayIndex === modalData.dayIndex,
+                    );
+                    if (idx !== -1) {
+                      // update in-place
+                      const updated = [...prev];
+                      updated[idx] = {
+                        ...updated[idx],
+                        shift_start: start.toISOString(),
+                        shift_end: end.toISOString(),
+                        note: modalData.note,
+                      };
+                      return updated;
+                    }
+                    return [
+                      ...prev,
+                      {
+                        user_id: modalData.user_id,
+                        dayIndex: modalData.dayIndex,
+                        shift_start: start.toISOString(),
+                        shift_end: end.toISOString(),
+                        note: modalData.note,
+                        isNew: true,
+                      },
+                    ];
+                  });
                   setModalData(null);
                 }}
               >
