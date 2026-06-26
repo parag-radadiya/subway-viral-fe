@@ -170,6 +170,19 @@ export const attendanceApi = {
   getUsersSummary: (query?: Record<string, string>) =>
     api.get(`/attendance/summary-by-user?${new URLSearchParams(query)}`),
 
+  /** GET /attendance/staff-shifts — PR #14 */
+  getStaffShifts: (params: {
+    shop_id: string;
+    from_date: string;
+    to_date: string;
+    user_id?: string;
+    page?: number;
+    limit?: number;
+    sort_by?: "total_work_hours" | "name";
+    sort_dir?: "asc" | "desc";
+    shift_order?: "asc" | "desc";
+  }) => api.get("/attendance/staff-shifts", { params }),
+
   verifyLocation: (data: {
     shop_id: string;
     latitude: number;
