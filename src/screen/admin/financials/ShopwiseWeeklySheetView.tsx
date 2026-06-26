@@ -86,27 +86,12 @@ const TH = ({
 // "formula" → read-only (grey tinted)
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const SHOPWISE_STORAGE_KEY = "financials_draft_shopwise_week";
-
 const ShopwiseWeeklySheetView = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
-
-  // Restore draft from localStorage on mount
-  const [weeks, setWeeks] = useState<WeekCard[]>(() => {
-    try {
-      const saved = localStorage.getItem(SHOPWISE_STORAGE_KEY);
-      if (saved) return JSON.parse(saved) as WeekCard[];
-    } catch {}
-    return [newWeekCard()];
-  });
+  const [weeks, setWeeks] = useState<WeekCard[]>([newWeekCard()]);
   const [submitting, setSubmitting] = useState(false);
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
-
-  // Save to localStorage on every weeks change
-  useEffect(() => {
-    localStorage.setItem(SHOPWISE_STORAGE_KEY, JSON.stringify(weeks));
-  }, [weeks]);
 
   useEffect(() => {
     shopsApi
@@ -283,8 +268,6 @@ const ShopwiseWeeklySheetView = () => {
           return;
         }
         toast.success(data.message);
-        // Clear draft after successful submit
-        localStorage.removeItem(SHOPWISE_STORAGE_KEY);
         setWeeks([newWeekCard()]);
         setActiveWeekIdx(0);
       })
@@ -294,8 +277,8 @@ const ShopwiseWeeklySheetView = () => {
 
   const activeWeek = weeks[activeWeekIdx];
 
-  const gc = "bg-green-50/50 !whitespace-nowrap !px-4"; // input cell tint
-  const fc = "bg-slate-50/70 !whitespace-nowrap !px-4"; // formula cell tint
+  const gc = "bg-green-50/50"; // input cell tint
+  const fc = "bg-slate-50/70"; // formula cell tint
 
   const fmtDateLabel = (ds: string) => {
     if (!ds) return "";
@@ -430,54 +413,64 @@ const ShopwiseWeeklySheetView = () => {
                 {/* Row 2: column labels */}
                 <tr className="bg-slate-100 text-slate-600 border-b-2 border-slate-300">
                   {/* Sales — in exact Excel column order */}
-                  <TH className={`${gc} text-green-700`}>GROSS SALES</TH>
+                  <TH className={`${gc} text-green-700`}>GROSS{"\n"}SALES</TH>
                   <TH className={`${gc} text-green-700`}>VAT</TH>
                   <TH className={`${fc} text-slate-500`}>VAT %</TH>
-                  <TH className={`${fc} text-slate-500`}>Adj VAT (12%)</TH>
-                  <TH className={`${fc} text-slate-700`}>NET SALES</TH>
-                  <TH className={`${fc} text-slate-500`}>Delivery %</TH>
-                  <TH className={`${fc} text-slate-500`}>Total 3PD Sale</TH>
-                  <TH className={`${gc} text-green-700`}>Cust Count</TH>
+                  <TH className={`${fc} text-slate-500`}>Adj VAT{"\n"}(12%)</TH>
+                  <TH className={`${fc} text-slate-700`}>NET{"\n"}SALES</TH>
+                  <TH className={`${fc} text-slate-500`}>Delivery{"\n"}%</TH>
+                  <TH className={`${fc} text-slate-500`}>
+                    Total{"\n"}3PD Sale
+                  </TH>
+                  <TH className={`${gc} text-green-700`}>Cust{"\n"}Count</TH>
                   {/* JustEat */}
                   <TH className={`${gc} text-orange-700`}>JE Sale</TH>
-                  <TH className={`${gc} text-orange-700`}>JUST Charge</TH>
-                  <TH className={`${gc} text-orange-700`}>20% Vat</TH>
-                  <TH className={`${fc} text-slate-500`}>Receive JE</TH>
-                  <TH className={`${gc} text-orange-700`}>Bank (JE)</TH>
-                  <TH className={`${gc} text-orange-700`}>Variance (JE)</TH>
+                  <TH className={`${gc} text-orange-700`}>JUST{"\n"}Charge</TH>
+                  <TH className={`${gc} text-orange-700`}>20%{"\n"}Vat</TH>
+                  <TH className={`${fc} text-slate-500`}>Receive{"\n"}JE</TH>
+                  <TH className={`${gc} text-orange-700`}>Bank{"\n"}(JE)</TH>
+                  <TH className={`${gc} text-orange-700`}>
+                    Variance{"\n"}(JE)
+                  </TH>
                   {/* Uber */}
                   <TH className={`${gc} text-green-700`}>Uber Sale</TH>
-                  <TH className={`${gc} text-green-700`}>UBER Charge</TH>
-                  <TH className={`${gc} text-green-700`}>20% Vat</TH>
-                  <TH className={`${fc} text-slate-500`}>Receive Uber</TH>
-                  <TH className={`${gc} text-green-700`}>Bank (Uber)</TH>
-                  <TH className={`${gc} text-green-700`}>Uber Advert</TH>
-                  <TH className={`${gc} text-green-700`}>Uber Disc%</TH>
+                  <TH className={`${gc} text-green-700`}>UBER{"\n"}Charge</TH>
+                  <TH className={`${gc} text-green-700`}>20%{"\n"}Vat</TH>
+                  <TH className={`${fc} text-slate-500`}>Receive{"\n"}Uber</TH>
+                  <TH className={`${gc} text-green-700`}>Bank{"\n"}(Uber)</TH>
+                  <TH className={`${gc} text-green-700`}>Uber{"\n"}Advert</TH>
+                  <TH className={`${gc} text-green-700`}>Uber{"\n"}Disc%</TH>
                   {/* Deliveroo */}
                   <TH className={`${gc} text-teal-700`}>Doo Sale</TH>
-                  <TH className={`${gc} text-teal-700`}>Doo Charge</TH>
-                  <TH className={`${gc} text-teal-700`}>20% Vat</TH>
-                  <TH className={`${fc} text-slate-500`}>Receive Doo</TH>
-                  <TH className={`${gc} text-teal-700`}>Bank (Doo)</TH>
-                  <TH className={`${gc} text-teal-700`}>Variance (Doo)</TH>
+                  <TH className={`${gc} text-teal-700`}>Doo{"\n"}Charge</TH>
+                  <TH className={`${gc} text-teal-700`}>20%{"\n"}Vat</TH>
+                  <TH className={`${fc} text-slate-500`}>Receive{"\n"}Doo</TH>
+                  <TH className={`${gc} text-teal-700`}>Bank{"\n"}(Doo)</TH>
+                  <TH className={`${gc} text-teal-700`}>Variance{"\n"}(Doo)</TH>
                   {/* Labour & Food */}
-                  <TH className={`${fc} text-slate-500`}>Del Chg TOTAL</TH>
-                  <TH className={`${fc} text-slate-500`}>Delivery Chg%</TH>
-                  <TH className={`${gc} text-violet-700`}>LABOUR HOURS</TH>
-                  <TH className={`${gc} text-violet-700`}>LABOUR RATE</TH>
-                  <TH className={`${fc} text-slate-500`}>LABOUR COST</TH>
-                  <TH className={`${fc} text-slate-500`}>Labour cost%</TH>
+                  <TH className={`${fc} text-slate-500`}>Del Chg{"\n"}TOTAL</TH>
+                  <TH className={`${fc} text-slate-500`}>Delivery{"\n"}Chg%</TH>
+                  <TH className={`${gc} text-violet-700`}>LABOUR{"\n"}HOURS</TH>
+                  <TH className={`${gc} text-violet-700`}>LABOUR{"\n"}RATE</TH>
+                  <TH className={`${fc} text-slate-500`}>LABOUR{"\n"}COST</TH>
+                  <TH className={`${fc} text-slate-500`}>Labour{"\n"}cost%</TH>
                   {/* Instore & Bidfood */}
-                  <TH className={`${gc} text-rose-700`}>BID FOOD</TH>
-                  <TH className={`${fc} text-slate-500`}>Food cost%</TH>
+                  <TH className={`${gc} text-rose-700`}>BID{"\n"}FOOD</TH>
+                  <TH className={`${fc} text-slate-500`}>Food{"\n"}cost%</TH>
                   <TH className={`${fc} text-slate-700 font-bold`}>
-                    TOTAL COST%
+                    TOTAL{"\n"}COST%
                   </TH>
-                  <TH className={`${gc} text-rose-700`}>Instore Food Cost</TH>
-                  <TH className={`${gc} text-rose-700`}>Instore Labour Cost</TH>
-                  <TH className={`${gc} text-rose-500`}>Prev Wk Bidfood</TH>
+                  <TH className={`${gc} text-rose-700`}>
+                    Instore{"\n"}Food Cost
+                  </TH>
+                  <TH className={`${gc} text-rose-700`}>
+                    Instore{"\n"}Labour Cost
+                  </TH>
+                  <TH className={`${gc} text-rose-500`}>
+                    Prev Wk{"\n"}Bidfood
+                  </TH>
                   <TH className={`${fc} text-rose-700 font-bold`}>
-                    Bidfood Total
+                    Bidfood{"\n"}Total
                   </TH>
                 </tr>
               </thead>
@@ -1010,7 +1003,6 @@ const ShopwiseWeeklySheetView = () => {
             <button
               type="button"
               onClick={() => {
-                localStorage.removeItem(SHOPWISE_STORAGE_KEY);
                 setWeeks([newWeekCard()]);
                 setActiveWeekIdx(0);
               }}
