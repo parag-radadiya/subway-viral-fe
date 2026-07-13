@@ -239,6 +239,21 @@ export const attendanceApi = {
     target_hours: number;
     note?: string;
   }) => api.post("/attendance/adjust-hours/apply", data),
+
+  /** POST /attendance/:id/break-start — start a lunch/other break */
+  breakStart: (id: string, break_type: "Lunch" | "Other" = "Lunch") =>
+    api.post(`/attendance/${id}/break-start`, { break_type }),
+
+  /** PUT /attendance/:id/break-end — end the currently open break */
+  breakEnd: (id: string) => api.put(`/attendance/${id}/break-end`, {}),
+
+  /** GET /attendance/weekly-payroll-report */
+  weeklyPayrollReport: (params: {
+    shop_id?: string;
+    week_start: string;  // YYYY-MM-DD
+    from_date?: string;  // YYYY-MM-DD
+    to_date?: string;    // YYYY-MM-DD
+  }) => api.get("/attendance/weekly-payroll-report", { params }),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────

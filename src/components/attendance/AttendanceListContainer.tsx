@@ -135,14 +135,16 @@ const AttendanceListContainer = ({
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          leftIcon={<Clock size={14} />}
-          onClick={() => setShowWorkedHours(true)}
-        >
-          View Worked Hours
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Clock size={14} />}
+            onClick={() => setShowWorkedHours(true)}
+          >
+            View Worked Hours
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
