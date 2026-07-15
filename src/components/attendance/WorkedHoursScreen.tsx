@@ -424,8 +424,8 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
     if (!startDate || !endDate) return;
     setLoading(true);
     const query: Record<string, string> = {
-      start_date: startDate,
-      end_date: endDate,
+      from_date: startDate,
+      to_date: endDate,
     };
     if (shopId !== "all") query.shop_id = shopId;
 

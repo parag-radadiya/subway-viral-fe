@@ -33,6 +33,8 @@ export const usersApi = {
   list: (query?: Record<string, string>) =>
     api.get(`/users?${new URLSearchParams(query)}`),
 
+  getUser: () => api.get(`/auth/me`),
+
   getById: (id: string) => api.get(`/users/${id}`),
 
   create: (data: Record<string, unknown>) => api.post("/users", data),
@@ -250,9 +252,10 @@ export const attendanceApi = {
   /** GET /attendance/weekly-payroll-report */
   weeklyPayrollReport: (params: {
     shop_id?: string;
-    week_start: string;  // YYYY-MM-DD
-    from_date?: string;  // YYYY-MM-DD
-    to_date?: string;    // YYYY-MM-DD
+    format?: string;
+    week_start: string; // YYYY-MM-DD
+    from_date?: string; // YYYY-MM-DD
+    to_date?: string; // YYYY-MM-DD
   }) => api.get("/attendance/weekly-payroll-report", { params }),
 };
 

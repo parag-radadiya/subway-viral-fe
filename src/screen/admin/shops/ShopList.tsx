@@ -25,6 +25,8 @@ interface Shop {
   geofence_radius_m: number;
   opening_time?: string;
   closing_time?: string;
+  is_active?: boolean;
+  is_all_shops?: boolean;
 }
 
 const ShopList = () => {
@@ -57,9 +59,11 @@ const ShopList = () => {
       .finally(() => setLoading(false));
   }, [page, limit]);
 
-  const filteredShops = shops.filter((shop) =>
-    shop.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredShops = shops
+    .filter((shop) => !shop.is_all_shops)
+    .filter((shop) =>
+      shop.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
 
   if (loading) {
     return (
@@ -155,6 +159,20 @@ const ShopList = () => {
                     </div>
                   ) : (
                     <span className="text-xs text-slate-300">—</span>
+                  ),
+              },
+              {
+                header: "Status",
+                align: "center",
+                render: (shop) =>
+                  shop.is_active === false ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
+                      Closed
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                      Active
+                    </span>
                   ),
               },
               {

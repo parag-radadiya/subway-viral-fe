@@ -50,6 +50,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
   const [punching, setPunching] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [activeAttendance, setActiveAttendance] = useState<any>(null);
+  console.log("🚀 - AttendancePunchCard - activeAttendance:", activeAttendance);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [eligibleRotas, setEligibleRotas] = useState<any[]>([]);
   const [selectedRotaId, setSelectedRotaId] = useState<string | null>(null);
@@ -271,8 +272,9 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     attendanceApi
       .breakStart(activeAttendance._id, "Lunch")
       .then((res) => {
-        const updated = res.data.data.attendance;
+        const updated = res.data.attendance;
         setActiveAttendance(updated);
+        fetchCurrentStatus();
         toast.success("Lunch break started!");
       })
       .catch((err: any) => {
@@ -287,7 +289,8 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     attendanceApi
       .breakEnd(activeAttendance._id)
       .then((res) => {
-        const updated = res.data.data.attendance;
+        const updated = res.data.attendance;
+        fetchCurrentStatus();
         setActiveAttendance(updated);
         toast.success("Break ended. Back to work!");
       })
@@ -604,7 +607,9 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                       isLoading={isBreaking}
                       className="rounded-2xl h-12 text-sm font-black bg-amber-500 hover:bg-amber-600 border-amber-500 shadow-lg shadow-amber-100"
                     >
-                      {!isBreaking && <UtensilsCrossed size={18} className="mr-2" />}
+                      {!isBreaking && (
+                        <UtensilsCrossed size={18} className="mr-2" />
+                      )}
                       End Break
                     </Button>
                   </div>

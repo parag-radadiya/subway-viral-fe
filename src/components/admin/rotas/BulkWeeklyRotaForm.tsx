@@ -28,6 +28,7 @@ interface ShiftCell {
   note?: string;
   isNew?: boolean;
   _id?: string;
+  isPreviousWeek?: boolean; // copied from previous week
 }
 
 interface BulkWeeklyRotaFormProps {
@@ -71,6 +72,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   loadingUser,
 }) => {
   const [bulkShifts, setBulkShifts] = useState<ShiftCell[]>([]);
+  console.log("🚀 - BulkWeeklyRotaForm - bulkShifts:", bulkShifts);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [publishing, setPublishing] = useState(false);
@@ -99,7 +101,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
     });
   }, [weekStart]);
 
-  // ─── Fetch existing rotas for the selected shop + week ───────────────────────
+  // ─── Fetch existing rotas for the selected shop + week (+ previous week) ─────
   useEffect(() => {
     if (!shopId) return;
     const weekStartStr = format(weekStart, "yyyy-MM-dd");
@@ -107,39 +109,109 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
     if (prevWeekShopKey.current === key) return;
     prevWeekShopKey.current = key;
 
+    // Compute previous week start
+    const prevWeekDate = new Date(weekStart);
+    prevWeekDate.setDate(prevWeekDate.getDate() - 7);
+    const prevWeekStartStr = format(prevWeekDate, "yyyy-MM-dd");
+
+    const parseShifts = (
+      rotas: any[],
+      baseWeekStart: Date,
+      isPreviousWeek: boolean,
+    ): ShiftCell[] =>
+      rotas.map((r: any) => {
+        const shiftDate = new Date(r.shift_date || r.shift_start);
+        const base = new Date(baseWeekStart);
+        const diffMs =
+          shiftDate.setHours(0, 0, 0, 0) - base.setHours(0, 0, 0, 0);
+        // const dayIndex = Math.round(diffMs / 86400000);
+        const dayIndex = Math.max(
+          0,
+          Math.min(6, Math.round(diffMs / 86400000)),
+        );
+        return {
+          _id: r._id,
+          user_id:
+            typeof r.user_id === "string" ? r.user_id : (r.user_id?._id ?? ""),
+          dayIndex: Math.max(0, Math.min(6, dayIndex)),
+          shift_start: r.shift_start,
+          shift_end: r.shift_end,
+          note: r.note || "",
+          isPreviousWeek,
+        };
+      });
+
     setLoadingExisting(true);
-    rotasApi
-      .week({ week_start: weekStartStr, shop_id: shopId })
-      .then(({ data }) => {
-        const rotas: any[] = Object.values(data?.data?.days).flat();
-        const existingShifts: ShiftCell[] = rotas.map((r: any) => {
-          const shiftDate = new Date(r.shift_date || r.shift_start);
-          // dayIndex = ISO day 0-6 relative to week start
-          const diffMs =
-            shiftDate.setHours(0, 0, 0, 0) - weekStart.setHours(0, 0, 0, 0);
-          const dayIndex = Math.round(diffMs / 86400000);
-          return {
-            _id: r._id,
-            user_id:
+
+    Promise.all([
+      rotasApi.week({ week_start: weekStartStr, shop_id: shopId }),
+      rotasApi.week({ week_start: prevWeekStartStr, shop_id: shopId }),
+    ])
+      .then(([currentRes, prevRes]) => {
+        const currentRotas: any[] = Object.values(
+          currentRes.data?.data?.days ?? {},
+        ).flat();
+        const prevRotas: any[] = Object.values(
+          prevRes.data?.data?.days ?? {},
+        ).flat();
+
+        const currentShifts = parseShifts(currentRotas, weekStart, false);
+
+        // For previous-week shifts: remap their shift times to the CURRENT week
+        // so they appear on the same day columns. Also strip _id so they're treated
+        // as new entries (copyable template) unless they already exist this week.
+        const prevShifts: ShiftCell[] = prevRotas
+          .map((r: any) => {
+            const shiftDate = new Date(r.shift_date || r.shift_start);
+            const base = new Date(prevWeekDate);
+            const diffMs =
+              shiftDate.setHours(0, 0, 0, 0) - base.setHours(0, 0, 0, 0);
+            const dayIndex = Math.max(
+              0,
+              Math.min(6, Math.round(diffMs / 86400000)),
+            );
+            const userId =
               typeof r.user_id === "string"
                 ? r.user_id
-                : (r.user_id?._id ?? ""),
-            dayIndex: Math.max(0, Math.min(6, dayIndex)),
-            shift_start: r.shift_start,
-            shift_end: r.shift_end,
-            note: r.note || "",
-          };
-        });
-        const existingIds = new Set(existingShifts.map((s) => s._id));
-        setBulkShifts((prev) => [
-          // keep new shifts added this session (no _id yet)
-          ...prev.filter((s) => !s._id || !existingIds.has(s._id)),
-          ...existingShifts,
-        ]);
+                : (r.user_id?._id ?? "");
+
+            // Remap shift_start / shift_end to the equivalent day this week
+            const remapToCurrentWeek = (isoStr: string, dayIdx: number) => {
+              const orig = new Date(isoStr);
+              const target = new Date(weekStart);
+              target.setDate(target.getDate() + dayIdx);
+              target.setHours(
+                orig.getHours(),
+                orig.getMinutes(),
+                orig.getSeconds(),
+                0,
+              );
+              return target.toISOString();
+            };
+
+            return {
+              user_id: userId,
+              dayIndex,
+              shift_start: remapToCurrentWeek(r.shift_start, dayIndex),
+              shift_end: remapToCurrentWeek(r.shift_end, dayIndex),
+              note: r.note || "",
+              isPreviousWeek: true,
+              isNew: true, // no _id → will be included in publish
+            } as ShiftCell;
+          })
+          // Only keep previous-week shifts where the same user has NO current-week
+          // shift on that day (avoid duplicates)
+          .filter(
+            (ps) =>
+              !currentShifts.some(
+                (cs) =>
+                  cs.user_id === ps.user_id && cs.dayIndex === ps.dayIndex,
+              ),
+          );
+
+        setBulkShifts([...currentShifts, ...prevShifts]);
       })
-      .catch(() => {
-        /* silently ignore */
-      })
+      .catch(() => {})
       .finally(() => setLoadingExisting(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shopId, weekStart.toISOString()]);
@@ -162,7 +234,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
       toast.error("Please select a shop first");
       return;
     }
-    // Only publish shifts without an _id (i.e. new ones added this session)
+    // Publish all shifts without an _id (new shifts + carried-over previous-week shifts)
     const newShifts = bulkShifts.filter((s) => !s._id);
     if (newShifts.length === 0) {
       toast.error("No new shifts assigned to publish");
@@ -226,14 +298,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                 d.setDate(d.getDate() - 7);
                 setCurrentDate(d);
               }}
-              disabled={
-                weekStart.getTime() <= getWeekStart(new Date()).getTime()
-              }
-              className={`p-2 rounded-lg transition-all ${
-                weekStart.getTime() <= getWeekStart(new Date()).getTime()
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-white"
-              }`}
+              className="p-2 hover:bg-white rounded-lg transition-all"
             >
               <ChevronLeft size={16} />
             </button>
@@ -363,6 +428,7 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                   const shift = bulkShifts.find(
                     (s) => s.user_id === member._id && s.dayIndex === i,
                   );
+                  const isPrev = shift?.isPreviousWeek === true;
                   return (
                     <td
                       key={i}
@@ -370,7 +436,11 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                     >
                       {shift ? (
                         <div
-                          className="rounded-xl bg-primary-50 border border-primary-100 group/shift hover:shadow-md hover:border-primary-200 transition-all cursor-pointer overflow-hidden"
+                          className={`rounded-xl border group/shift hover:shadow-md transition-all cursor-pointer overflow-hidden ${
+                            isPrev
+                              ? "bg-amber-50 border-amber-200 hover:border-amber-300"
+                              : "bg-primary-50 border-primary-100 hover:border-primary-200"
+                          }`}
                           onClick={() =>
                             setModalData({
                               user_id: shift.user_id,
@@ -387,10 +457,26 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                         >
                           {/* Header */}
                           <div className="flex items-center justify-between px-2.5 pt-2 pb-0">
-                            <Clock size={11} className="text-primary-400" />
+                            <div className="flex items-center gap-1">
+                              <Clock
+                                size={11}
+                                className={
+                                  isPrev ? "text-amber-400" : "text-primary-400"
+                                }
+                              />
+                              {isPrev && (
+                                <span className="text-[8px] font-black uppercase tracking-widest text-amber-500 leading-none">
+                                  prev
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-0.5 opacity-0 group-hover/shift:opacity-100 transition-all">
                               <span
-                                className="p-0.5 hover:bg-primary-100 rounded text-primary-400 transition-all"
+                                className={`p-0.5 rounded transition-all ${
+                                  isPrev
+                                    ? "hover:bg-amber-100 text-amber-400"
+                                    : "hover:bg-primary-100 text-primary-400"
+                                }`}
                                 title="Edit Shift"
                               >
                                 <Pencil size={12} />
@@ -413,19 +499,43 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
                           <div className="px-2.5 pt-1.5 pb-2.5">
                             <div className="flex items-center gap-1.5">
                               <div className="flex-1 min-w-0">
-                                <p className="text-[9px] font-bold text-primary-400 uppercase tracking-wide leading-none mb-0.5">
+                                <p
+                                  className={`text-[9px] font-bold uppercase tracking-wide leading-none mb-0.5 ${
+                                    isPrev
+                                      ? "text-amber-400"
+                                      : "text-primary-400"
+                                  }`}
+                                >
                                   Start
                                 </p>
-                                <p className="text-[11px] font-black text-primary-700 tabular-nums leading-tight truncate">
+                                <p
+                                  className={`text-[11px] font-black tabular-nums leading-tight truncate ${
+                                    isPrev
+                                      ? "text-amber-700"
+                                      : "text-primary-700"
+                                  }`}
+                                >
                                   {formatTimeGrid(shift.shift_start)}
                                 </p>
                               </div>
 
                               <div className="flex-1 min-w-0 text-right">
-                                <p className="text-[9px] font-bold text-primary-400 uppercase tracking-wide leading-none mb-0.5">
+                                <p
+                                  className={`text-[9px] font-bold uppercase tracking-wide leading-none mb-0.5 ${
+                                    isPrev
+                                      ? "text-amber-400"
+                                      : "text-primary-400"
+                                  }`}
+                                >
                                   End
                                 </p>
-                                <p className="text-[11px] font-black text-primary-500 tabular-nums leading-tight truncate">
+                                <p
+                                  className={`text-[11px] font-black tabular-nums leading-tight truncate ${
+                                    isPrev
+                                      ? "text-amber-500"
+                                      : "text-primary-500"
+                                  }`}
+                                >
                                   {formatTimeGrid(shift.shift_end)}
                                 </p>
                               </div>
@@ -469,9 +579,24 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         </table>
       </div>
 
-      <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+      <div className="flex flex-wrap justify-between items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
         <div className="flex items-center gap-2 text-slate-500 text-xs font-bold">
           <UsersIcon size={16} /> {filteredStaff.length} Employees Available
+        </div>
+        {/* Legend */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-primary-100 border border-primary-200" />
+            <span className="text-[10px] text-slate-500 font-medium">
+              This week
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-amber-100 border border-amber-200" />
+            <span className="text-[10px] text-slate-500 font-medium">
+              Carried from previous week
+            </span>
+          </div>
         </div>
         <p className="text-[10px] text-slate-400 font-medium italic">
           Changes are local until you Publish Week
