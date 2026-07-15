@@ -26,7 +26,11 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ token: string; refresh_token?: string; user: User }>,
+      action: PayloadAction<{
+        token: string;
+        refresh_token?: string;
+        user: User;
+      }>,
     ) => {
       state.token = action.payload.token;
       if (action.payload.refresh_token) {
@@ -41,6 +45,7 @@ const authSlice = createSlice({
       state.isAuthenticated = action.payload;
     },
     setUser: (state, action: PayloadAction<User>) => {
+      console.log("🚀 - action:", action.payload);
       state.user = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

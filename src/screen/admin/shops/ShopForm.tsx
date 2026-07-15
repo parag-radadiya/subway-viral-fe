@@ -24,6 +24,7 @@ interface ShopFormData {
   geofence_radius_m: number;
   opening_time: string;
   closing_time: string;
+  is_active: boolean;
 }
 
 const ShopForm = () => {
@@ -43,6 +44,7 @@ const ShopForm = () => {
   } = useForm<ShopFormData>({
     defaultValues: {
       geofence_radius_m: 100,
+      is_active: true,
     },
   });
 
@@ -233,6 +235,24 @@ const ShopForm = () => {
             min: { value: 20, message: "Minimum 20m recommended" },
           })}
         />
+
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Shop Status</p>
+            <p className="text-xs text-slate-400 mt-0.5">Toggle to mark this shop as active or closed</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              {...register("is_active")}
+            />
+            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            <span className="ml-3 text-sm font-semibold text-slate-700 peer-checked:text-primary-700">
+              Active
+            </span>
+          </label>
+        </div>
 
         <div className="pt-4 flex gap-3">
           <Button

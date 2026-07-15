@@ -5,11 +5,13 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Coffee,
   Fingerprint,
   Loader2,
   MapPin,
   Navigation,
   ShieldCheck,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -17,6 +19,16 @@ import Button from "../common/Button";
 import { attendanceApi } from "../../config/apiCall";
 import { useBiometric } from "../../hooks/useBiometric";
 import { useAppSelector } from "../../store";
+
+interface BreakEntry {
+  _id: string;
+  break_start: string;
+  break_end: string | null;
+  break_type: "Lunch" | "Other";
+  duration_minutes: number | null;
+  is_manual: boolean;
+  manual_by: string | null;
+}
 
 interface AttendancePunchCardProps {
   onSuccess: () => void;
@@ -41,11 +53,40 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
   console.log("🚀 - AttendancePunchCard - activeAttendance:", activeAttendance);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [eligibleRotas, setEligibleRotas] = useState<any[]>([]);
-  console.log("🚀 - AttendancePunchCard - eligibleRotas:", eligibleRotas);
   const [selectedRotaId, setSelectedRotaId] = useState<string | null>(null);
   const [isFetchingRotas, setIsFetchingRotas] = useState(false);
 
+  // Lunch break state
+  const [isBreaking, setIsBreaking] = useState(false);
+  const [breakElapsed, setBreakElapsed] = useState(0); // seconds since break_start
+
   const timerRef = useRef<any>(null);
+  const breakTimerRef = useRef<any>(null);
+
+  // Derived break fields from activeAttendance
+  const isOnBreak: boolean = activeAttendance?.is_on_break ?? false;
+  const breaks: BreakEntry[] = activeAttendance?.breaks ?? [];
+  const totalBreakMinutes: number = activeAttendance?.total_break_minutes ?? 0;
+
+  // Tick a live elapsed counter when on break
+  useEffect(() => {
+    if (breakTimerRef.current) clearInterval(breakTimerRef.current);
+    if (isOnBreak) {
+      const openBreak = breaks.find((b) => !b.break_end);
+      if (openBreak) {
+        const startMs = new Date(openBreak.break_start).getTime();
+        const tick = () =>
+          setBreakElapsed(Math.floor((Date.now() - startMs) / 1000));
+        tick();
+        breakTimerRef.current = setInterval(tick, 1000);
+      }
+    } else {
+      setBreakElapsed(0);
+    }
+    return () => {
+      if (breakTimerRef.current) clearInterval(breakTimerRef.current);
+    };
+  }, [isOnBreak, breaks]);
 
   const resetVerification = useCallback(() => {
     setLocationVerified(false);
@@ -105,6 +146,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
     fetchCurrentStatus();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (breakTimerRef.current) clearInterval(breakTimerRef.current);
     };
   }, [fetchCurrentStatus]);
 
@@ -220,6 +262,51 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
       ok = await authenticate();
     }
     if (ok) handleSuccess();
+  };
+
+  // ── Lunch break handlers ──────────────────────────────────────────────────
+
+  const handleStartBreak = () => {
+    if (!activeAttendance?._id) return;
+    setIsBreaking(true);
+    attendanceApi
+      .breakStart(activeAttendance._id, "Lunch")
+      .then((res) => {
+        const updated = res.data.attendance;
+        setActiveAttendance(updated);
+        fetchCurrentStatus();
+        toast.success("Lunch break started!");
+      })
+      .catch((err: any) => {
+        toast.error(err.message || "Could not start break.");
+      })
+      .finally(() => setIsBreaking(false));
+  };
+
+  const handleEndBreak = () => {
+    if (!activeAttendance?._id) return;
+    setIsBreaking(true);
+    attendanceApi
+      .breakEnd(activeAttendance._id)
+      .then((res) => {
+        const updated = res.data.attendance;
+        fetchCurrentStatus();
+        setActiveAttendance(updated);
+        toast.success("Break ended. Back to work!");
+      })
+      .catch((err: any) => {
+        toast.error(err.message || "Could not end break.");
+      })
+      .finally(() => setIsBreaking(false));
+  };
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  const fmtSeconds = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return [h, m, sec].map((v) => String(v).padStart(2, "0")).join(":");
   };
 
   if (loadingStatus) {
@@ -465,6 +552,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
           {activeTab === "out" && (
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-4">
+                {/* Clocked-in status */}
                 <div className="flex items-center gap-2 justify-center bg-success-50 text-success-700 px-4 py-3 rounded-xl border border-success-100">
                   <CheckCircle2 size={16} />
                   <span className="text-xs font-bold">
@@ -477,6 +565,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                   </span>
                 </div>
 
+                {/* Linked shift */}
                 {activeAttendance?.rota_id && (
                   <div className="flex flex-col items-center gap-1 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -493,6 +582,69 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                         "hh:mm a",
                       )}
                     </p>
+                  </div>
+                )}
+
+                {/* ── Lunch break section ── */}
+                {isOnBreak ? (
+                  /* Currently on break */
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-4 animate-fade-in">
+                    <div className="flex items-center justify-center gap-2 text-amber-700">
+                      <Coffee size={18} className="shrink-0" />
+                      <span className="text-sm font-bold">On Lunch Break</span>
+                    </div>
+                    <div className="text-3xl font-mono font-black text-amber-600 text-center">
+                      {fmtSeconds(breakElapsed)}
+                    </div>
+                    <p className="text-[11px] text-amber-600 text-center">
+                      Punch-out is disabled while on break
+                    </p>
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      size="lg"
+                      onClick={handleEndBreak}
+                      isLoading={isBreaking}
+                      className="rounded-2xl h-12 text-sm font-black bg-amber-500 hover:bg-amber-600 border-amber-500 shadow-lg shadow-amber-100"
+                    >
+                      {!isBreaking && (
+                        <UtensilsCrossed size={18} className="mr-2" />
+                      )}
+                      End Break
+                    </Button>
+                  </div>
+                ) : (
+                  /* Not on break — show break history summary + start button */
+                  <div className="space-y-3">
+                    {totalBreakMinutes > 0 && (
+                      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Coffee size={14} />
+                          <span className="text-xs font-bold">Total break</span>
+                        </div>
+                        <span className="text-xs font-mono font-black text-slate-700">
+                          {totalBreakMinutes}m
+                        </span>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleStartBreak}
+                      disabled={isBreaking}
+                      className={clsx(
+                        "w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border border-dashed transition-all text-sm font-bold",
+                        isBreaking
+                          ? "opacity-50 cursor-not-allowed text-slate-400 border-slate-200"
+                          : "text-amber-600 border-amber-300 hover:bg-amber-50 hover:border-amber-400",
+                      )}
+                    >
+                      {isBreaking ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Coffee size={16} />
+                      )}
+                      Start Lunch Break
+                    </button>
                   </div>
                 )}
               </div>
@@ -516,6 +668,7 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                     size="lg"
                     onClick={handleVerifyLocation}
                     isLoading={isVerifying}
+                    disabled={isOnBreak}
                     className="rounded-2xl h-14 text-base font-bold shadow-lg shadow-primary-200"
                   >
                     {!isVerifying && <Navigation size={20} className="mr-2" />}
@@ -550,8 +703,13 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                     <div className="absolute inset-0 rounded-full border-4 border-dashed border-slate-100 animate-spin-slow" />
                     <button
                       onClick={handleBiometric}
-                      disabled={punching}
-                      className="absolute inset-2 rounded-full flex items-center justify-center transition-all duration-300 shadow-inner bg-orange-50 text-orange-600 hover:bg-orange-100 scale:95 opacity:80"
+                      disabled={punching || isOnBreak}
+                      className={clsx(
+                        "absolute inset-2 rounded-full flex items-center justify-center transition-all duration-300 shadow-inner",
+                        isOnBreak
+                          ? "bg-slate-100 text-slate-300 cursor-not-allowed"
+                          : "bg-orange-50 text-orange-600 hover:bg-orange-100",
+                      )}
                     >
                       {punching ? (
                         <Loader2 className="animate-spin" size={40} />
@@ -566,7 +724,9 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                       Clock Out
                     </h3>
                     <p className="text-sm text-slate-500 px-8 leading-relaxed">
-                      End your shift and verify your hours for the day.
+                      {isOnBreak
+                        ? "End your lunch break before clocking out."
+                        : "End your shift and verify your hours for the day."}
                     </p>
                   </div>
 
@@ -576,9 +736,13 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
                     size="lg"
                     onClick={handleBiometric}
                     isLoading={punching}
-                    className="rounded-2xl h-14 text-base font-black shadow-lg"
+                    disabled={isOnBreak}
+                    className={clsx(
+                      "rounded-2xl h-14 text-base font-black shadow-lg",
+                      isOnBreak && "opacity-50 cursor-not-allowed",
+                    )}
                   >
-                    Verify Punch Out
+                    {isOnBreak ? "End Break First" : "Verify Punch Out"}
                   </Button>
 
                   <button

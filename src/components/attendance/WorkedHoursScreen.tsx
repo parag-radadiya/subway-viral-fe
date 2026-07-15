@@ -3,6 +3,7 @@ import { attendanceApi, shopsApi } from "../../config/apiCall";
 import {
   ArrowLeft,
   Clock,
+  FileText,
   Loader2,
   User,
   TrendingUp,
@@ -13,6 +14,7 @@ import {
   Hash,
   Timer,
 } from "lucide-react";
+import Button from "../common/Button";
 import { toast } from "react-toastify";
 import Select from "../common/Select";
 import Input from "../common/Input";
@@ -31,6 +33,16 @@ interface UserSummaryRecord {
   total_actual_hours: number;
 }
 
+interface BreakEntry {
+  _id: string;
+  break_start: string;
+  break_end: string | null;
+  break_type: "Lunch" | "Other";
+  duration_minutes: number | null;
+  is_manual: boolean;
+  manual_by: string | null;
+}
+
 interface Shift {
   _id: string;
   shift_date: string; // "YYYY-MM-DD"
@@ -40,10 +52,15 @@ interface Shift {
   work_minutes: number;
   shop_id: { _id: string; name: string };
   rota_id?: {
+    shift_date?: string;
     start_time?: string;
     end_time?: string;
     note?: string;
   };
+  breaks?: BreakEntry[];
+  total_break_hours?: number;
+  total_break_minutes?: number;
+  is_on_break?: boolean;
 }
 
 interface StaffDetail {
@@ -53,6 +70,7 @@ interface StaffDetail {
   records_count: number;
   total_work_hours: number;
   total_actual_hours: number;
+  total_break_hours?: number;
   first_punch_in: string | null;
   last_punch_out: string | null;
   shifts: Shift[];
@@ -391,6 +409,7 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
   const [shopId, setShopId] = useState("all");
   const [startDate, setStartDate] = useState(defaultFrom);
   const [endDate, setEndDate] = useState(defaultTo);
+  const [fetchingPayroll, setFetchingPayroll] = useState(false);
 
   // Load shops once
   useEffect(() => {
@@ -405,8 +424,8 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
     if (!startDate || !endDate) return;
     setLoading(true);
     const query: Record<string, string> = {
-      start_date: startDate,
-      end_date: endDate,
+      from_date: startDate,
+      to_date: endDate,
     };
     if (shopId !== "all") query.shop_id = shopId;
 
@@ -440,6 +459,37 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
     (s, r) => s + (r.records_count ?? 0),
     0,
   );
+
+  // ── Weekly payroll report ────────────────────────────────────────────────
+  const handlePayrollReport = () => {
+    if (!startDate || !endDate) {
+      toast.error("Set a date range first.");
+      return;
+    }
+    setFetchingPayroll(true);
+    attendanceApi
+      .weeklyPayrollReport({
+        week_start: startDate,
+        from_date: startDate,
+        to_date: endDate,
+        ...(shopId !== "all" ? { shop_id: shopId } : {}),
+      })
+      .then((res) => {
+        console.log(
+          "%c[Weekly Payroll Report]",
+          "color:#6366f1;font-weight:bold;font-size:13px",
+          res.data,
+        );
+        toast.success("Payroll report fetched — check DevTools Console.");
+      })
+      .catch((err) => {
+        console.error("[Weekly Payroll Report] Error:", err);
+        toast.error(
+          err?.response?.data?.message ?? "Failed to fetch payroll report.",
+        );
+      })
+      .finally(() => setFetchingPayroll(false));
+  };
 
   return (
     <div className="space-y-6">
@@ -498,6 +548,22 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
               </option>
             ))}
           </Select>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={
+              fetchingPayroll ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <FileText size={13} />
+              )
+            }
+            onClick={handlePayrollReport}
+            isLoading={fetchingPayroll}
+          >
+            Payroll Report
+          </Button>
         </div>
       </div>
 

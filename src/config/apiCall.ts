@@ -33,6 +33,8 @@ export const usersApi = {
   list: (query?: Record<string, string>) =>
     api.get(`/users?${new URLSearchParams(query)}`),
 
+  getUser: () => api.get(`/auth/me`),
+
   getById: (id: string) => api.get(`/users/${id}`),
 
   create: (data: Record<string, unknown>) => api.post("/users", data),
@@ -239,6 +241,22 @@ export const attendanceApi = {
     target_hours: number;
     note?: string;
   }) => api.post("/attendance/adjust-hours/apply", data),
+
+  /** POST /attendance/:id/break-start — start a lunch/other break */
+  breakStart: (id: string, break_type: "Lunch" | "Other" = "Lunch") =>
+    api.post(`/attendance/${id}/break-start`, { break_type }),
+
+  /** PUT /attendance/:id/break-end — end the currently open break */
+  breakEnd: (id: string) => api.put(`/attendance/${id}/break-end`, {}),
+
+  /** GET /attendance/weekly-payroll-report */
+  weeklyPayrollReport: (params: {
+    shop_id?: string;
+    format?: string;
+    week_start: string; // YYYY-MM-DD
+    from_date?: string; // YYYY-MM-DD
+    to_date?: string; // YYYY-MM-DD
+  }) => api.get("/attendance/weekly-payroll-report", { params }),
 };
 
 // ─── Rotas API ────────────────────────────────────────────────────────────────

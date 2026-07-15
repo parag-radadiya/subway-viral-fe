@@ -18,27 +18,37 @@ Pick this endpoint when the UI flow is:
 
 If you only need a single staff's shifts, pass `user_id`. If you need range-level totals on top of the page (e.g. the "this month: 187h" headline), use `total_work_hours` / `total_actual_hours` on the top-level response — those are computed across the entire range, not just the current page.
 
+> **Update:** `shop_id` is now **optional**. Omit it to get a cross-shop view scoped to whatever shops the caller can already see — see [Access control / scope](#access-control--scope) below. Useful for an admin/manager "all my shops this week" screen without a shop picker.
+
 ---
 
 ## Query parameters
 
-| Name          | Required | Type                         | Default            | Notes                                                                                             |
-| ------------- | -------- | ---------------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
-| `shop_id`     | yes      | string (ObjectId)            | —                  | Mongo `_id` of the shop.                                                                          |
-| `from_date`   | yes      | ISO date                     | —                  | Inclusive. `YYYY-MM-DD` or full ISO. Server normalizes to start-of-day UTC.                       |
-| `to_date`     | yes      | ISO date                     | —                  | Inclusive. `YYYY-MM-DD` or full ISO. Server normalizes to end-of-day UTC. Must be ≥ `from_date`.  |
-| `user_id`     | no       | string (ObjectId)            | —                  | Limit the result to one staff member. Self-scope users automatically restricted to themselves.    |
-| `page`        | no       | integer ≥ 1                  | `1`                | Paginates **staff**, not shifts.                                                                  |
-| `limit`       | no       | integer 1–100                | `20`               | Staff per page.                                                                                   |
-| `sort_by`     | no       | `total_work_hours` \| `name` | `total_work_hours` | Sort key for the staff list.                                                                      |
-| `sort_dir`    | no       | `asc` \| `desc`              | `desc`             | Sort direction.                                                                                   |
-| `shift_order` | no       | `asc` \| `desc`              | `asc`              | Order of `shifts[]` **inside each staff** (chronological vs reverse-chronological by `punch_in`). |
+| Name          | Required | Type                         | Default            | Notes                                                                                                                                                                                                           |
+| ------------- | -------- | ---------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shop_id`     | no       | string (ObjectId)            | —                  | Mongo `_id` of the shop. Omit to span every shop in the caller's access (see scope table below). Each shift in the response still carries its own populated `shop_id`, so multi-shop results stay attributable. |
+| `from_date`   | yes      | ISO date                     | —                  | Inclusive. `YYYY-MM-DD` or full ISO. Server normalizes to start-of-day UTC.                                                                                                                                     |
+| `to_date`     | yes      | ISO date                     | —                  | Inclusive. `YYYY-MM-DD` or full ISO. Server normalizes to end-of-day UTC. Must be ≥ `from_date`.                                                                                                                |
+| `user_id`     | no       | string (ObjectId)            | —                  | Limit the result to one staff member. Self-scope users automatically restricted to themselves.                                                                                                                  |
+| `page`        | no       | integer ≥ 1                  | `1`                | Paginates **staff**, not shifts.                                                                                                                                                                                |
+| `limit`       | no       | integer 1–100                | `20`               | Staff per page.                                                                                                                                                                                                 |
+| `sort_by`     | no       | `total_work_hours` \| `name` | `total_work_hours` | Sort key for the staff list.                                                                                                                                                                                    |
+| `sort_dir`    | no       | `asc` \| `desc`              | `desc`             | Sort direction.                                                                                                                                                                                                 |
+| `shift_order` | no       | `asc` \| `desc`              | `asc`              | Order of `shifts[]` **inside each staff** (chronological vs reverse-chronological by `punch_in`).                                                                                                               |
+
+### What "omit shop_id" means per role
+
+| Role / scope              | Behavior when `shop_id` is omitted                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **root / admin**          | Sees every shop, same as before.                                                                                         |
+| **shop-scoped** (manager) | Restricted to every shop they're assigned to (not just one) — their totals and staff list are merged across those shops. |
+| **self-scoped** (staff)   | Sees only their own shifts, across whatever shop(s) they happen to have punches in.                                      |
 
 ### Validation behavior
 
-- Missing `shop_id` → `400 { success: false, message: "shop_id is required" }`
 - Missing or invalid `from_date` / `to_date` → `400 from_date and to_date are required and must be valid ISO dates`
 - `to_date < from_date` → `400 to_date must be greater than or equal to from_date`
+- `shop_id` no longer has a "required" validation error — omitting it is valid input.
 
 ---
 
