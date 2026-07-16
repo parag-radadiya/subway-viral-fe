@@ -317,9 +317,16 @@ export const financialsApi = {
 
   getMonthlySale: (query?: string) =>
     api.get(`/store-reports/monthly-sale?${query || ""}`),
+  editMonthlySale: (id: string, data: Record<string, unknown>) =>
+    api.put(`/store-reports/monthly-sale/${id}`, data),
+  deleteMonthlySale: (id: string) =>
+    api.delete(`/store-reports/monthly-sale/${id}`),
 
   getWeekly: (query?: string) =>
     api.get(`/store-reports/weekly?${query || ""}`),
+  editWeekly: (id: string, data: Record<string, unknown>) =>
+    api.put(`/store-reports/weekly/${id}`, data),
+  deleteWeekly: (id: string) => api.delete(`/store-reports/weekly/${id}`),
 
   list: (query?: string) => api.get(`/store-reports/table?${query || ""}`),
   getById: (id: string) => api.get(`/financials/${id}`),

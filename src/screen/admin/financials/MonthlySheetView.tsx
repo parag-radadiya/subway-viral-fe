@@ -72,13 +72,44 @@ const formulaTdCls = "border-r border-slate-100 px-3 py-1.5 text-right text-[11p
 const inputTdCls = "border-r border-slate-100 px-1 py-1 bg-green-50/40";
 
 // ── Component ─────────────────────────────────────────────────────────────────
+const LOCAL_STORAGE_KEY = "financials_monthly_draft";
+
 const MonthlySheetView: React.FC = () => {
   const [shops, setShops] = useState<any[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
-  const [year, setYear] = useState(String(new Date().getFullYear()));
-  const [monthNum, setMonthNum] = useState(String(new Date().getMonth() + 1));
-  const [rows, setRows] = useState<MonthlyShopRow[]>([]);
+
+  const [year, setYear] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) return JSON.parse(saved).year || String(new Date().getFullYear());
+    } catch {}
+    return String(new Date().getFullYear());
+  });
+
+  const [monthNum, setMonthNum] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) return JSON.parse(saved).monthNum || String(new Date().getMonth() + 1);
+    } catch {}
+    return String(new Date().getMonth() + 1);
+  });
+
+  const [rows, setRows] = useState<MonthlyShopRow[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const p = JSON.parse(saved).rows;
+        if (p && p.length > 0) return p;
+      }
+    } catch {}
+    return [];
+  });
+  
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ year, monthNum, rows }));
+  }, [year, monthNum, rows]);
 
   const makeRow = (s: any): MonthlyShopRow => ({
     shopId: s._id,
@@ -98,9 +129,19 @@ const MonthlySheetView: React.FC = () => {
       .list()
       .then((res: any) => {
         const data = res.data.data;
-        const loaded = data.shops || data.data || [];
+        const loaded = (data.shops || data.data || []).filter(
+          (s: any) => !s.is_all_shops && s.is_active !== false
+        );
         setShops(loaded);
-        setRows(loaded.map(makeRow));
+        setRows((prev) => {
+          if (prev.length > 0) {
+            return loaded.map((s: any) => {
+              const existing = prev.find((p) => p.shopId === s._id);
+              return existing || makeRow(s);
+            });
+          }
+          return loaded.map(makeRow);
+        });
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"))
       .finally(() => setShopsLoading(false));
@@ -109,7 +150,10 @@ const MonthlySheetView: React.FC = () => {
   const handleCell = (shopId: string, field: keyof MonthlyShopRow, value: string) =>
     setRows((prev) => prev.map((r) => (r.shopId === shopId ? { ...r, [field]: value } : r)));
 
-  const resetAll = () => setRows(shops.map(makeRow));
+  const resetAll = () => {
+    setRows(shops.map(makeRow));
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  };
 
   const handleSubmit = async () => {
     if (!year || !monthNum) { toast.error("Please set year and month."); return; }

@@ -98,7 +98,9 @@ const ShopwiseWeeklySheetView = () => {
       .list()
       .then((res: any) => {
         const data = res.data.data;
-        const loaded: Shop[] = data.shops || data.data || [];
+        const loaded: Shop[] = (data.shops || data.data || []).filter(
+          (s: any) => !s.is_all_shops && s.is_active !== false
+        );
         setShops(loaded);
         setWeeks((prev) => {
           if (

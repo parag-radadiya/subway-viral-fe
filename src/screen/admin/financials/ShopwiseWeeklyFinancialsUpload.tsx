@@ -22,7 +22,9 @@ const ShopwiseWeeklyFinancialsUpload = () => {
       .list()
       .then((res: any) => {
         const data = res.data.data;
-        const loadedShops = data.shops || data.data || [];
+        const loadedShops = (data.shops || data.data || []).filter(
+          (s: any) => !s.is_all_shops && s.is_active !== false
+        );
         setShops(loadedShops);
 
         setWeeks((prev) => {

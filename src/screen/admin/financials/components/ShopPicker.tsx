@@ -18,6 +18,8 @@ export function ShopPicker({
   const selected = shops.find((s) => s._id === value);
   const filtered = shops.filter(
     (s) =>
+      s.is_active !== false &&
+      !s.is_all_shops &&
       s.name.toLowerCase().includes(search.toLowerCase()) &&
       (!disabledIds.includes(s._id) || s._id === value),
   );

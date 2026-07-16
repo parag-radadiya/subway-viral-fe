@@ -85,7 +85,6 @@ export function calcDerived(m: ShopMetrics) {
   const foodCostPct = pct(bidFood, netSales);
   const totalCostPct = deliveryChargePct + labourCostPct + foodCostPct;
 
-  console.log("🚀 - calcDerived - vat:", vat, netSales);
   return {
     netSales,
     adjustedVat,

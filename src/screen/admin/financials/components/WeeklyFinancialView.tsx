@@ -6,8 +6,11 @@ import {
   Filter,
   Loader2,
   X,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import Dialog from "../../../../components/common/Dialog";
 import Input from "../../../../components/common/Input";
 import Select from "../../../../components/common/Select";
@@ -118,7 +121,7 @@ function RecordDetailBody({ record }: { record: any }) {
 }
 
 // ─── Weekly Accordion Card ─────────────────────────────────────────────────────
-export function WeeklyAccordionCard({ weekRange, shops, onView }: any) {
+export function WeeklyAccordionCard({ weekRange, shops, onView, onEdit, onDelete }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const first = shops[0] ?? {};
 
@@ -191,13 +194,26 @@ export function WeeklyAccordionCard({ weekRange, shops, onView }: any) {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => onView(record)}
-                  className="ml-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-800 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors shrink-0"
-                >
-                  <Eye size={14} />
-                  View
-                </button>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <button
+                    onClick={() => onView(record)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-800 hover:bg-primary-50 px-2 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Eye size={14} />
+                  </button>
+                  <button
+                    onClick={() => onEdit(record)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600 hover:bg-primary-50 px-2 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Edit size={14} />
+                  </button>
+                  <button
+                    onClick={() => onDelete(record)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 px-2 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -211,6 +227,8 @@ export function WeeklyAccordionCard({ weekRange, shops, onView }: any) {
 const ViewByWeek = ({
   data,
   onView,
+  onEdit,
+  onDelete,
   page,
   limit,
   total,
@@ -247,6 +265,8 @@ const ViewByWeek = ({
           weekRange={weekRange}
           shops={shops}
           onView={onView}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
 
@@ -374,7 +394,7 @@ export function WeeklyFinancialView() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
+  const fetchRecords = () => {
     setList([]);
     setLoading(true);
     const raw: Record<string, string> = {
@@ -405,7 +425,83 @@ export function WeeklyFinancialView() {
         setTotalPages(1);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchRecords();
   }, [page, limit, viewMode, shopId, weekNumber, monthNumber, year]);
+
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [deletingRecord, setDeletingRecord] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editForm, setEditForm] = useState({
+    sales: "",
+    net: "",
+    vat: "",
+    labour: "",
+    royalties: "",
+    food_cost: "",
+    commision: "",
+    commision_percentage: "",
+  });
+
+  const handleEdit = (record: any) => {
+    const m = record.metrics || {};
+    setEditForm({
+      sales: String(m.sales || ""),
+      net: String(m.net || ""),
+      vat: String(m.vat || ""),
+      labour: String(m.labour || ""),
+      royalties: String(m.royalties || ""),
+      food_cost: String(m.food_cost || ""),
+      commision: String(m.commision || ""),
+      commision_percentage: String(m.commision_percentage || ""),
+    });
+    setEditingRecord(record);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRecord) return;
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        metrics: {
+          sales: Number(editForm.sales),
+          net: Number(editForm.net),
+          vat: Number(editForm.vat),
+          labour: Number(editForm.labour),
+          royalties: Number(editForm.royalties),
+          food_cost: Number(editForm.food_cost),
+          commision: Number(editForm.commision),
+          commision_percentage: Number(editForm.commision_percentage),
+        },
+      };
+      await financialsApi.editWeekly(editingRecord._id, payload);
+      toast.success("Record updated successfully");
+      setEditingRecord(null);
+      fetchRecords();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update record");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingRecord) return;
+    setIsDeleting(true);
+    try {
+      await financialsApi.deleteWeekly(deletingRecord._id);
+      toast.success("Record deleted successfully");
+      setDeletingRecord(null);
+      fetchRecords();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to delete record");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const hasFilters =
     viewMode !== "all" ||
@@ -587,11 +683,13 @@ export function WeeklyFinancialView() {
                   }
                 >
                   <option value="all">All Shops</option>
-                  {shops.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name}
-                    </option>
-                  ))}
+                  {shops
+                    .filter((s) => !s.is_all_shops && s.is_active !== false)
+                    .map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name}
+                      </option>
+                    ))}
                 </Select>
               </div>
             </div>
@@ -715,14 +813,29 @@ export function WeeklyFinancialView() {
                 header: "Actions",
                 align: "right",
                 render: (r) => (
-                  <button
-                    onClick={() => setSelectedRecord(r)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-800 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors"
-                    title="View details"
-                  >
-                    <Eye size={14} />
-                    View
-                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => setSelectedRecord(r)}
+                      className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="View details"
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleEdit(r)}
+                      className="p-1.5 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="Edit Record"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={() => setDeletingRecord(r)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Delete Record"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 ),
               },
             ]}
@@ -747,6 +860,8 @@ export function WeeklyFinancialView() {
           <ViewByWeek
             data={list}
             onView={setSelectedRecord}
+            onEdit={handleEdit}
+            onDelete={setDeletingRecord}
             page={page}
             limit={limit}
             total={total}
@@ -772,6 +887,136 @@ export function WeeklyFinancialView() {
         className="max-w-5xl"
       >
         {selectedRecord && <RecordDetailBody record={selectedRecord} />}
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog
+        isOpen={!!editingRecord}
+        onClose={() => setEditingRecord(null)}
+        title={`Edit Weekly Record - W${editingRecord?.week_number} ${editingRecord?.shop_id?.name || editingRecord?.store_name_raw || ""}`}
+        maxWidth="2xl"
+        footer={
+          <>
+            <button
+              onClick={() => setEditingRecord(null)}
+              className="flex-1 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              className="flex-1 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting && <Loader2 size={14} className="animate-spin" />}
+              Save Changes
+            </button>
+          </>
+        }
+      >
+        {editingRecord && (
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Sales"
+              type="number"
+              step="0.01"
+              value={editForm.sales}
+              onChange={(e) => setEditForm({ ...editForm, sales: e.target.value })}
+            />
+            <Input
+              label="Net"
+              type="number"
+              step="0.01"
+              value={editForm.net}
+              onChange={(e) => setEditForm({ ...editForm, net: e.target.value })}
+            />
+            <Input
+              label="VAT"
+              type="number"
+              step="0.01"
+              value={editForm.vat}
+              onChange={(e) => setEditForm({ ...editForm, vat: e.target.value })}
+            />
+            <Input
+              label="Labour"
+              type="number"
+              step="0.01"
+              value={editForm.labour}
+              onChange={(e) => setEditForm({ ...editForm, labour: e.target.value })}
+            />
+            <Input
+              label="Royalties"
+              type="number"
+              step="0.01"
+              value={editForm.royalties}
+              onChange={(e) => setEditForm({ ...editForm, royalties: e.target.value })}
+            />
+            <Input
+              label="Food Cost"
+              type="number"
+              step="0.01"
+              value={editForm.food_cost}
+              onChange={(e) => setEditForm({ ...editForm, food_cost: e.target.value })}
+            />
+            <Input
+              label="Commission"
+              type="number"
+              step="0.01"
+              value={editForm.commision}
+              onChange={(e) => setEditForm({ ...editForm, commision: e.target.value })}
+            />
+            <Input
+              label="Commission %"
+              type="number"
+              step="0.01"
+              value={editForm.commision_percentage}
+              onChange={(e) => setEditForm({ ...editForm, commision_percentage: e.target.value })}
+            />
+          </div>
+        )}
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog
+        isOpen={!!deletingRecord}
+        onClose={() => setDeletingRecord(null)}
+        title="Confirm Deletion"
+        maxWidth="sm"
+        footer={
+          <>
+            <button
+              onClick={() => setDeletingRecord(null)}
+              className="flex-1 py-3 text-[10px] font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest rounded-xl hover:bg-slate-200/50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              className="flex-1 py-3 bg-danger-600 hover:bg-danger-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-danger-500/30 transition-all"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="animate-spin inline" size={16} />
+              ) : (
+                "Delete"
+              )}
+            </button>
+          </>
+        }
+      >
+        <div className="text-center pb-2">
+          <div className="w-16 h-16 bg-danger-50 text-danger-500 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Trash2 size={24} />
+          </div>
+          <h3 className="text-lg font-black text-slate-800 mb-2 tracking-tight">
+            Are you sure?
+          </h3>
+          <p className="text-sm font-medium text-slate-500">
+            Do you really want to delete this record? This action cannot be
+            undone and will permanently remove it.
+          </p>
+        </div>
       </Dialog>
     </div>
   );

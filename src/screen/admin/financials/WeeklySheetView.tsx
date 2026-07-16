@@ -107,18 +107,44 @@ const formulaCls =
   "px-3 py-1.5 text-right text-[11px] font-mono text-slate-500 bg-slate-50/70 border-r border-slate-100";
 const inputTdCls = "border-r border-slate-100 px-1 py-1 bg-green-50/40";
 
+const LOCAL_STORAGE_KEY = "financials_weekly_draft";
+
 // ── Component ─────────────────────────────────────────────────────────────────
 const WeeklySheetView: React.FC = () => {
   const [shops, setShops] = useState<Shop[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState("");
-  const [rows, setRows] = useState<RowData[]>([newRow()]);
+  
+  const [selectedShopId, setSelectedShopId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) return JSON.parse(saved).selectedShopId || "";
+    } catch {}
+    return "";
+  });
+
+  const [rows, setRows] = useState<RowData[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const p = JSON.parse(saved).rows;
+        if (p && p.length > 0) return p;
+      }
+    } catch {}
+    return [newRow()];
+  });
+
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ selectedShopId, rows }));
+  }, [selectedShopId, rows]);
 
   useEffect(() => {
     shopsApi
       .list()
       .then((res: any) => {
-        const loaded = res.data.data.shops || res.data.data.data || [];
+        const loaded = (res.data.data.shops || res.data.data.data || []).filter(
+          (s: any) => !s.is_all_shops && s.is_active !== false
+        );
         setShops(loaded);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));
@@ -205,6 +231,7 @@ const WeeklySheetView: React.FC = () => {
       toast.success(`Successfully uploaded ${ok} weeks.`);
       setRows([newRow()]);
       setSelectedShopId("");
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
     } else {
       toast.error(`Uploaded ${ok} weeks, ${fail} failed.`);
     }
@@ -545,12 +572,12 @@ const WeeklySheetView: React.FC = () => {
         </p>
         <div className="flex items-center gap-3">
           <button
-            type="button"
             onClick={() => {
               setRows([newRow()]);
               setSelectedShopId("");
+              localStorage.removeItem(LOCAL_STORAGE_KEY);
             }}
-            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
+            className="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-transparent"
           >
             <Trash2 size={13} /> Reset
           </button>

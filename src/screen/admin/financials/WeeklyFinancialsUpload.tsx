@@ -81,7 +81,9 @@ const WeeklyFinancialsUpload: React.FC = () => {
     shopsApi
       .list()
       .then((res: any) => {
-        const loadedShops = res.data.data.shops || res.data.data.data || [];
+        const loadedShops = (res.data.data.shops || res.data.data.data || []).filter(
+          (s: any) => !s.is_all_shops && s.is_active !== false
+        );
         setShops(loadedShops);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));

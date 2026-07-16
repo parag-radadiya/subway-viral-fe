@@ -121,19 +121,26 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
     ): ShiftCell[] =>
       rotas.map((r: any) => {
         const shiftDate = new Date(r.shift_date || r.shift_start);
-        const base = new Date(baseWeekStart);
-        const diffMs =
-          shiftDate.setHours(0, 0, 0, 0) - base.setHours(0, 0, 0, 0);
-        // const dayIndex = Math.round(diffMs / 86400000);
+        // Use UTC midnight to avoid local timezone offset shifting the date
+        const shiftMidnightUTC = Date.UTC(
+          shiftDate.getUTCFullYear(),
+          shiftDate.getUTCMonth(),
+          shiftDate.getUTCDate(),
+        );
+        const baseMidnightUTC = Date.UTC(
+          baseWeekStart.getUTCFullYear(),
+          baseWeekStart.getUTCMonth(),
+          baseWeekStart.getUTCDate(),
+        );
         const dayIndex = Math.max(
           0,
-          Math.min(6, Math.round(diffMs / 86400000)),
+          Math.min(6, Math.round((shiftMidnightUTC - baseMidnightUTC) / 86400000)),
         );
         return {
           _id: r._id,
           user_id:
             typeof r.user_id === "string" ? r.user_id : (r.user_id?._id ?? ""),
-          dayIndex: Math.max(0, Math.min(6, dayIndex)),
+          dayIndex,
           shift_start: r.shift_start,
           shift_end: r.shift_end,
           note: r.note || "",
@@ -154,21 +161,33 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         const prevRotas: any[] = Object.values(
           prevRes.data?.data?.days ?? {},
         ).flat();
+        console.log(
+          "🚀 - BulkWeeklyRotaForm - prevRotas:",
+          currentRotas,
+          prevRotas,
+        );
 
         const currentShifts = parseShifts(currentRotas, weekStart, false);
-
         // For previous-week shifts: remap their shift times to the CURRENT week
         // so they appear on the same day columns. Also strip _id so they're treated
         // as new entries (copyable template) unless they already exist this week.
         const prevShifts: ShiftCell[] = prevRotas
           .map((r: any) => {
             const shiftDate = new Date(r.shift_date || r.shift_start);
-            const base = new Date(prevWeekDate);
-            const diffMs =
-              shiftDate.setHours(0, 0, 0, 0) - base.setHours(0, 0, 0, 0);
+            // Use UTC midnight to avoid local timezone offset shifting the date
+            const shiftMidnightUTC = Date.UTC(
+              shiftDate.getUTCFullYear(),
+              shiftDate.getUTCMonth(),
+              shiftDate.getUTCDate(),
+            );
+            const baseMidnightUTC = Date.UTC(
+              prevWeekDate.getUTCFullYear(),
+              prevWeekDate.getUTCMonth(),
+              prevWeekDate.getUTCDate(),
+            );
             const dayIndex = Math.max(
               0,
-              Math.min(6, Math.round(diffMs / 86400000)),
+              Math.min(6, Math.round((shiftMidnightUTC - baseMidnightUTC) / 86400000)),
             );
             const userId =
               typeof r.user_id === "string"
