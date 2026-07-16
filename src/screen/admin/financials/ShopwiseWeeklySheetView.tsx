@@ -85,13 +85,30 @@ const TH = ({
 // "input" → editable (green tinted)
 // "formula" → read-only (grey tinted)
 
+const LOCAL_STORAGE_KEY = "financials_shopwise_weekly_draft";
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 const ShopwiseWeeklySheetView = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
-  const [weeks, setWeeks] = useState<WeekCard[]>([newWeekCard()]);
+  
+  const [weeks, setWeeks] = useState<WeekCard[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const p = JSON.parse(saved).weeks;
+        if (p && p.length > 0) return p;
+      }
+    } catch {}
+    return [newWeekCard()];
+  });
+  
   const [submitting, setSubmitting] = useState(false);
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ weeks }));
+  }, [weeks]);
 
   useEffect(() => {
     shopsApi
@@ -272,6 +289,7 @@ const ShopwiseWeeklySheetView = () => {
         toast.success(data.message);
         setWeeks([newWeekCard()]);
         setActiveWeekIdx(0);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
       })
       .catch((err: any) => toast.error(err.message || "Failed to import data"))
       .finally(() => setSubmitting(false));
@@ -1007,6 +1025,7 @@ const ShopwiseWeeklySheetView = () => {
               onClick={() => {
                 setWeeks([newWeekCard()]);
                 setActiveWeekIdx(0);
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
               }}
               className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
             >
