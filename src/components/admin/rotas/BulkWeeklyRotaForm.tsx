@@ -1,4 +1,4 @@
-import { format, startOfISOWeek } from "date-fns";
+import { differenceInCalendarDays, format, startOfISOWeek } from "date-fns";
 
 import {
   AlertTriangle,
@@ -120,22 +120,22 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
       isPreviousWeek: boolean,
     ): ShiftCell[] =>
       rotas.map((r: any) => {
-        const shiftDate = new Date(r.shift_date || r.shift_start);
-        // Use UTC midnight to avoid local timezone offset shifting the date
-        const shiftMidnightUTC = Date.UTC(
-          shiftDate.getUTCFullYear(),
-          shiftDate.getUTCMonth(),
-          shiftDate.getUTCDate(),
+        // Use new Date() and LOCAL getters so the calendar date is always
+        // correct for the user's timezone regardless of ISO string format.
+        const raw = new Date(r.shift_date || r.shift_start);
+        // Normalise to local midnight so differenceInCalendarDays is exact.
+        const shiftDay = new Date(
+          raw.getFullYear(),
+          raw.getMonth(),
+          raw.getDate(),
         );
-        const baseMidnightUTC = Date.UTC(
-          baseWeekStart.getUTCFullYear(),
-          baseWeekStart.getUTCMonth(),
-          baseWeekStart.getUTCDate(),
-        );
+
+        // dayIndex: 0 = Monday … 6 = Sunday (matches the UI Mon–Sun grid)
         const dayIndex = Math.max(
           0,
-          Math.min(6, Math.round((shiftMidnightUTC - baseMidnightUTC) / 86400000)),
+          Math.min(6, differenceInCalendarDays(shiftDay, baseWeekStart)),
         );
+
         return {
           _id: r._id,
           user_id:
@@ -173,21 +173,18 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         // as new entries (copyable template) unless they already exist this week.
         const prevShifts: ShiftCell[] = prevRotas
           .map((r: any) => {
-            const shiftDate = new Date(r.shift_date || r.shift_start);
-            // Use UTC midnight to avoid local timezone offset shifting the date
-            const shiftMidnightUTC = Date.UTC(
-              shiftDate.getUTCFullYear(),
-              shiftDate.getUTCMonth(),
-              shiftDate.getUTCDate(),
+            // Same approach: Date object + local getters → local midnight
+            const raw = new Date(r.shift_date || r.shift_start);
+            const shiftDay = new Date(
+              raw.getFullYear(),
+              raw.getMonth(),
+              raw.getDate(),
             );
-            const baseMidnightUTC = Date.UTC(
-              prevWeekDate.getUTCFullYear(),
-              prevWeekDate.getUTCMonth(),
-              prevWeekDate.getUTCDate(),
-            );
+
+            // dayIndex relative to the PREVIOUS week's Monday
             const dayIndex = Math.max(
               0,
-              Math.min(6, Math.round((shiftMidnightUTC - baseMidnightUTC) / 86400000)),
+              Math.min(6, differenceInCalendarDays(shiftDay, prevWeekDate)),
             );
             const userId =
               typeof r.user_id === "string"

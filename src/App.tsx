@@ -122,113 +122,129 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const ProtectedRouter = () => {
+  const role = useAppSelector((s) => s.auth.user?.role?.role_name || "");
+
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route
+        path={ROUTES.LOGIN}
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Protected routes */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
+        }
+      >
+        {/* Root Flow */}
+        <Route
+          element={
+            <RootLayout>
+              <Outlet />
+            </RootLayout>
+          }
+        >
+          {RootRoutes}
+        </Route>
+
+        {/* Admin Flow */}
+        {role === "Admin" && (
+          <Route
+            element={
+              <AdminLayout>
+                <Outlet />
+              </AdminLayout>
+            }
+          >
+            {AdminRoutes}
+          </Route>
+        )}
+
+        {/* Manager Flow */}
+        {role === "Manager" && (
+          <Route
+            element={
+              <ManagerLayout>
+                <Outlet />
+              </ManagerLayout>
+            }
+          >
+            {ManagerRoutes}
+          </Route>
+        )}
+
+        {/* Sub-Manager Flow */}
+        {role === "Sub-Manager" && (
+          <Route
+            element={
+              <SubManagerLayout>
+                <Outlet />
+              </SubManagerLayout>
+            }
+          >
+            {SubManagerRoutes}
+          </Route>
+        )}
+
+        {/* Staff Flow */}
+        {role === "Staff" && (
+          <Route
+            element={
+              <StaffLayout>
+                <Outlet />
+              </StaffLayout>
+            }
+          >
+            {StaffRoutes}
+          </Route>
+        )}
+      </Route>
+
+      {/* Default redirect based on role */}
+      <Route path="/" element={<RoleRedirector />} />
+
+      {/* 404 fallback */}
+      <Route
+        path="*"
+        element={
+          <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
+            <div className="text-center">
+              <p className="text-7xl font-black text-primary-200">404</p>
+              <p className="text-lg font-semibold text-primary-800 mt-2">
+                Page not found
+              </p>
+              <p className="text-slate-400 text-sm mt-1">
+                The page you are looking for doesn&apos;t exist.
+              </p>
+              <button
+                onClick={() => window.history.back()}
+                className="mt-4 inline-flex btn-primary text-sm px-5 py-2.5 rounded-lg"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        }
+      />
+    </Routes>
+  );
+};
+
 const App = () => {
   return (
     <Provider store={store}>
       <BrowserRouter>
         <AppInitializer>
-          <Routes>
-            {/* Public routes */}
-            <Route
-              path={ROUTES.LOGIN}
-              element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              }
-            />
-
-            {/* Protected routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <Outlet />
-                </ProtectedRoute>
-              }
-            >
-              {/* Root Flow */}
-              <Route
-                element={
-                  <RootLayout>
-                    <Outlet />
-                  </RootLayout>
-                }
-              >
-                {RootRoutes}
-              </Route>
-
-              {/* Admin Flow */}
-              <Route
-                element={
-                  <AdminLayout>
-                    <Outlet />
-                  </AdminLayout>
-                }
-              >
-                {AdminRoutes}
-              </Route>
-
-              {/* Manager Flow */}
-              <Route
-                element={
-                  <ManagerLayout>
-                    <Outlet />
-                  </ManagerLayout>
-                }
-              >
-                {ManagerRoutes}
-              </Route>
-
-              {/* Sub-Manager Flow */}
-              <Route
-                element={
-                  <SubManagerLayout>
-                    <Outlet />
-                  </SubManagerLayout>
-                }
-              >
-                {SubManagerRoutes}
-              </Route>
-
-              {/* Staff Flow */}
-              <Route
-                element={
-                  <StaffLayout>
-                    <Outlet />
-                  </StaffLayout>
-                }
-              >
-                {StaffRoutes}
-              </Route>
-            </Route>
-
-            {/* Default redirect based on role */}
-            <Route path="/" element={<RoleRedirector />} />
-
-            {/* 404 fallback */}
-            <Route
-              path="*"
-              element={
-                <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
-                  <div className="text-center">
-                    <p className="text-7xl font-black text-primary-200">404</p>
-                    <p className="text-lg font-semibold text-primary-800 mt-2">
-                      Page not found
-                    </p>
-                    <p className="text-slate-400 text-sm mt-1">
-                      The page you are looking for doesn&apos;t exist.
-                    </p>
-                    <button
-                      onClick={() => window.history.back()}
-                      className="mt-4 inline-flex btn-primary text-sm px-5 py-2.5 rounded-lg"
-                    >
-                      Go Back
-                    </button>
-                  </div>
-                </div>
-              }
-            />
-          </Routes>
+          <ProtectedRouter />
           <ToastContainer
             position="top-right"
             autoClose={3000}

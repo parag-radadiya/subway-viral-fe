@@ -44,6 +44,7 @@ const RotaListContainer = ({
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   const navigate = useNavigate();
 
@@ -71,19 +72,31 @@ const RotaListContainer = ({
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchInitialData = () => {
-      Promise.all([shopsApi.list(), usersApi.list()])
-        .then(([shopsRes, usersRes]) => {
-          setShops(shopsRes.data.data.shops || []);
-          setUsers(usersRes.data.data?.users || usersRes.data?.users || []);
-        })
-        .catch((err) => {
-          console.error(err);
-          toast.error(err.message || "Failed to load filter data.");
-        });
-    };
-    fetchInitialData();
+    shopsApi
+      .list()
+      .then((res) => setShops(res.data.data.shops || []))
+      .catch((err) => {
+        console.error(err);
+        toast.error(err.message || "Failed to load shops.");
+      });
   }, []);
+
+  useEffect(() => {
+    if (activeFilters.shop_id === "all") {
+      setUsers([]);
+      return;
+    }
+    setUsers([]);
+    setLoadingUsers(true);
+    usersApi
+      .getStaffByShop(activeFilters.shop_id, { page: "1", limit: "100" })
+      .then((res) => {
+        const data = res.data.data;
+        setUsers(data.users || []);
+      })
+      .catch(() => toast.error("Failed to load staff assigned to this shop"))
+      .finally(() => setLoadingUsers(false));
+  }, [activeFilters.shop_id]);
 
   useEffect(() => {
     if (activeTab === "all") {

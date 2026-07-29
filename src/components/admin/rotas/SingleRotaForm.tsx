@@ -3,6 +3,7 @@ import { Save } from "lucide-react";
 import Input from "../../common/Input";
 import Select from "../../common/Select";
 import Button from "../../common/Button";
+import TimePicker24 from "../../common/TimePicker24";
 
 interface SingleRotaFormProps {
   formData: {
@@ -91,21 +92,15 @@ const SingleRotaForm: React.FC<SingleRotaFormProps> = ({
             setFormData({ ...formData, shiftDate: e.target.value })
           }
         />
-        <Input
-          type="time"
+        <TimePicker24
           label="Start Time *"
           value={formData.startTime}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, startTime: e.target.value })
-          }
+          onChange={(val) => setFormData({ ...formData, startTime: val })}
         />
-        <Input
-          type="time"
+        <TimePicker24
           label="End Time *"
           value={formData.endTime}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, endTime: e.target.value })
-          }
+          onChange={(val) => setFormData({ ...formData, endTime: val })}
         />
       </div>
 

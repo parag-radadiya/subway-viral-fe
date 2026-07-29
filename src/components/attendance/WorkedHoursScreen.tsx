@@ -23,6 +23,7 @@ import Input from "../common/Input";
 import { StatCard } from "../common/Card";
 import Table from "../common/Table";
 import Dialog from "../common/Dialog";
+import { format } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,8 @@ interface Shift {
   shop_id: { _id: string; name: string };
   rota_id?: {
     shift_date?: string;
+    shift_end?: string;
+    shift_start: string;
     start_time?: string;
     end_time?: string;
     note?: string;
@@ -107,11 +110,7 @@ const fmtTime = (iso: string | null): string => {
 
 const fmtShiftDate = (dateStr: string): string => {
   if (!dateStr) return "—";
-  return new Date(dateStr + "T00:00:00").toLocaleDateString([], {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  return format(dateStr, "dd MMM yyyy");
 };
 
 // ─── Staff Detail Dialog ──────────────────────────────────────────────────────
@@ -306,9 +305,16 @@ const StaffDetailDialog = ({
                   header: "Scheduled",
                   render: (s) => (
                     <span className="text-xs font-medium text-slate-500 whitespace-nowrap">
-                      {s.rota_id?.start_time && s.rota_id?.end_time
+                      {/* {s.rota_id?.start_time && s.rota_id?.end_time
                         ? `${s.rota_id.start_time} – ${s.rota_id.end_time}`
-                        : "—"}
+                        : "—"} */}
+                      {s.rota_id?.shift_start
+                        ? format(new Date(s.rota_id?.shift_start), "HH:mm")
+                        : ""}{" "}
+                      -{" "}
+                      {s.rota_id?.shift_end
+                        ? format(new Date(s.rota_id.shift_end), "HH:mm")
+                        : "TBA"}
                     </span>
                   ),
                 },
