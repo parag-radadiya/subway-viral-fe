@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:vercel": "tsc && vite build --emptyOutDir && exit 0",
-    "build:debug": "tsc && vite build --debug",
+    "dev": "node init && vite",
+    "build": "node init && vite build",
+    "build:vercel": "node init && tsc && vite build --emptyOutDir && exit 0",
+    "build:debug": "node init && tsc && vite build --debug",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
