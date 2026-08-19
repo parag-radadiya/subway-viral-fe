@@ -74,7 +74,7 @@ const UserForm = () => {
               phone_code: userData.phone_code,
               phone_num: userData.phone_num,
               role_id: userData.role_id._id,
-              active_shop_id: userData.shop_id._id,
+              active_shop_id: userData.shop_id?._id,
               assigned_shop_ids: userData.assigned_shop_ids,
             });
           }
