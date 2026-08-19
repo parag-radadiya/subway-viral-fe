@@ -7,6 +7,7 @@ export const ROUTES = {
   // Role-based root paths
   ROOT: {
     DASHBOARD: "/root/dashboard",
+    CONFIGURATION: "/root/configuration",
   },
   ADMIN: {
     DASHBOARD: "/admin/dashboard",

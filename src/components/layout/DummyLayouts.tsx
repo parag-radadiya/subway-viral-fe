@@ -7,6 +7,7 @@ import {
   UserCheck,
   Package,
   Navigation,
+  Settings,
 } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
@@ -19,7 +20,11 @@ export const RootLayout = ({ children }: { children: ReactNode }) => (
         path: ROUTES.ROOT.DASHBOARD,
         icon: LayoutDashboard,
       },
-      { label: "Rotas", path: ROUTES.ADMIN.ROTAS.LIST, icon: Calendar },
+      {
+        label: "Configuration",
+        path: ROUTES.ROOT.CONFIGURATION,
+        icon: Settings,
+      },
     ]}
   >
     {children}
