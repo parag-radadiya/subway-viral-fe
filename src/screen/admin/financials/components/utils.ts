@@ -39,6 +39,7 @@ export const newWeekCard = (): WeekCard => ({
   id: crypto.randomUUID(),
   startDate: "",
   endDate: "",
+  fetchedWeekData: false,
   shops: [newShopEntry()],
 });
 

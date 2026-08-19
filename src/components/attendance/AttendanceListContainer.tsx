@@ -4,6 +4,7 @@ import {
   MapPin,
   Loader2,
   Clock,
+  Edit,
   Eye,
   LogIn,
   LogOut,
@@ -12,11 +13,13 @@ import {
   Fingerprint,
   AlertCircle,
   CheckCircle2,
+  History,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Table from "../common/Table";
 import Select from "../common/Select";
 import Button from "../common/Button";
+import Input from "../common/Input";
 import WorkedHoursScreen from "./WorkedHoursScreen";
 import Dialog from "../common/Dialog";
 import { format } from "date-fns";
@@ -80,6 +83,12 @@ interface AttendanceRecord {
   total_break_hours: number;
   breaks_count: number;
   is_on_break: boolean;
+  // manager correction
+  corrected_by: { _id: string; name: string; email: string } | null;
+  corrected_at: string | null;
+  correction_note: string | null;
+  original_punch_in: string | null;
+  original_punch_out: string | null;
   // legacy
   status?: string;
 }
@@ -104,6 +113,12 @@ const fmtDate = (iso: string | null): string => {
 const fmtDateTime = (iso: string | null): string => {
   if (!iso) return "—";
   return format(new Date(iso), "dd MMM yyyy, HH:mm");
+};
+
+// Local-time value for a <input type="datetime-local" />
+const toDateTimeLocal = (iso: string | null): string => {
+  if (!iso) return "";
+  return format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
 };
 
 const calcDuration = (start: string, end: string | null): string => {
@@ -419,6 +434,38 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
           </div>
         )}
 
+        {/* ── Manager Correction (if any) ── */}
+        {record.corrected_by && (
+          <div className="bg-white rounded-xl border border-slate-100 p-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
+              <History size={11} /> Manager Correction
+            </p>
+            <InfoRow
+              label="Corrected By"
+              value={record.corrected_by.name}
+            />
+            <InfoRow
+              label="Corrected At"
+              value={fmtDateTime(record.corrected_at)}
+            />
+            {record.correction_note && (
+              <InfoRow label="Note" value={record.correction_note} />
+            )}
+            {record.original_punch_in && (
+              <InfoRow
+                label="Original Punch In"
+                value={fmtDateTime(record.original_punch_in)}
+              />
+            )}
+            {record.original_punch_out && (
+              <InfoRow
+                label="Original Punch Out"
+                value={fmtDateTime(record.original_punch_out)}
+              />
+            )}
+          </div>
+        )}
+
         {/* ── Metadata ── */}
         <div className="bg-slate-50 rounded-xl border border-slate-100 p-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
@@ -447,6 +494,145 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
   );
 };
 
+// ─── Correct Attendance Dialog ────────────────────────────────────────────────
+
+interface CorrectAttendanceDialogProps {
+  record: AttendanceRecord | null;
+  onClose: () => void;
+  onCorrected: (updated: AttendanceRecord) => void;
+}
+
+const CorrectAttendanceDialog = ({
+  record,
+  onClose,
+  onCorrected,
+}: CorrectAttendanceDialogProps) => {
+  const [punchIn, setPunchIn] = useState("");
+  const [punchOut, setPunchOut] = useState("");
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (record) {
+      setPunchIn(toDateTimeLocal(record.punch_in));
+      setPunchOut(toDateTimeLocal(record.punch_out));
+      setNote("");
+      setError(null);
+    }
+  }, [record]);
+
+  if (!record) return null;
+
+  const handleSubmit = () => {
+    if (!punchIn && !punchOut) {
+      setError("Provide at least a punch in or punch out time.");
+      return;
+    }
+    setError(null);
+    setSaving(true);
+    attendanceApi
+      .correct(record._id, {
+        punch_in: punchIn ? new Date(punchIn).toISOString() : undefined,
+        punch_out: punchOut ? new Date(punchOut).toISOString() : undefined,
+        note: note.trim() || undefined,
+      })
+      .then((res) => {
+        toast.success(
+          res.data?.message || "Attendance times corrected successfully",
+        );
+        onCorrected(res.data.data.attendance);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to correct attendance record.");
+      })
+      .finally(() => setSaving(false));
+  };
+
+  return (
+    <Dialog
+      isOpen={!!record}
+      onClose={onClose}
+      title="Correct Clock-In / Clock-Out"
+      maxWidth="md"
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 text-[10px] font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest rounded-xl hover:bg-slate-200/50 transition-colors"
+            disabled={saving}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/30 transition-all disabled:opacity-50"
+            disabled={saving}
+          >
+            {saving ? (
+              <Loader2 className="animate-spin inline" size={16} />
+            ) : (
+              "Save Correction"
+            )}
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="w-9 h-9 rounded-lg bg-accent-100 text-accent-700 flex items-center justify-center font-black text-xs shrink-0">
+            {(record.user_id?.name || "U").slice(0, 2).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-primary-800 truncate">
+              {record.user_id?.name || "Unknown"}
+            </p>
+            <p className="text-[11px] text-slate-400 truncate">
+              {record.shop_id?.name || "Unknown Shop"} &middot;{" "}
+              {fmtDate(record.punch_in)}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            type="datetime-local"
+            label="Punch In"
+            value={punchIn}
+            onChange={(e) => setPunchIn(e.target.value)}
+          />
+          <Input
+            type="datetime-local"
+            label="Punch Out"
+            value={punchOut}
+            onChange={(e) => setPunchOut(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 mb-1">
+            Note <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <textarea
+            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary-300 transition"
+            rows={2}
+            placeholder="Reason for the correction…"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            maxLength={300}
+          />
+        </div>
+
+        {error && (
+          <p className="text-xs text-danger-500 flex items-center gap-1.5">
+            <AlertCircle size={13} /> {error}
+          </p>
+        )}
+      </div>
+    </Dialog>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const AttendanceListContainer = ({
@@ -462,6 +648,8 @@ const AttendanceListContainer = ({
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(
     null,
   );
+  const [correctingRecord, setCorrectingRecord] =
+    useState<AttendanceRecord | null>(null);
 
   // Filter state
   const [activeFilters, setActiveFilters] = useState({
@@ -530,6 +718,13 @@ const AttendanceListContainer = ({
       })
       .finally(() => setLoading(false));
   }, [activeFilters, page, limit]);
+
+  const handleCorrected = (updated: AttendanceRecord) => {
+    setRecords((prev) =>
+      prev.map((r) => (r._id === updated._id ? { ...r, ...updated } : r)),
+    );
+    setCorrectingRecord(null);
+  };
 
   const hasActiveFilters =
     activeFilters.shop_id !== "all" || activeFilters.user_id !== "all";
@@ -746,13 +941,22 @@ const AttendanceListContainer = ({
                 header: "Action",
                 align: "center",
                 render: (record) => (
-                  <button
-                    onClick={() => setSelectedRecord(record)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 active:scale-95 transition-all"
-                  >
-                    <Eye size={12} />
-                    View
-                  </button>
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setSelectedRecord(record)}
+                      className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => setCorrectingRecord(record)}
+                      className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
+                      title="Correct Clock-In/Out"
+                    >
+                      <Edit size={14} />
+                    </button>
+                  </div>
                 ),
               },
             ]}
@@ -778,6 +982,13 @@ const AttendanceListContainer = ({
       <RecordDetailDialog
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}
+      />
+
+      {/* ── Correct Attendance Dialog ── */}
+      <CorrectAttendanceDialog
+        record={correctingRecord}
+        onClose={() => setCorrectingRecord(null)}
+        onCorrected={handleCorrected}
       />
     </div>
   );
