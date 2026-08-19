@@ -54,6 +54,7 @@ const UserWeeklyTotal = React.memo(
       });
       const hours = Math.floor(totalMins / 60);
       const mins = Math.round(totalMins % 60);
+
       return hours > 0 || mins > 0
         ? `${hours}h ${mins > 0 ? `${mins}m` : ""}`.trim()
         : "---";
@@ -72,7 +73,6 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
   loadingUser,
 }) => {
   const [bulkShifts, setBulkShifts] = useState<ShiftCell[]>([]);
-  console.log("🚀 - BulkWeeklyRotaForm - bulkShifts:", bulkShifts);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [publishing, setPublishing] = useState(false);
@@ -161,12 +161,6 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         const prevRotas: any[] = Object.values(
           prevRes.data?.data?.days ?? {},
         ).flat();
-        console.log(
-          "🚀 - BulkWeeklyRotaForm - prevRotas:",
-          currentRotas,
-          prevRotas,
-        );
-
         const currentShifts = parseShifts(currentRotas, weekStart, false);
         // For previous-week shifts: remap their shift times to the CURRENT week
         // so they appear on the same day columns. Also strip _id so they're treated
@@ -174,17 +168,36 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
         const prevShifts: ShiftCell[] = prevRotas
           .map((r: any) => {
             // Same approach: Date object + local getters → local midnight
-            const raw = new Date(r.shift_date || r.shift_start);
-            const shiftDay = new Date(
-              raw.getFullYear(),
-              raw.getMonth(),
-              raw.getDate(),
-            );
+            const start_raw = new Date(r.shift_start);
+            const end_raw = new Date(r.shift_end);
 
-            // dayIndex relative to the PREVIOUS week's Monday
-            const dayIndex = Math.max(
+            const startIndex = Math.max(
               0,
-              Math.min(6, differenceInCalendarDays(shiftDay, prevWeekDate)),
+              Math.min(
+                6,
+                differenceInCalendarDays(
+                  new Date(
+                    start_raw.getFullYear(),
+                    start_raw.getMonth(),
+                    start_raw.getDate(),
+                  ),
+                  prevWeekDate,
+                ),
+              ),
+            );
+            const endIndex = Math.max(
+              0,
+              Math.min(
+                6,
+                differenceInCalendarDays(
+                  new Date(
+                    end_raw.getFullYear(),
+                    end_raw.getMonth(),
+                    end_raw.getDate(),
+                  ),
+                  prevWeekDate,
+                ),
+              ),
             );
             const userId =
               typeof r.user_id === "string"
@@ -207,9 +220,9 @@ const BulkWeeklyRotaForm: React.FC<BulkWeeklyRotaFormProps> = ({
 
             return {
               user_id: userId,
-              dayIndex,
-              shift_start: remapToCurrentWeek(r.shift_start, dayIndex),
-              shift_end: remapToCurrentWeek(r.shift_end, dayIndex),
+              dayIndex: startIndex,
+              shift_start: remapToCurrentWeek(r.shift_start, startIndex),
+              shift_end: remapToCurrentWeek(r.shift_end, endIndex),
               note: r.note || "",
               isPreviousWeek: true,
               isNew: true, // no _id → will be included in publish

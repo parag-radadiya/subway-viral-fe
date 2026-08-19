@@ -44,7 +44,7 @@ const Dialog = ({
   };
 
   return (
-    <div className="fixed inset-0 min-h-screen z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 min-h-screen z-[110] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
         onClick={onClose}

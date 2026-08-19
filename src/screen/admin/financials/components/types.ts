@@ -42,5 +42,6 @@ export interface WeekCard {
   id: string;
   startDate: string;
   endDate: string;
+  fetchedWeekData: boolean;
   shops: ShopEntry[];
 }
