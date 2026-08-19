@@ -42,7 +42,7 @@ export const usersApi = {
   update: (id: string, data: Record<string, unknown>) =>
     api.put(`/users/${id}`, data),
 
-  deactivate: (id: string) => api.delete(`/users/${id}`),
+  remove: (id: string) => api.delete(`/users/${id}`),
 
   assignedShopsStaffSummary: () =>
     api.get("/users/assigned-shops/staff-summary"),
@@ -199,6 +199,12 @@ export const attendanceApi = {
   }) => api.post("/attendance/punch-in", data),
 
   punchOut: (id: string) => api.put(`/attendance/${id}/punch-out`, {}),
+
+  /** PUT /attendance/:id/correct — manager correction of punch_in/punch_out (can_correct_attendance) */
+  correct: (
+    id: string,
+    data: { punch_in?: string; punch_out?: string; note?: string },
+  ) => api.put(`/attendance/${id}/correct`, data),
 
   manualPunchIn: (data: Record<string, unknown>) =>
     api.post("/attendance/manual-punch-in", data),
@@ -408,4 +414,30 @@ export const notificationsApi = {
 
   /** DELETE /notifications/:id — soft-delete / archive */
   archive: (id: string) => api.delete(`/notifications/${id}`),
+};
+
+// ─── Sandbox API (Root only) ───────────────────────────────────────────────────
+
+export interface SandboxCloneResult {
+  source_database: string;
+  sandbox_database: string;
+  same_cluster: boolean;
+  collections_cloned: number;
+  total_documents: number;
+  collections: { collection: string; documents: number; indexes: number }[];
+  started_at: string;
+  finished_at: string;
+  duration_ms: number;
+}
+
+export const sandboxApi = {
+  /** POST /sandbox/clone — clones production DB into sandbox (Root only) */
+  clone: async () => {
+    const response = await api.post<ApiResponse<SandboxCloneResult>>(
+      "/sandbox/clone",
+      { confirm: true },
+      { timeout: 60000 },
+    );
+    return response.data.data;
+  },
 };

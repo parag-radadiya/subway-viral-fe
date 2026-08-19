@@ -7,7 +7,7 @@ import {
 } from "date-fns";
 import { CheckCircle2, Plus, RefreshCw, Trash2 } from "lucide-react";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
@@ -85,30 +85,82 @@ const TH = ({
 // "input" → editable (green tinted)
 // "formula" → read-only (grey tinted)
 
-const LOCAL_STORAGE_KEY = "financials_shopwise_weekly_draft";
-
 // ─── Main Component ────────────────────────────────────────────────────────────
 const ShopwiseWeeklySheetView = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
-  
-  const [weeks, setWeeks] = useState<WeekCard[]>(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const p = JSON.parse(saved).weeks;
-        if (p && p.length > 0) return p;
-      }
-    } catch {}
-    return [newWeekCard()];
-  });
-  
+
+  const [weeks, setWeeks] = useState<WeekCard[]>(() => [newWeekCard()]);
+
   const [submitting, setSubmitting] = useState(false);
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
 
+  const activeWeek = weeks[activeWeekIdx];
+
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ weeks }));
-  }, [weeks]);
+    if (
+      !activeWeek.startDate ||
+      !activeWeek.endDate ||
+      activeWeek.fetchedWeekData
+    )
+      return;
+    const raw: Record<string, string> = {
+      view: "reconciled",
+      report_type: "weekly_financial",
+      page: String(1),
+      include_weekly_totals: `true`,
+      week_number: String(getISOWeek(new Date(activeWeek.startDate))),
+      limit: String(100),
+      pagination_basis: "week_number",
+      year: String(new Date(activeWeek.startDate).getFullYear()),
+    };
+
+    financialsApi.list(new URLSearchParams(raw).toString()).then(({ data }) => {
+      const shopWiseData = data?.data?.rows?.reduce((obj: any, value: any) => {
+        const itm = value?.metrics;
+        obj[value.shopId] = {
+          grossSales: itm["GROSS SALES"],
+          vat: itm["VAT"],
+          customerCount: itm["Customer Count"],
+          justEatSale: itm["JustEat Sale"],
+          justCharge: itm["JUST Charge"],
+          justEatVat: itm["JustEat 20% Vat"],
+          justEatBankReceived: itm["JustEat Amount Received in Bank"],
+          justEatVariance: itm["JustEat Variance from Bank"],
+          uberEatSale: itm["UberEat Sale"],
+          uberEatCharge: itm["UBEREAT Charge"],
+          uberEatVat: itm["UBEREAT 20% Vat"],
+          uberEatBankReceived: itm["UBEREAT Amount Received in Bank"],
+          uberAdvertise: itm["Ubereats Advertise"],
+          uberDiscount: itm["Uber discount %"],
+          deliverooSale: itm["Deliveroo sale"],
+          deliverooCharge: itm["DELIVEROO Charge"],
+          deliverooVat: itm["DELIVEROO 20% Vat"],
+          deliverooBankReceived: itm["DELIVEROO Amount Received in Bank"],
+          deliverooVariance: itm["Variance from Bank"],
+          labourHours: itm["LABOUR HOURS"],
+          labourRate: itm["LABOUR RATE"],
+          bidFood: itm["BID FOOD "],
+          instoreFoodCost: itm["Instore Food Cost"],
+          instoreLabourCost: itm["Instore Labour Cost"],
+          bidfoodPreviousWeek: itm["Previous Week"],
+        };
+        return obj;
+      }, {});
+      console.log("🚀 - ShopwiseWeeklySheetView - data:", shopWiseData);
+
+      setWeeks((prev) => {
+        prev[activeWeekIdx].shops.map((shop) => {
+          if (shopWiseData?.[shop.shopId]) {
+            shop.metrics = shopWiseData?.[shop.shopId];
+          }
+          return shop;
+        });
+        console.log("🚀 - ShopwiseWeeklySheetView - prev:", prev);
+        return structuredClone(prev);
+      });
+    });
+  }, [activeWeek.startDate, activeWeek.endDate, activeWeekIdx]);
 
   useEffect(() => {
     shopsApi
@@ -116,7 +168,7 @@ const ShopwiseWeeklySheetView = () => {
       .then((res: any) => {
         const data = res.data.data;
         const loaded: Shop[] = (data.shops || data.data || []).filter(
-          (s: any) => !s.is_all_shops && s.is_active !== false
+          (s: any) => !s.is_all_shops && s.is_active !== false,
         );
         setShops(loaded);
         setWeeks((prev) => {
@@ -289,13 +341,10 @@ const ShopwiseWeeklySheetView = () => {
         toast.success(data.message);
         setWeeks([newWeekCard()]);
         setActiveWeekIdx(0);
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
       })
       .catch((err: any) => toast.error(err.message || "Failed to import data"))
       .finally(() => setSubmitting(false));
   };
-
-  const activeWeek = weeks[activeWeekIdx];
 
   const gc = "bg-green-50/50"; // input cell tint
   const fc = "bg-slate-50/70"; // formula cell tint
@@ -1025,7 +1074,6 @@ const ShopwiseWeeklySheetView = () => {
               onClick={() => {
                 setWeeks([newWeekCard()]);
                 setActiveWeekIdx(0);
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
               }}
               className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
             >
