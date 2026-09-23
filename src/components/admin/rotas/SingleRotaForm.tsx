@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Save } from "lucide-react";
 import Input from "../../common/Input";
 import Select from "../../common/Select";
 import Button from "../../common/Button";
-import TimePicker24 from "../../common/TimePicker24";
 
 interface SingleRotaFormProps {
   formData: {
@@ -33,9 +32,48 @@ const SingleRotaForm: React.FC<SingleRotaFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (field: string) =>
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!editItemId && !formData.shop_id)
+      newErrors.shop_id = "Shop is required";
+    if (!editItemId && !formData.user_id)
+      newErrors.user_id = "Employee is required";
+    if (!formData.startTime)
+      newErrors.startTime = "Start time is required";
+    if (!formData.endTime)
+      newErrors.endTime = "End time is required";
+
+    if (formData.startTime && formData.endTime) {
+      const startMs = new Date(formData.startTime).getTime();
+      const endMs = new Date(formData.endTime).getTime();
+      const diffMs = endMs - startMs;
+      if (diffMs <= 0)
+        newErrors.endTime = "End time must be after start time";
+      else if (diffMs > 24 * 60 * 60 * 1000)
+        newErrors.endTime = "End time must be within 24 hours of start time";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    if (!validate()) {
+      e.preventDefault();
+      return;
+    }
+    onSubmit(e);
+  };
+
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="bg-white rounded-2xl border border-slate-200 shadow-card p-8 space-y-5"
     >
       {!editItemId && (
@@ -43,9 +81,11 @@ const SingleRotaForm: React.FC<SingleRotaFormProps> = ({
           <Select
             label="Shop *"
             value={formData.shop_id}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFormData({ ...formData, shop_id: e.target.value })
-            }
+            error={errors.shop_id}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setFormData({ ...formData, shop_id: e.target.value });
+              clearError("shop_id");
+            }}
           >
             <option value="" disabled>
               Select Shop
@@ -60,9 +100,11 @@ const SingleRotaForm: React.FC<SingleRotaFormProps> = ({
           <Select
             label="Employee *"
             value={formData.user_id}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFormData({ ...formData, user_id: e.target.value })
-            }
+            error={errors.user_id}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setFormData({ ...formData, user_id: e.target.value });
+              clearError("user_id");
+            }}
           >
             <option value="" disabled>
               Select Employee
@@ -83,24 +125,27 @@ const SingleRotaForm: React.FC<SingleRotaFormProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
-          type="date"
-          label="Shift Date *"
-          value={formData.shiftDate}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, shiftDate: e.target.value })
-          }
-        />
-        <TimePicker24
+          type="datetime-local"
           label="Start Time *"
           value={formData.startTime}
-          onChange={(val) => setFormData({ ...formData, startTime: val })}
+          error={errors.startTime}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setFormData({ ...formData, startTime: e.target.value });
+            clearError("startTime");
+            clearError("endTime");
+          }}
         />
-        <TimePicker24
+        <Input
+          type="datetime-local"
           label="End Time *"
           value={formData.endTime}
-          onChange={(val) => setFormData({ ...formData, endTime: val })}
+          error={errors.endTime}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setFormData({ ...formData, endTime: e.target.value });
+            clearError("endTime");
+          }}
         />
       </div>
 

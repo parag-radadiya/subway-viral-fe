@@ -174,7 +174,7 @@ const StaffDetailDialog = ({
       isOpen={!!summary}
       onClose={onClose}
       title={`${displayName} — Shift Details`}
-      maxWidth="2xl"
+      maxWidth="4xl"
       className="max-h-[90vh] overflow-auto"
     >
       {/* ── Loading ── */}
@@ -563,7 +563,6 @@ const WorkedHoursScreen = ({ onBack }: WorkedHoursScreenProps) => {
 
             <Button
               variant="secondary"
-              size="sm"
               leftIcon={
                 fetchingPayroll ? (
                   <Loader2 size={13} className="animate-spin" />

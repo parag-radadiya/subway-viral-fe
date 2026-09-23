@@ -9,7 +9,7 @@ interface DialogProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl" | "full";
 }
 
 const Dialog = ({
@@ -40,6 +40,7 @@ const Dialog = ({
     lg: "max-w-lg",
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
+    "4xl": "max-w-4xl",
     full: "max-w-full m-4",
   };
 
