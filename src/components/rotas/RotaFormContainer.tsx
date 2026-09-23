@@ -6,7 +6,7 @@ import Tabs from "../common/Tabs";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import SingleRotaForm from "../admin/rotas/SingleRotaForm";
 import BulkWeeklyRotaForm from "../admin/rotas/BulkWeeklyRotaForm";
-import { format } from "date-fns";
+
 
 interface RotaFormContainerProps {
   onSuccessRoute: string;
@@ -22,12 +22,18 @@ export default function RotaFormContainer({
   const [loading, setLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [loadingUser, setLoadingUsers] = useState(false);
+  const toDatetimeLocal = (iso: string) => {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const [formData, setFormData] = useState({
     user_id: "",
     shop_id: "",
     shiftDate: "",
-    startTime: "09:00",
-    endTime: "17:00",
+    startTime: "",
+    endTime: "",
     note: "",
   });
 
@@ -50,8 +56,7 @@ export default function RotaFormContainer({
 
         if (editItemId && rotaRes) {
           const rota = rotaRes.data.data?.rota || rotaRes.data.rota;
-          const shiftDateObj = new Date(rota.shift_date || rota.shift_start);
-          const dateStr = shiftDateObj.toISOString().split("T")[0];
+          const startDT = toDatetimeLocal(rota.shift_start);
           setFormData({
             user_id:
               typeof rota.user_id === "string"
@@ -61,9 +66,9 @@ export default function RotaFormContainer({
               typeof rota.shop_id === "string"
                 ? rota.shop_id
                 : rota.shop_id?._id || "",
-            shiftDate: dateStr,
-            startTime: format(new Date(rota.shift_start), "HH:mm") || "09:00",
-            endTime: format(new Date(rota.shift_end), "HH:mm") || "17:00",
+            shiftDate: startDT.split("T")[0],
+            startTime: startDT,
+            endTime: toDatetimeLocal(rota.shift_end),
             note: rota.note || "",
           });
         }
@@ -97,7 +102,6 @@ export default function RotaFormContainer({
     if (
       !formData.user_id ||
       !formData.shop_id ||
-      !formData.shiftDate ||
       !formData.startTime ||
       !formData.endTime
     ) {
@@ -105,12 +109,18 @@ export default function RotaFormContainer({
       return;
     }
 
-    const shiftStart = new Date(
-      `${formData.shiftDate}T${formData.startTime}:00`,
-    ).toISOString();
-    const shiftEnd = new Date(
-      `${formData.shiftDate}T${formData.endTime}:00`,
-    ).toISOString();
+    const shiftStart = new Date(formData.startTime).toISOString();
+    const shiftEnd = new Date(formData.endTime).toISOString();
+
+    const diffMs = new Date(shiftEnd).getTime() - new Date(shiftStart).getTime();
+    if (diffMs <= 0) {
+      toast.error("End time must be after start time");
+      return;
+    }
+    if (diffMs > 24 * 60 * 60 * 1000) {
+      toast.error("End time must be within 24 hours of start time");
+      return;
+    }
 
     const payload = {
       user_id: formData.user_id,
