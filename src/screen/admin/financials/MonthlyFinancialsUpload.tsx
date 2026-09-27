@@ -23,7 +23,7 @@ const MonthlyFinancialsUpload: React.FC = () => {
       .then((res: any) => {
         const data = res.data.data;
         const loadedShops = (data.shops || data.data || []).filter(
-          (s: any) => !s.is_all_shops && s.is_active !== false
+          (s: any) => !s.is_all_shops && s.is_active !== false,
         );
         setShops(loadedShops);
 
@@ -130,7 +130,7 @@ const MonthlyFinancialsUpload: React.FC = () => {
   const totalEntries = months.reduce((acc, m) => acc + m.shops.length, 0);
 
   return (
-    <div className="space-y-6 pb-28 animate-fade-in">
+    <div className="space-y-6  animate-fade-in">
       {/* ── Page header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

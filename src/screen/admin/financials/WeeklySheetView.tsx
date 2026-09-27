@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import { financialsApi, shopsApi } from "../../../config/apiCall";
 import { Shop } from "./components/types";
+import { WeeklyImportRow } from "./ExcelImportDialog";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface RowData {
@@ -110,9 +111,13 @@ const inputTdCls = "border-r border-slate-100 px-1 py-1 bg-green-50/40";
 const LOCAL_STORAGE_KEY = "financials_weekly_draft";
 
 // ── Component ─────────────────────────────────────────────────────────────────
-const WeeklySheetView: React.FC = () => {
+interface WeeklySheetViewProps {
+  importedRows?: WeeklyImportRow[];
+}
+
+const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
   const [shops, setShops] = useState<Shop[]>([]);
-  
+
   const [selectedShopId, setSelectedShopId] = useState<string>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -135,7 +140,10 @@ const WeeklySheetView: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ selectedShopId, rows }));
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({ selectedShopId, rows }),
+    );
   }, [selectedShopId, rows]);
 
   useEffect(() => {
@@ -143,12 +151,30 @@ const WeeklySheetView: React.FC = () => {
       .list()
       .then((res: any) => {
         const loaded = (res.data.data.shops || res.data.data.data || []).filter(
-          (s: any) => !s.is_all_shops && s.is_active !== false
+          (s: any) => !s.is_all_shops && s.is_active !== false,
         );
         setShops(loaded);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));
   }, []);
+
+  // ── Import from Excel ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!importedRows || importedRows.length === 0) return;
+    const mapped: RowData[] = importedRows.map((r) => {
+      // Parse week range label into dates: '29/12 To 04/01' → derive from weekNumber
+      const diw = setISOWeek(new Date(), r.weekNumber);
+      return {
+        id: Math.random().toString(36).substring(2, 9),
+        weekNum: r.weekNumber,
+        startDate: format(startOfISOWeek(diw), "yyyy-MM-dd"),
+        endDate: format(endOfISOWeek(diw), "yyyy-MM-dd"),
+        sales: String(r.sales),
+        commision: String(r.commission),
+      };
+    });
+    setRows(mapped);
+  }, [importedRows]);
 
   const handleChange = (id: string, field: keyof RowData, value: string) => {
     setRows((prev) =>
@@ -269,7 +295,7 @@ const WeeklySheetView: React.FC = () => {
   const dash = "—";
 
   return (
-    <div className="space-y-4 pb-28 animate-fade-in">
+    <div className="space-y-4  animate-fade-in">
       {/* ── Controls ── */}
       <div className="flex flex-wrap items-center gap-3">
         {/* <div className="flex items-center gap-2">
@@ -577,7 +603,7 @@ const WeeklySheetView: React.FC = () => {
               setSelectedShopId("");
               localStorage.removeItem(LOCAL_STORAGE_KEY);
             }}
-            className="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-transparent"
+            className="px-4 py-2 text-sm font-semibold text-slate-500 whitespace-nowrap flex items-center gap-2 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-transparent"
           >
             <Trash2 size={13} /> Reset
           </button>

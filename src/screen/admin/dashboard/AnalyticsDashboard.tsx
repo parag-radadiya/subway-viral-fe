@@ -5,12 +5,14 @@ import type {
   DashboardFilters,
   KpiMatrixData,
   TrendData,
+  WeeklyReportData,
 } from "./analytics.types";
 import AnalyticsChannelCharts from "./AnalyticsChannelCharts";
 import AnalyticsFilterBar from "./AnalyticsFilterBar";
 import AnalyticsKpiCards from "./AnalyticsKpiCards";
 import AnalyticsShopTable from "./AnalyticsShopTable";
 import AnalyticsTrendChart from "./AnalyticsTrendChart";
+import WeeklyReportDashboard from "./WeeklyReportDashboard";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -91,6 +93,8 @@ const AnalyticsDashboard = () => {
   const [kpiData, setKpiData] = useState<KpiMatrixData | null>(null);
   const [revenueTrend, setRevenueTrend] = useState<TrendData | null>(null);
   const [costTrend, setCostTrend] = useState<TrendData | null>(null);
+  const [weeklyReportData, setWeeklyReportData] =
+    useState<WeeklyReportData | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -112,36 +116,54 @@ const AnalyticsDashboard = () => {
     setLoading(true);
     setError(null);
 
-    const base = {
-      from_date: filters.from_date,
-      to_date: filters.to_date,
-      report_type: filters.report_type,
-      view: "reconciled" as const,
-      ...(filters.shop_ids ? { shop_ids: filters.shop_ids } : {}),
-    };
+    const isWeeklyReport = filters.report_type === "weekly_report";
 
     try {
-      const [kpiRes, revTrendRes, costTrendRes] = await Promise.all([
-        analyticsApi.kpiMatrix({
-          ...base,
+      if (isWeeklyReport) {
+        // ── Weekly roll-up report — single endpoint, no shop filter ──
+        const res = await analyticsApi.weeklyReport({
+          from_date: filters.from_date,
+          to_date: filters.to_date,
           compare_from: filters.compare_from,
           compare_to: filters.compare_to,
-        }),
-        analyticsApi.trend({
-          ...base,
-          metrics: "grossSales,netSales",
-          group_by: "total",
-        }),
-        analyticsApi.trend({
-          ...base,
-          metrics: "labourPercent,foodCostPercent",
-          group_by: "total",
-        }),
-      ]);
+        });
+        setWeeklyReportData(res.data?.data ?? null);
+        setKpiData(null);
+        setRevenueTrend(null);
+        setCostTrend(null);
+      } else {
+        // ── Existing storewise / monthly reports ──
+        const base = {
+          from_date: filters.from_date,
+          to_date: filters.to_date,
+          report_type: filters.report_type,
+          view: "reconciled" as const,
+          ...(filters.shop_ids ? { shop_ids: filters.shop_ids } : {}),
+        };
 
-      setKpiData(kpiRes.data?.data ?? null);
-      setRevenueTrend(revTrendRes.data?.data ?? null);
-      setCostTrend(costTrendRes.data?.data ?? null);
+        const [kpiRes, revTrendRes, costTrendRes] = await Promise.all([
+          analyticsApi.kpiMatrix({
+            ...base,
+            compare_from: filters.compare_from,
+            compare_to: filters.compare_to,
+          }),
+          analyticsApi.trend({
+            ...base,
+            metrics: "grossSales,netSales",
+            group_by: "total",
+          }),
+          analyticsApi.trend({
+            ...base,
+            metrics: "labourPercent,foodCostPercent",
+            group_by: "total",
+          }),
+        ]);
+
+        setKpiData(kpiRes.data?.data ?? null);
+        setRevenueTrend(revTrendRes.data?.data ?? null);
+        setCostTrend(costTrendRes.data?.data ?? null);
+        setWeeklyReportData(null);
+      }
     } catch (err: any) {
       if (err?.code === "ERR_CANCELED") return;
       setError(err?.response?.data?.message ?? err?.message ?? "Unknown error");
@@ -194,9 +216,18 @@ const AnalyticsDashboard = () => {
       {error && <ErrorBanner message={error} onRetry={fetchAll} />}
 
       {/* Skeleton while first load */}
-      {loading && !kpiData && <DashboardSkeleton />}
+      {loading && !kpiData && !weeklyReportData && <DashboardSkeleton />}
 
-      {/* Content */}
+      {/* Weekly Roll-up Report */}
+      {filters.report_type === "weekly_report" && (
+        <WeeklyReportDashboard
+          data={weeklyReportData}
+          comparePeriodLabel={comparePeriodLabel}
+          loading={loading}
+        />
+      )}
+
+      {/* Storewise / Monthly Content */}
       {kpiData && (
         <div className="space-y-6">
           {/* Row 1 — KPI cards */}

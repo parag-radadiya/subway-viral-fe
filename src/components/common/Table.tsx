@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 export interface Column<T> {
   header: string;
@@ -23,6 +23,7 @@ interface TableProps<T> {
   keyExtractor: (item: T) => string | number;
   emptyStateMessage?: string | ReactNode;
   pagination?: PaginationConfig;
+  loading?: boolean;
 }
 
 const Table = <T,>({
@@ -31,6 +32,7 @@ const Table = <T,>({
   keyExtractor,
   emptyStateMessage = "No records found.",
   pagination,
+  loading = false,
 }: TableProps<T>) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
@@ -55,44 +57,60 @@ const Table = <T,>({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {data.map((item) => (
-              <tr
-                key={keyExtractor(item)}
-                className="hover:bg-slate-50/50 transition-colors group"
-              >
-                {columns.map((col, idx) => (
-                  <td
-                    key={idx}
-                    className={`px-6 py-4 whitespace-nowrap ${
-                      col.align === "center"
-                        ? "text-center"
-                        : col.align === "right"
-                          ? "text-right"
-                          : "text-left"
-                    }`}
-                  >
-                    {col.render
-                      ? col.render(item)
-                      : col.accessor
-                        ? (item[col.accessor] as ReactNode)
-                        : null}
-                  </td>
-                ))}
-              </tr>
-            ))}
-            {data.length === 0 && (
+            {loading ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-slate-400"
+                  className="px-6 py-14 text-center text-slate-400"
                 >
-                  {typeof emptyStateMessage === "string" ? (
-                    <p className="text-sm">{emptyStateMessage}</p>
-                  ) : (
-                    emptyStateMessage
-                  )}
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="animate-spin" size={24} />
+                    <p className="text-xs font-medium">Loading...</p>
+                  </div>
                 </td>
               </tr>
+            ) : (
+              <>
+                {data.map((item) => (
+                  <tr
+                    key={keyExtractor(item)}
+                    className="hover:bg-slate-50/50 transition-colors group"
+                  >
+                    {columns.map((col, idx) => (
+                      <td
+                        key={idx}
+                        className={`px-6 py-4 whitespace-nowrap ${
+                          col.align === "center"
+                            ? "text-center"
+                            : col.align === "right"
+                              ? "text-right"
+                              : "text-left"
+                        }`}
+                      >
+                        {col.render
+                          ? col.render(item)
+                          : col.accessor
+                            ? (item[col.accessor] as ReactNode)
+                            : null}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                {data.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="px-6 py-12 text-center text-slate-400"
+                    >
+                      {typeof emptyStateMessage === "string" ? (
+                        <p className="text-sm">{emptyStateMessage}</p>
+                      ) : (
+                        emptyStateMessage
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </>
             )}
           </tbody>
         </table>

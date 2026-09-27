@@ -1,4 +1,9 @@
-import { Calendar, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useState } from "react";
 import { type DashboardFilters } from "./analytics.types";
 
@@ -13,7 +18,7 @@ interface Props {
 
 const fmtD = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate()
+    d.getDate(),
   ).padStart(2, "0")}`;
 
 function getMondayOfWeek(year: number, week: number): Date {
@@ -34,13 +39,23 @@ function currentIsoWeek(): number {
   const now = new Date();
   const jan1 = new Date(now.getFullYear(), 0, 1);
   return Math.ceil(
-    (Math.floor((now.getTime() - jan1.getTime()) / 86_400_000) + 1) / 7
+    (Math.floor((now.getTime() - jan1.getTime()) / 86_400_000) + 1) / 7,
   );
 }
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 const now = new Date();
@@ -53,7 +68,7 @@ function weeksInYear(year: number): number {
   const dec28 = new Date(year, 11, 28);
   const jan1 = new Date(year, 0, 1);
   return Math.ceil(
-    (Math.floor((dec28.getTime() - jan1.getTime()) / 86_400_000) + 1) / 7
+    (Math.floor((dec28.getTime() - jan1.getTime()) / 86_400_000) + 1) / 7,
   );
 }
 
@@ -160,7 +175,9 @@ const WeekSelect = ({
 // ─── Main component ────────────────────────────────────────────────────────────
 
 const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
-  const isWeekly = filters.report_type === "weekly_financial";
+  const isWeekly =
+    filters.report_type === "weekly_financial" ||
+    filters.report_type === "weekly_report";
 
   // ── Week state ──────────────────────────────────────────────────────────────
   const [weekYear, setWeekYear] = useState(CUR_YEAR);
@@ -177,14 +194,20 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
   const [endMonth, setEndMonth] = useState(CUR_MONTH);
 
   const [cmpMonthYear, setCmpMonthYear] = useState(CUR_YEAR - 1);
-  const [cmpStartMonth, setCmpStartMonth] = useState(Math.max(1, CUR_MONTH - 2));
+  const [cmpStartMonth, setCmpStartMonth] = useState(
+    Math.max(1, CUR_MONTH - 2),
+  );
   const [cmpEndMonth, setCmpEndMonth] = useState(CUR_MONTH);
 
   // ── Apply helpers ───────────────────────────────────────────────────────────
 
   const applyWeeks = (
-    wy: number, sw: number, ew: number,
-    cwy: number, csw: number, cew: number,
+    wy: number,
+    sw: number,
+    ew: number,
+    cwy: number,
+    csw: number,
+    cew: number,
   ) => {
     onChange({
       from_date: fmtD(getMondayOfWeek(wy, sw)),
@@ -195,12 +218,16 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
   };
 
   const applyMonths = (
-    my: number, sm: number, em: number,
-    cmy: number, csm: number, cem: number,
+    my: number,
+    sm: number,
+    em: number,
+    cmy: number,
+    csm: number,
+    cem: number,
   ) => {
     onChange({
       from_date: fmtD(new Date(my, sm - 1, 1)),
-      to_date: fmtD(new Date(my, em, 0)),       // day 0 = last day of prev month
+      to_date: fmtD(new Date(my, em, 0)), // day 0 = last day of prev month
       compare_from: fmtD(new Date(cmy, csm - 1, 1)),
       compare_to: fmtD(new Date(cmy, cem, 0)),
     });
@@ -212,17 +239,21 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
     const maxW = weeksInYear(y);
     const sw = Math.min(startWeek, maxW);
     const ew = Math.max(sw, Math.min(endWeek, maxW));
-    setWeekYear(y); setStartWeek(sw); setEndWeek(ew);
+    setWeekYear(y);
+    setStartWeek(sw);
+    setEndWeek(ew);
     applyWeeks(y, sw, ew, cmpWeekYear, cmpStartWeek, cmpEndWeek);
   };
   const updStartWeek = (v: number) => {
     const ew = Math.max(v, endWeek);
-    setStartWeek(v); setEndWeek(ew);
+    setStartWeek(v);
+    setEndWeek(ew);
     applyWeeks(weekYear, v, ew, cmpWeekYear, cmpStartWeek, cmpEndWeek);
   };
   const updEndWeek = (v: number) => {
     const sw = Math.min(startWeek, v);
-    setEndWeek(v); setStartWeek(sw);
+    setEndWeek(v);
+    setStartWeek(sw);
     applyWeeks(weekYear, sw, v, cmpWeekYear, cmpStartWeek, cmpEndWeek);
   };
 
@@ -230,17 +261,21 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
     const maxW = weeksInYear(y);
     const csw = Math.min(cmpStartWeek, maxW);
     const cew = Math.max(csw, Math.min(cmpEndWeek, maxW));
-    setCmpWeekYear(y); setCmpStartWeek(csw); setCmpEndWeek(cew);
+    setCmpWeekYear(y);
+    setCmpStartWeek(csw);
+    setCmpEndWeek(cew);
     applyWeeks(weekYear, startWeek, endWeek, y, csw, cew);
   };
   const updCmpStartWeek = (v: number) => {
     const cew = Math.max(v, cmpEndWeek);
-    setCmpStartWeek(v); setCmpEndWeek(cew);
+    setCmpStartWeek(v);
+    setCmpEndWeek(cew);
     applyWeeks(weekYear, startWeek, endWeek, cmpWeekYear, v, cew);
   };
   const updCmpEndWeek = (v: number) => {
     const csw = Math.min(cmpStartWeek, v);
-    setCmpEndWeek(v); setCmpStartWeek(csw);
+    setCmpEndWeek(v);
+    setCmpStartWeek(csw);
     applyWeeks(weekYear, startWeek, endWeek, cmpWeekYear, csw, v);
   };
 
@@ -248,16 +283,25 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
 
   const updMonthYear = (y: number) => {
     setMonthYear(y);
-    applyMonths(y, startMonth, endMonth, cmpMonthYear, cmpStartMonth, cmpEndMonth);
+    applyMonths(
+      y,
+      startMonth,
+      endMonth,
+      cmpMonthYear,
+      cmpStartMonth,
+      cmpEndMonth,
+    );
   };
   const updStartMonth = (v: number) => {
     const em = Math.max(v, endMonth);
-    setStartMonth(v); setEndMonth(em);
+    setStartMonth(v);
+    setEndMonth(em);
     applyMonths(monthYear, v, em, cmpMonthYear, cmpStartMonth, cmpEndMonth);
   };
   const updEndMonth = (v: number) => {
     const sm = Math.min(startMonth, v);
-    setEndMonth(v); setStartMonth(sm);
+    setEndMonth(v);
+    setStartMonth(sm);
     applyMonths(monthYear, sm, v, cmpMonthYear, cmpStartMonth, cmpEndMonth);
   };
 
@@ -267,30 +311,34 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
   };
   const updCmpStartMonth = (v: number) => {
     const cem = Math.max(v, cmpEndMonth);
-    setCmpStartMonth(v); setCmpEndMonth(cem);
+    setCmpStartMonth(v);
+    setCmpEndMonth(cem);
     applyMonths(monthYear, startMonth, endMonth, cmpMonthYear, v, cem);
   };
   const updCmpEndMonth = (v: number) => {
     const csm = Math.min(cmpStartMonth, v);
-    setCmpEndMonth(v); setCmpStartMonth(csm);
+    setCmpEndMonth(v);
+    setCmpStartMonth(csm);
     applyMonths(monthYear, startMonth, endMonth, cmpMonthYear, csm, v);
   };
 
   return (
     <div className="flex justify-between items-center gap-3 flex-wrap">
       <div className="flex flex-wrap items-center gap-2">
-
         {/* ── Report type ── */}
         <Pill className="cursor-pointer hover:bg-slate-50">
           <select
             value={filters.report_type}
             onChange={(e) =>
-              onChange({ report_type: e.target.value as DashboardFilters["report_type"] })
+              onChange({
+                report_type: e.target.value as DashboardFilters["report_type"],
+              })
             }
             disabled={loading}
             className="bg-transparent border-none p-0 pr-5 text-sm focus:ring-0 outline-none cursor-pointer text-slate-700 disabled:opacity-50"
           >
-            <option value="weekly_financial">Weekly</option>
+            <option value="weekly_financial">Storewise Weekly</option>
+            <option value="weekly_report">Weekly</option>
             <option value="monthly_store_kpi">Monthly</option>
           </select>
         </Pill>
@@ -302,20 +350,46 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
           {isWeekly ? (
             /* Weekly: [‹ 2026 ›] W03 → W06 */
             <div className="flex items-center gap-1.5">
-              <YearStepper value={weekYear} onChange={updWeekYear} disabled={loading} />
+              <YearStepper
+                value={weekYear}
+                onChange={updWeekYear}
+                disabled={loading}
+              />
               <span className="text-slate-300 text-xs">·</span>
-              <WeekSelect value={startWeek} onChange={updStartWeek} year={weekYear} disabled={loading} />
+              <WeekSelect
+                value={startWeek}
+                onChange={updStartWeek}
+                year={weekYear}
+                disabled={loading}
+              />
               <span className="text-slate-400 text-xs">→</span>
-              <WeekSelect value={endWeek} onChange={updEndWeek} year={weekYear} disabled={loading} />
+              <WeekSelect
+                value={endWeek}
+                onChange={updEndWeek}
+                year={weekYear}
+                disabled={loading}
+              />
             </div>
           ) : (
             /* Monthly: [‹ 2026 ›] Jan → Jun */
             <div className="flex items-center gap-1.5">
-              <YearStepper value={monthYear} onChange={updMonthYear} disabled={loading} />
+              <YearStepper
+                value={monthYear}
+                onChange={updMonthYear}
+                disabled={loading}
+              />
               <span className="text-slate-300 text-xs">·</span>
-              <MonthSelect value={startMonth} onChange={updStartMonth} disabled={loading} />
+              <MonthSelect
+                value={startMonth}
+                onChange={updStartMonth}
+                disabled={loading}
+              />
               <span className="text-slate-400 text-xs">→</span>
-              <MonthSelect value={endMonth} onChange={updEndMonth} disabled={loading} />
+              <MonthSelect
+                value={endMonth}
+                onChange={updEndMonth}
+                disabled={loading}
+              />
             </div>
           )}
         </Pill>
@@ -327,39 +401,69 @@ const AnalyticsFilterBar = ({ filters, onChange, shops, loading }: Props) => {
         <Pill>
           {isWeekly ? (
             <div className="flex items-center gap-1.5">
-              <YearStepper value={cmpWeekYear} onChange={updCmpWeekYear} disabled={loading} />
+              <YearStepper
+                value={cmpWeekYear}
+                onChange={updCmpWeekYear}
+                disabled={loading}
+              />
               <span className="text-slate-300 text-xs">·</span>
-              <WeekSelect value={cmpStartWeek} onChange={updCmpStartWeek} year={cmpWeekYear} disabled={loading} />
+              <WeekSelect
+                value={cmpStartWeek}
+                onChange={updCmpStartWeek}
+                year={cmpWeekYear}
+                disabled={loading}
+              />
               <span className="text-slate-400 text-xs">→</span>
-              <WeekSelect value={cmpEndWeek} onChange={updCmpEndWeek} year={cmpWeekYear} disabled={loading} />
+              <WeekSelect
+                value={cmpEndWeek}
+                onChange={updCmpEndWeek}
+                year={cmpWeekYear}
+                disabled={loading}
+              />
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <YearStepper value={cmpMonthYear} onChange={updCmpMonthYear} disabled={loading} />
+              <YearStepper
+                value={cmpMonthYear}
+                onChange={updCmpMonthYear}
+                disabled={loading}
+              />
               <span className="text-slate-300 text-xs">·</span>
-              <MonthSelect value={cmpStartMonth} onChange={updCmpStartMonth} disabled={loading} />
+              <MonthSelect
+                value={cmpStartMonth}
+                onChange={updCmpStartMonth}
+                disabled={loading}
+              />
               <span className="text-slate-400 text-xs">→</span>
-              <MonthSelect value={cmpEndMonth} onChange={updCmpEndMonth} disabled={loading} />
+              <MonthSelect
+                value={cmpEndMonth}
+                onChange={updCmpEndMonth}
+                disabled={loading}
+              />
             </div>
           )}
         </Pill>
       </div>
 
       {/* ── Shop selector ── */}
-      <Pill className="cursor-pointer hover:bg-slate-50">
-        <SlidersHorizontal size={13} className="text-slate-400" />
-        <select
-          value={filters.shop_ids}
-          onChange={(e) => onChange({ shop_ids: e.target.value })}
-          disabled={loading}
-          className="bg-transparent border-none p-0 pr-5 text-sm focus:ring-0 outline-none cursor-pointer text-slate-700 disabled:opacity-50 max-w-[180px]"
-        >
-          <option value="">All shops</option>
-          {shops.map((s) => (
-            <option key={s._id} value={s._id}>{s.name}</option>
-          ))}
-        </select>
-      </Pill>
+      {filters.report_type !== "weekly_report" && (
+        <Pill className="cursor-pointer hover:bg-slate-50">
+          <SlidersHorizontal size={13} className="text-slate-400" />
+          <select
+            value={filters.shop_ids}
+            onChange={(e) => onChange({ shop_ids: e.target.value })}
+            disabled={loading}
+            className="bg-transparent border-none p-0 pr-5 text-sm focus:ring-0 outline-none cursor-pointer text-slate-700 disabled:opacity-50 max-w-[180px]"
+          >
+            <option value="">All shops</option>
+            {shops.map((s) => (
+              <option key={s._id} value={s._id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </Pill>
+      )}
     </div>
   );
 };

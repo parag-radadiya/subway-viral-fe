@@ -81,9 +81,11 @@ const WeeklyFinancialsUpload: React.FC = () => {
     shopsApi
       .list()
       .then((res: any) => {
-        const loadedShops = (res.data.data.shops || res.data.data.data || []).filter(
-          (s: any) => !s.is_all_shops && s.is_active !== false
-        );
+        const loadedShops = (
+          res.data.data.shops ||
+          res.data.data.data ||
+          []
+        ).filter((s: any) => !s.is_all_shops && s.is_active !== false);
         setShops(loadedShops);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));
@@ -211,7 +213,7 @@ const WeeklyFinancialsUpload: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-28 animate-fade-in">
+    <div className="space-y-6  animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
