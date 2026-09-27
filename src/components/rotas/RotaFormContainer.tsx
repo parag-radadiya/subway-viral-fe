@@ -7,7 +7,6 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import SingleRotaForm from "../admin/rotas/SingleRotaForm";
 import BulkWeeklyRotaForm from "../admin/rotas/BulkWeeklyRotaForm";
 
-
 interface RotaFormContainerProps {
   onSuccessRoute: string;
 }
@@ -88,6 +87,7 @@ export default function RotaFormContainer({
       .getStaffByShop(formData?.shop_id, {
         page: "1",
         limit: "100",
+        include_assigned: "true",
       })
       .then((res) => {
         const data = res.data.data;
@@ -112,7 +112,8 @@ export default function RotaFormContainer({
     const shiftStart = new Date(formData.startTime).toISOString();
     const shiftEnd = new Date(formData.endTime).toISOString();
 
-    const diffMs = new Date(shiftEnd).getTime() - new Date(shiftStart).getTime();
+    const diffMs =
+      new Date(shiftEnd).getTime() - new Date(shiftStart).getTime();
     if (diffMs <= 0) {
       toast.error("End time must be after start time");
       return;

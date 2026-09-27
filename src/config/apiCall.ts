@@ -344,7 +344,7 @@ export interface AnalyticsBaseParams {
   from_date?: string;
   to_date?: string;
   shop_ids?: string;
-  report_type?: "weekly_financial" | "monthly_store_kpi";
+  report_type?: "weekly_financial" | "monthly_store_kpi" | "weekly_report";
   view?: "reconciled" | "excel_raw" | "admin_weekly";
 }
 
@@ -381,6 +381,14 @@ export const analyticsApi = {
       group_by?: "total" | "shop";
     },
   ) => api.get("/store-reports/analytics/v2/trend", { params }),
+
+  /** Endpoint 5 — Weekly Roll-up Report */
+  weeklyReport: (params: {
+    from_date?: string;
+    to_date?: string;
+    compare_from?: string;
+    compare_to?: string;
+  }) => api.get("/store-reports/analytics/v2/weekly-report", { params }),
 };
 
 // ─── Notifications API ────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
@@ -33,6 +33,7 @@ const UserList = () => {
   const [users, setUsers] = useState<FinalUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -43,10 +44,27 @@ const UserList = () => {
   const [deleteTarget, setDeleteTarget] = useState<FinalUser | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(1);
+    }, 300);
+  };
+
   const fetchUsers = () => {
     setLoading(true);
+    const query: Record<string, string> = {
+      page: page.toString(),
+      limit: limit.toString(),
+    };
+    if (debouncedSearch.trim()) query.search = debouncedSearch.trim();
+
     usersApi
-      .list({ page: page.toString(), limit: limit.toString() })
+      .list(query)
       .then(({ data }) => {
         const resultData = data.data;
         setUsers(resultData.users || []);
@@ -62,7 +80,7 @@ const UserList = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, limit]);
+  }, [page, limit, debouncedSearch]);
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -82,12 +100,6 @@ const UserList = () => {
       });
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
       case "root":
@@ -103,14 +115,6 @@ const UserList = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-slate-400">
-        <Loader2 className="animate-spin mb-4" size={32} />
-        <p className="text-sm font-medium">Loading personnel...</p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -140,11 +144,11 @@ const UserList = () => {
               placeholder="Search by name or email..."
               className="max-w-sm"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               startIcon={<Search size={16} />}
             />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto whitespace-nowrap">
-              {filteredUsers.length} Users Found
+              {total} Users Found
             </p>
           </div>
 
@@ -244,8 +248,9 @@ const UserList = () => {
                   ),
                 },
               ]}
-              data={filteredUsers}
+              data={users}
               keyExtractor={(u) => u._id}
+              loading={loading}
               emptyStateMessage="No personnel found."
               pagination={{
                 page,

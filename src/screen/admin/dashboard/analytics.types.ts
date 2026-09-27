@@ -101,5 +101,62 @@ export interface DashboardFilters {
   compare_from: string;
   compare_to: string;
   shop_ids: string;
-  report_type: "weekly_financial" | "monthly_store_kpi";
+  report_type: "weekly_financial" | "monthly_store_kpi" | "weekly_report";
+}
+
+// ─── Weekly Report Types ───────────────────────────────────────────────────────
+
+export interface WeeklyReportSummary {
+  sales: number;
+  net: number;
+  labour: number;
+  vat: number;
+  royalties: number;
+  foodCost: number;
+  commission: number;
+  total: number;
+  income: number;
+  commissionPercent: number; // fraction — multiply ×100
+  avgWeeklySales: number;
+}
+
+export interface WeeklyReportTrendPoint {
+  year: number;
+  week_number: number;
+  week_range_label: string;
+  week_start: string;
+  week_end: string;
+  sales: number;
+  net: number;
+  labour: number;
+  vat: number;
+  royalties: number;
+  foodCost: number;
+  commission: number;
+  total: number;
+  income: number;
+  commissionPercent: number;
+}
+
+export interface WeeklyReportDelta {
+  current: number;
+  compare: number;
+  change: number;
+  changePct: number | null;
+}
+
+export interface WeeklyReportData {
+  report_type: string;
+  period: { from: string; to: string } | null;
+  weeks_count: number;
+  has_data: boolean;
+  summary: WeeklyReportSummary;
+  trend: WeeklyReportTrendPoint[];
+  comparison?: {
+    period: { from: string; to: string };
+    weeks_count: number;
+    current: WeeklyReportSummary;
+    compare: WeeklyReportSummary;
+    delta: Record<string, WeeklyReportDelta>;
+  };
 }

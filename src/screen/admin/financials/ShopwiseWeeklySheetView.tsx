@@ -21,6 +21,7 @@ import {
   newShopEntry,
   newWeekCard,
 } from "./components/utils";
+import { ShopwiseWeeklyImportRow } from "./ExcelImportDialog";
 
 // ─── Editable cell ─────────────────────────────────────────────────────────────
 const EditCell = ({
@@ -86,7 +87,13 @@ const TH = ({
 // "formula" → read-only (grey tinted)
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-const ShopwiseWeeklySheetView = () => {
+interface ShopwiseWeeklySheetViewProps {
+  importedRows?: ShopwiseWeeklyImportRow[];
+}
+
+const ShopwiseWeeklySheetView = ({
+  importedRows,
+}: ShopwiseWeeklySheetViewProps) => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
 
@@ -101,7 +108,8 @@ const ShopwiseWeeklySheetView = () => {
     if (
       !activeWeek.startDate ||
       !activeWeek.endDate ||
-      activeWeek.fetchedWeekData
+      activeWeek.fetchedWeekData ||
+      (importedRows && importedRows?.length > 0)
     )
       return;
     const raw: Record<string, string> = {
@@ -147,8 +155,6 @@ const ShopwiseWeeklySheetView = () => {
         };
         return obj;
       }, {});
-      console.log("🚀 - ShopwiseWeeklySheetView - data:", shopWiseData);
-
       setWeeks((prev) => {
         prev[activeWeekIdx].shops.map((shop) => {
           if (shopWiseData?.[shop.shopId]) {
@@ -156,7 +162,6 @@ const ShopwiseWeeklySheetView = () => {
           }
           return shop;
         });
-        console.log("🚀 - ShopwiseWeeklySheetView - prev:", prev);
         return structuredClone(prev);
       });
     });
@@ -191,6 +196,80 @@ const ShopwiseWeeklySheetView = () => {
       .catch((err: any) => toast.error(err.message || "Failed to load shops"))
       .finally(() => setShopsLoading(false));
   }, []);
+
+  // ── Import from Excel ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!importedRows || importedRows.length === 0 || shops.length === 0)
+      return;
+
+    // Group rows by week number
+    const weekMap = new Map<number, ShopwiseWeeklyImportRow[]>();
+    for (const row of importedRows) {
+      const arr = weekMap.get(row.weekNumber) ?? [];
+      arr.push(row);
+      weekMap.set(row.weekNumber, arr);
+    }
+
+    const newWeeks: WeekCard[] = [];
+    for (const [weekNum, rows] of weekMap) {
+      // Build week card
+      const diw = setISOWeek(new Date(), weekNum);
+      const wk = newWeekCard();
+      wk.startDate = format(startOfISOWeek(diw), "yyyy-MM-dd");
+      wk.endDate = format(endOfISOWeek(diw), "yyyy-MM-dd");
+
+      // Map shops — match by name (case-insensitive trim)
+      wk.shops = shops.map((shop) => {
+        const entry = newShopEntry();
+        entry.shopId = shop._id;
+        const match = rows.find(
+          (r) =>
+            r.storeName.toLowerCase().trim() === shop.name.toLowerCase().trim(),
+        );
+        if (match) {
+          entry.metrics = {
+            grossSales: String(match.grossSales),
+            vat: String(match.vat),
+            customerCount: String(match.customerCount),
+            justEatSale: String(match.justEatSale),
+            justCharge: String(match.justCharge),
+            justEatVat: String(match.justEatVat),
+            justEatBankReceived: String(match.justEatBankReceived),
+            justEatVariance: String(match.justEatVariance),
+            uberEatSale: String(match.uberEatSale),
+            uberEatCharge: String(match.uberEatCharge),
+            uberEatVat: String(match.uberEatVat),
+            uberEatBankReceived: String(match.uberEatBankReceived),
+            uberAdvertise: String(match.uberAdvertise),
+            uberDiscount: String(match.uberDiscount),
+            deliverooSale: String(match.deliverooSale),
+            deliverooCharge: String(match.deliverooCharge),
+            deliverooVat: String(match.deliverooVat),
+            deliverooBankReceived: String(match.deliverooBankReceived),
+            deliverooVariance: String(match.deliverooVariance),
+            labourHours: String(match.labourHours),
+            labourRate: "",
+            bidFood: String(match.bidFood),
+            instoreFoodCost: String(match.instoreFoodCost),
+            instoreLabourCost: String(match.instoreLabourCost),
+            bidfoodPreviousWeek: String(match.bidfoodPreviousWeek),
+          };
+        }
+        return entry;
+      });
+      newWeeks.push(wk);
+    }
+
+    // Sort weeks by weekNum
+    newWeeks.sort((a, b) => {
+      const wa = a.startDate ? getISOWeek(new Date(a.startDate)) : 0;
+      const wb2 = b.startDate ? getISOWeek(new Date(b.startDate)) : 0;
+      return wa - wb2;
+    });
+
+    setWeeks(newWeeks);
+    setActiveWeekIdx(0);
+  }, [importedRows, shops]);
 
   // ── Week management ──────────────────────────────────────────────────────────
   const addWeek = useCallback(() => {

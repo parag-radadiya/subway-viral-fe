@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { shopsApi } from "../../../config/apiCall";
 import {
   Store,
   Plus,
   Search,
   MapPin,
-  Loader2,
   Eye,
   Clock,
   Edit,
@@ -34,22 +33,38 @@ const ShopList = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(1);
+    }, 300);
+  };
+
   useEffect(() => {
     setLoading(true);
+    const query: Record<string, string> = {
+      page: `${page}`,
+      limit: `${limit}`,
+    };
+    if (debouncedSearch.trim()) query.search = debouncedSearch.trim();
+
     shopsApi
-      .list({
-        page: `${page}`,
-        limit: `${limit}`,
-      })
+      .list(query)
       .then((res: any) => {
         const data = res.data.data;
-        setShops(data.shops || data.data || []);
+        const allShops: Shop[] = data.shops || data.data || [];
+        setShops(allShops.filter((s) => !s.is_all_shops));
         setTotal(data.total || data.shops?.length || 0);
         setTotalPages(data.total_pages || data.totalPages || 1);
       })
@@ -57,22 +72,7 @@ const ShopList = () => {
         toast.error(err.message || "Failed to fetch shops");
       })
       .finally(() => setLoading(false));
-  }, [page, limit]);
-
-  const filteredShops = shops
-    .filter((shop) => !shop.is_all_shops)
-    .filter((shop) =>
-      shop.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-slate-400">
-        <Loader2 className="animate-spin mb-4" size={32} />
-        <p className="text-sm font-medium">Loading shops...</p>
-      </div>
-    );
-  }
+  }, [page, limit, debouncedSearch]);
 
   return (
     <div className="space-y-6">
@@ -100,14 +100,11 @@ const ShopList = () => {
             placeholder="Search shops by name..."
             className="max-w-sm"
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => handleSearchChange(e.target.value)}
             startIcon={<Search size={16} />}
           />
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto whitespace-nowrap">
-            {filteredShops.length} Total Locations
+            {total} Total Locations
           </p>
         </div>
         <div className="p-4">
@@ -202,8 +199,9 @@ const ShopList = () => {
                 ),
               },
             ]}
-            data={filteredShops}
+            data={shops}
             keyExtractor={(shop) => shop._id}
+            loading={loading}
             emptyStateMessage="No shops found matching your search."
             pagination={{
               page,
