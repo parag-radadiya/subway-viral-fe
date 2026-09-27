@@ -1,175 +1,209 @@
-# Frontend Integration — Clone Production → Sandbox (Root only)
+# Frontend Integration — Weekly Report Analytics
 
-A new **Root-only** action lets a Root user copy the entire production database
-into a separate **sandbox** database, so new features can be tested against
-real-shaped data without touching production.
+A new dashboard endpoint returns analytics over the **by-week totals** — one
+aggregate figure per week across all shops (not a per-shop breakdown). It
+mirrors the other dashboard analytics: a period **summary**, a per-week
+**trend** series, and an optional current-vs-previous **comparison**.
 
-> ⚠️ This is a **destructive** operation **on the sandbox** — it drops and
-> rebuilds every sandbox collection as an exact snapshot of production. It never
-> writes to production. Treat it like a "reset sandbox from prod" button.
+This is the third analytics dataset alongside the existing per-shop **storewise
+weekly** and **monthly** analytics — this one is the **weekly roll-up** report.
+
+> Also shipped in the same change: the existing per-shop analytics
+> (`/analytics/v2/kpi-matrix`, `shop-compare`, `period-compare`, `trend`) no
+> longer include the aggregate **"Unknown" / "All Shops"** row. If you were
+> filtering that out on the client, you can remove that workaround.
 
 ---
 
-## 1. Who can see this button
+## 1. Endpoint
 
-This action is restricted to the **Root** role only (not Admin, Manager, etc.).
-Show the button only when the logged-in user is Root.
+### `GET /api/store-reports/analytics/v2/weekly-report`
 
-After login, the user object from `POST /api/auth/login` (and
-`GET /api/auth/me`) includes `role_id.role_name`:
+- **Auth:** `Authorization: Bearer <access_token>` — requires the
+  `can_view_all_staff` permission (Root / Admin / Manager by default). A caller
+  without it gets `403`.
+
+**Query params** (all optional):
+
+| Param          | Type       | Notes                                                   |
+| -------------- | ---------- | ------------------------------------------------------- |
+| `from_date`    | date (ISO) | Start of the current window, e.g. `2026-07-06`.         |
+| `to_date`      | date (ISO) | End of the current window, e.g. `2026-08-02`.           |
+| `compare_from` | date (ISO) | Start of the comparison window. Omit for no comparison. |
+| `compare_to`   | date (ISO) | End of the comparison window.                           |
+
+If neither `from_date` nor `to_date` is given, **all** weeks are returned.
+`comparison` is included in the response **only** when `compare_from` and/or
+`compare_to` are supplied.
 
 ```js
-const isRoot = user?.role_id?.role_name === "Root";
-// render the "Clone production to sandbox" button only when isRoot === true
-```
+async function fetchWeeklyReport(
+  token,
+  { fromDate, toDate, compareFrom, compareTo },
+) {
+  const qs = new URLSearchParams();
+  if (fromDate) qs.set("from_date", fromDate);
+  if (toDate) qs.set("to_date", toDate);
+  if (compareFrom) qs.set("compare_from", compareFrom);
+  if (compareTo) qs.set("compare_to", compareTo);
 
-> The server enforces this regardless of the UI — a non-Root token gets `403`.
-> The flag is only for UX. Always handle `403` gracefully.
-
----
-
-## 2. Common response envelope
-
-Every response uses the same shape:
-
-```jsonc
-// success
-{ "status": 200, "message": "…", "data": { /* … */ } }
-
-// error
-{ "status": 403, "message": "Forbidden: root access required", "data": {} }
-```
-
-All requests need the auth header:
-
-```
-Authorization: Bearer <access_token>
-```
-
----
-
-## 3. The endpoint
-
-### `POST /api/sandbox/clone`
-
-Clones production into the sandbox database.
-
-**Request body**
-
-| Field        | Type    | Required | Notes                                                    |
-| ------------ | ------- | -------- | -------------------------------------------------------- |
-| `confirm`    | boolean | **Yes**  | Must be exactly `true`. Guard against accidental clicks. |
-| `batch_size` | integer | No       | Documents copied per batch. Default `1000`. Leave unset. |
-
-```js
-async function cloneProductionToSandbox(token) {
-  const res = await fetch("/api/sandbox/clone", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const res = await fetch(
+    `/api/store-reports/analytics/v2/weekly-report?${qs}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
     },
-    body: JSON.stringify({ confirm: true }),
-  });
+  );
   const json = await res.json();
   if (!res.ok) throw new Error(json.message);
   return json.data;
 }
 ```
 
-**Success — `200`**
+---
+
+## 2. Response
+
+Standard envelope — the payload is in `data`:
 
 ```jsonc
 {
   "status": 200,
-  "message": "Production database cloned into sandbox",
+  "message": "Weekly report analytics fetched successfully",
   "data": {
-    "source_database": "staff_inventory",
-    "sandbox_database": "staff_inventory_sandbox",
-    "same_cluster": true,
-    "collections_cloned": 12,
-    "total_documents": 5842,
-    "collections": [
-      { "collection": "users", "documents": 214, "indexes": 4 },
-      { "collection": "attendances", "documents": 3120, "indexes": 3 },
-      { "collection": "shops", "documents": 18, "indexes": 2 },
-      // … one entry per collection
+    "report_type": "weekly_report",
+    "period": { "from": "2026-07-06", "to": "2026-08-02" },
+    "weeks_count": 4,
+    "has_data": true,
+
+    "summary": {
+      "sales": 197362.85,
+      "net": 161837.54,
+      "labour": 15789.03,
+      "vat": 35525.31,
+      "royalties": 20229.7,
+      "foodCost": 35604.25,
+      "commission": 56831.49,
+      "total": 163979.78,
+      "income": 33383.07,
+      "commissionPercent": 0.29, // FRACTION — multiply by 100 to display (29%)
+      "avgWeeklySales": 49340.71,
+    },
+
+    "trend": [
+      {
+        "year": 2026,
+        "week_number": 28,
+        "week_range_label": "06/07 to 12/07",
+        "week_start": "2026-07-06T00:00:00.000Z",
+        "week_end": "2026-07-12T23:59:59.999Z",
+        "sales": 52288.15,
+        "net": 42500.1,
+        "labour": 4100.0,
+        "vat": 9200.0,
+        "royalties": 5200.0,
+        "foodCost": 9300.0,
+        "commission": 15000.0,
+        "total": 43000.0,
+        "income": 8600.0,
+        "commissionPercent": 0.29,
+      },
+      // …one entry per week, ordered by year then week_number
     ],
-    "started_at": "2026-08-19T10:15:00.000Z",
-    "finished_at": "2026-08-19T10:15:07.400Z",
-    "duration_ms": 7400,
   },
 }
 ```
 
-Use `collections_cloned`, `total_documents`, and `duration_ms` to render a
-"Sandbox refreshed — 12 collections, 5,842 documents in 7.4s" confirmation.
+### Fields
+
+| Field         | Meaning                                                            |
+| ------------- | ------------------------------------------------------------------ |
+| `report_type` | Always `"weekly_report"`.                                          |
+| `period`      | Echoes the `from`/`to` you sent (or `null`).                       |
+| `weeks_count` | Number of weeks in range.                                          |
+| `has_data`    | `false` when no weeks fall in the range — show an empty state.     |
+| `summary`     | Totals across the range (see metric keys below) + derived fields.  |
+| `trend[]`     | One object per week, same metric keys, for charting a time series. |
+
+**Metric keys** (in both `summary` and each `trend` item): `sales`, `net`,
+`labour`, `vat`, `royalties`, `foodCost`, `commission`, `total`, `income` —
+all money amounts. Plus:
+
+- `commissionPercent` — a **fraction** (e.g. `0.29`). Multiply by 100 for a `%`.
+- `avgWeeklySales` — **summary only**; `sales / weeks_count`.
 
 ---
 
-## 4. Error responses to handle
+## 3. Comparison (period-over-period)
 
-| Status | When                                        | Suggested UI                                                        |
-| ------ | ------------------------------------------- | ------------------------------------------------------------------- |
-| `400`  | `confirm` was not `true`                    | Shouldn't happen if you always send `true`; show generic error.     |
-| `400`  | Sandbox target misconfigured (same as prod) | "Sandbox is not configured. Contact backend." (server config issue) |
-| `401`  | Missing / invalid / expired token           | Redirect to login.                                                  |
-| `403`  | Caller is not Root                          | Hide the button; show "Root access required" if reached anyway.     |
-| `503`  | Database not connected                      | "Service unavailable, try again shortly."                           |
+When you pass `compare_from` / `compare_to`, the payload adds a `comparison`
+block: the current summary, the compare-window summary, and a per-metric
+`delta` with absolute `change` and `changePct`.
 
-```jsonc
-{
-  "status": 400,
-  "message": "Confirmation required: send { \"confirm\": true } …",
-  "data": {},
-}
+Request:
+
+```
+/api/store-reports/analytics/v2/weekly-report?from_date=2026-07-06&to_date=2026-08-02&compare_from=2026-06-08&compare_to=2026-07-05
 ```
 
----
+Response adds:
 
-## 5. Recommended UX
-
-Because this overwrites the sandbox and can take several seconds:
-
-1. **Guard with a confirm dialog.** Something like:
-   _"This will erase the sandbox database and replace it with a fresh copy of
-   production. Continue?"_ → only then send `{ confirm: true }`.
-2. **Show a loading/spinner state** while the request is in flight — it is a
-   longer request than typical CRUD calls (it copies the whole database).
-3. **Disable the button** while running to prevent double-submits.
-4. **Render the summary** from the response on success (counts + duration).
-5. This action is **safe to re-run** anytime — each run fully resets the sandbox.
-
-```jsx
-// Example (React-ish)
-async function onClone() {
-  if (!window.confirm("Erase the sandbox and refresh it from production?"))
-    return;
-  setLoading(true);
-  try {
-    const summary = await cloneProductionToSandbox(token);
-    toast.success(
-      `Sandbox refreshed: ${summary.collections_cloned} collections, ` +
-        `${summary.total_documents.toLocaleString()} docs in ` +
-        `${(summary.duration_ms / 1000).toFixed(1)}s`,
-    );
-  } catch (e) {
-    toast.error(e.message);
-  } finally {
-    setLoading(false);
+```jsonc
+"comparison": {
+  "period": { "from": "2026-06-08", "to": "2026-07-05" },
+  "weeks_count": 4,
+  "current": { /* same shape as summary */ },
+  "compare": { /* summary for the compare window */ },
+  "delta": {
+    "sales":  { "current": 197362.85, "compare": 194188.22, "change": 3174.63, "changePct": 1.63 },
+    "net":    { "current": 161837.54, "compare": 159002.10, "change": 2835.44, "changePct": 1.78 }
+    // …one entry per metric, including commissionPercent / avgWeeklySales
   }
 }
 ```
 
+- `change` = `current − compare`.
+- `changePct` = percentage change, or **`null`** when `compare` is `0` (avoid
+  dividing by zero — render as "—" or "n/a").
+- Use `changePct` sign for the up/down arrow and colour.
+
+```jsx
+const delta = data.comparison?.delta?.sales;
+if (delta) {
+  const up = (delta.changePct ?? 0) >= 0;
+  render(`£${delta.current.toLocaleString()}`, {
+    badge:
+      delta.changePct == null
+        ? "—"
+        : `${up ? "▲" : "▼"} ${Math.abs(delta.changePct)}%`,
+    color: up ? "green" : "red",
+  });
+}
+```
+
 ---
 
-## 6. Notes for the frontend
+## 4. Error responses
 
-- **Nothing to point at a "sandbox API".** The frontend keeps calling the same
-  backend base URL. Whether the _backend itself_ runs against production or
-  sandbox data is a backend/deployment concern — this endpoint only populates
-  the sandbox database; it does not switch which database the app reads from.
-- **Timeouts:** if your HTTP client has a short default timeout, bump it for
-  this call (e.g. 60s+) since large databases take longer to copy.
-- **Only expose in internal/admin tooling.** This belongs in a Root-only
-  settings/ops screen, not general app UI.
+| Status | When                              | Suggested UI                          |
+| ------ | --------------------------------- | ------------------------------------- |
+| `400`  | A date param is not a valid date  | Fix the picker value; show a message. |
+| `401`  | Missing / invalid / expired token | Redirect to login.                    |
+| `403`  | Caller lacks `can_view_all_staff` | Hide the report from this role.       |
+
+```jsonc
+{ "status": 400, "message": "from_date must be a valid date", "data": {} }
+```
+
+---
+
+## 5. Notes
+
+- **Aggregate, not per-shop.** This report has no `shop_id` dimension — it's the
+  weekly total across every store. For per-shop weekly figures keep using the
+  storewise weekly analytics (`report_type=weekly_financial`).
+- **Percentages are fractions.** `commissionPercent` (and any percentage-style
+  delta) is `0.29`, not `29`. Multiply by 100 when displaying.
+- **Empty ranges** return `200` with `has_data: false` and empty `trend` — not
+  an error. Render an empty state.
+- **Ordering.** `trend` is sorted by `year` then `week_number`, so you can plot
+  it directly.
