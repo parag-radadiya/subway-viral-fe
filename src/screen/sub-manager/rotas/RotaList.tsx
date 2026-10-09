@@ -6,6 +6,7 @@ const RotaList = () => {
     <RotaListContainer
       title="Store Rotas"
       subtitle="Manage schedules and staff coverage for your shop"
+      role="sub-manager"
       routes={{
         list: ROUTES.SUB_MANAGER.ROTAS.LIST,
         create: ROUTES.SUB_MANAGER.ROTAS.CREATE,

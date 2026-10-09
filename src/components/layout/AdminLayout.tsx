@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Calendar,
   Clock,
   DollarSign,
@@ -17,6 +18,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { label: "Shops", path: ROUTES.ADMIN.SHOPS.LIST, icon: Store },
     { label: "Users", path: ROUTES.ADMIN.USERS.LIST, icon: Users },
     { label: "Rotas", path: ROUTES.ADMIN.ROTAS.LIST, icon: Calendar },
+    // {
+    //   label: "Rota Stats",
+    //   path: ROUTES.ADMIN.ROTAS.DASHBOARD,
+    //   icon: BarChart3,
+    // },
     { label: "Attendance", path: ROUTES.ADMIN.ATTENDANCE, icon: Clock },
     { label: "Inventory", path: ROUTES.ADMIN.INVENTORY.LIST, icon: Package },
     {

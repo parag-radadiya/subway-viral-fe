@@ -6,6 +6,7 @@ const RotaList = () => {
     <RotaListContainer
       title="Org-Wide Rotas"
       subtitle="Global oversight and management across all locations"
+      role="admin"
       routes={{
         list: ROUTES.ADMIN.ROTAS.LIST,
         create: ROUTES.ADMIN.ROTAS.CREATE,

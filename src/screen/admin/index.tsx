@@ -25,6 +25,7 @@ import FinancialsUpload from "./financials/FinancialsUpload";
 
 // Import Analytics screens
 import AnalyticsDashboard from "./dashboard/AnalyticsDashboard";
+import RotaDashboard from "../manager/rotas/RotaDashboard";
 
 const AdminRoutes = (
   <>
@@ -47,6 +48,7 @@ const AdminRoutes = (
     <Route path={ROUTES.ADMIN.ROTAS.CREATE} element={<RotaForm />} />
     <Route path={ROUTES.ADMIN.ROTAS.EDIT(":id")} element={<RotaForm />} />
     <Route path={ROUTES.ADMIN.ROTAS.DETAILS(":id")} element={<RotaDetail />} />
+    <Route path={ROUTES.ADMIN.ROTAS.DASHBOARD} element={<RotaDashboard />} />
 
     {/* Attendance */}
     <Route path={ROUTES.ADMIN.ATTENDANCE} element={<AttendanceList />} />

@@ -56,11 +56,11 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         path: ROUTES.MANAGER.INVENTORY.LIST,
         icon: Package,
       },
-      {
-        label: "Rota Stats",
-        path: ROUTES.MANAGER.ROTAS.DASHBOARD,
-        icon: BarChart3,
-      },
+      // {
+      //   label: "Rota Stats",
+      //   path: ROUTES.MANAGER.ROTAS.DASHBOARD,
+      //   icon: BarChart3,
+      // },
 
       {
         label: "Rotas",

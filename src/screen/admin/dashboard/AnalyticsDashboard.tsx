@@ -252,7 +252,10 @@ const AnalyticsDashboard = () => {
           </div>
 
           {/* Row 3 — Channel charts */}
-          <AnalyticsChannelCharts kpis={kpiData.total.current} />
+          <AnalyticsChannelCharts
+            kpis={kpiData.total.current}
+            compareKpis={kpiData.total.compare as any}
+          />
 
           {/* Row 4 — Shop ranking table */}
           <AnalyticsShopTable shops={kpiData.shops} />

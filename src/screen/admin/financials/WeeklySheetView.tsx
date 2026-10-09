@@ -118,13 +118,15 @@ interface WeeklySheetViewProps {
 const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
   const [shops, setShops] = useState<Shop[]>([]);
 
-  const [selectedShopId, setSelectedShopId] = useState<string>(() => {
+  const [selectedShopId, setSelectedShopId] = useState<string>(
+    "" /* () => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) return JSON.parse(saved).selectedShopId || "";
     } catch {}
     return "";
-  });
+  } */,
+  );
 
   const [rows, setRows] = useState<RowData[]>(() => {
     try {
@@ -153,6 +155,7 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
         const loaded = (res.data.data.shops || res.data.data.data || []).filter(
           (s: any) => !s.is_all_shops && s.is_active !== false,
         );
+        console.log("🚀 - WeeklySheetView - loaded:", loaded);
         setShops(loaded);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));
@@ -256,7 +259,7 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
     if (fail === 0) {
       toast.success(`Successfully uploaded ${ok} weeks.`);
       setRows([newRow()]);
-      setSelectedShopId("");
+      // setSelectedShopId("");
       localStorage.removeItem(LOCAL_STORAGE_KEY);
     } else {
       toast.error(`Uploaded ${ok} weeks, ${fail} failed.`);
@@ -325,7 +328,7 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
           type="button"
           onClick={() => {
             setRows([newRow()]);
-            setSelectedShopId("");
+            // setSelectedShopId("");
           }}
           className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-200 rounded-lg px-3 py-2 bg-white hover:bg-red-50 transition-colors"
         >
@@ -600,7 +603,7 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
           <button
             onClick={() => {
               setRows([newRow()]);
-              setSelectedShopId("");
+              // setSelectedShopId("");
               localStorage.removeItem(LOCAL_STORAGE_KEY);
             }}
             className="px-4 py-2 text-sm font-semibold text-slate-500 whitespace-nowrap flex items-center gap-2 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-transparent"

@@ -1,0 +1,37 @@
+- on 404 move to / not back ✅
+- add inventory in manager and sub manager ✅
+- sub manager should not allow to create rota, just view current active shop rota (remove selection dialog) ✅
+- manager should allow to create user of his own shops
+- manager should be allowed to update attendence ✅
+- in dashboard > channel revenue show number without hover, same for all graphs ✅
+- issue in laboub in bulk import 
+- show a graph for channel mix 2 column graph, crurent, compare value, also show percentage on side ✅
+- in import excel give option import all, import last recore
+- shopwise weekly > import issue in labour rate, labour cost
+- weekly remove shopId state and fetch it from the below curl (#C1)
+- issue in shopwise weekly first month data
+- add import in monthly feature 
+- change payrate to 12.71
+- when manager creates user max it sould be manager 
+
+
+
+# c1
+curl --url 'https://fiction-generators-emotions-outstanding.trycloudflare.com/api/store-reports/weekly?page=1&limit=10' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.9,hi;q=0.8' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZWY2Zjc0NTQwY2VlYjdiODJiODA4NiIsImlhdCI6MTc5MTQ3OTA0OCwiZXhwIjoxNzkyMDgzODQ4fQ.G9qVFFa7JqTk3qu-nE9i8uqfN5dFfGLcOTbyhLdHxdU' \
+  -H 'dnt: 1' \
+  -H 'if-none-match: W/"21a1-RMymbI3O9NUAFMjwiW1nlWdMD7o"' \
+  -H 'origin: https://princeton-catalog-integration-sponsor.trycloudflare.com' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://princeton-catalog-integration-sponsor.trycloudflare.com/' \
+  -H 'sec-ch-ua: "Chromium";v="154", "Google Chrome";v="154", "Not A(Brand";v="99"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: cross-site' \
+  -H 'sec-gpc: 1' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36' \
+  -H 'x-device-id: 2281767056'

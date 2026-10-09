@@ -8,12 +8,12 @@ import SubManagerRotaDetail from "./rotas/RotaDetail";
 import SubManagerRotaForm from "./rotas/RotaForm";
 import SubManagerAttendanceList from "./attendance/AttendanceList";
 import SubManagerPunchInPage from "./attendance/PunchInPage";
-import InventoryList from "../admin/inventory/InventoryList";
-import InventoryForm from "../admin/inventory/InventoryForm";
-import InventoryDetail from "../admin/inventory/InventoryDetail";
-import QueryList from "../admin/inventory/QueryList";
-import QueryDetail from "../admin/inventory/QueryDetail";
-import AuditLogList from "../admin/inventory/AuditLogList";
+import InventoryList from "./inventory/InventoryList";
+import InventoryForm from "./inventory/InventoryForm";
+import InventoryDetail from "./inventory/InventoryDetail";
+import QueryList from "./inventory/QueryList";
+import QueryDetail from "./inventory/QueryDetail";
+import AuditLogList from "./inventory/AuditLogList";
 
 const SubManagerRoutes = (
   <>

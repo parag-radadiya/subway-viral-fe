@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { KpiTotals } from "./analytics.types";
 
 ChartJS.register(
@@ -47,11 +48,17 @@ const CostBreakdownDonut = ({ kpis }: { kpis: KpiTotals }) => {
       <div style={{ height: "220px" }}>
         <Doughnut
           data={data}
+          plugins={[ChartDataLabels]}
           options={{
             responsive: true,
             maintainAspectRatio: false,
             cutout: "65%",
             plugins: {
+              datalabels: {
+                color: "#fff",
+                font: { size: 10, weight: "bold" as const },
+                formatter: (val: any) => (val > 0 ? fmt(val) : ""),
+              },
               legend: {
                 position: "right",
                 labels: { boxWidth: 12, font: { size: 11 }, padding: 12 },
@@ -89,10 +96,19 @@ const ChannelBar = ({ kpis }: { kpis: KpiTotals }) => {
       <div style={{ height: "220px" }}>
         <Bar
           data={data}
+          plugins={[ChartDataLabels]}
           options={{
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { top: 20 } },
             plugins: {
+              datalabels: {
+                align: "top" as const,
+                anchor: "end" as const,
+                color: "#64748b",
+                font: { size: 10, weight: "bold" as const },
+                formatter: (val: any) => (val > 0 ? fmt(val) : ""),
+              },
               legend: { display: false },
               tooltip: {
                 callbacks: { label: (ctx) => ` ${fmt(ctx.parsed.y!)}` },
@@ -121,45 +137,88 @@ const ChannelBar = ({ kpis }: { kpis: KpiTotals }) => {
   );
 };
 
-// ─── Channel Mix Badges ───────────────────────────────────────────────────────
-const ChannelMixBadges = ({ kpis }: { kpis: KpiTotals }) => {
-  const channels = [
-    {
-      label: "In-Store",
-      value: kpis.instorePercent ?? 100 - kpis.threePdPercent,
-      color: "bg-emerald-500",
-    },
-    {
-      label: "Just Eat",
-      value: (kpis.justeat / kpis.grossSales) * 100,
-      color: "bg-orange-500",
-    },
-    {
-      label: "Uber Eats",
-      value: (kpis.ubereat / kpis.grossSales) * 100,
-      color: "bg-teal-500",
-    },
-    {
-      label: "Deliveroo",
-      value: (kpis.deliveroo / kpis.grossSales) * 100,
-      color: "bg-sky-500",
-    },
-  ];
+// ─── Channel Comparison Bar ──────────────────────────────────────────────────
+const ChannelComparisonBar = ({
+  kpis,
+  compareKpis,
+}: {
+  kpis: KpiTotals;
+  compareKpis?: KpiTotals;
+}) => {
+  const data = {
+    labels: ["In-Store", "Just Eat", "Uber Eats", "Deliveroo"],
+    datasets: [
+      {
+        label: "Current",
+        data: [kpis.instore, kpis.justeat, kpis.ubereat, kpis.deliveroo],
+        backgroundColor: "#10b981", // Emerald
+        borderRadius: 4,
+      },
+      {
+        label: "Previous",
+        data: [
+          compareKpis?.instore || 0,
+          compareKpis?.justeat || 0,
+          compareKpis?.ubereat || 0,
+          compareKpis?.deliveroo || 0,
+        ],
+        backgroundColor: "#94a3b8", // Slate
+        borderRadius: 4,
+      },
+    ],
+  };
 
   return (
-    <div className="flex flex-wrap gap-2 mt-4">
-      {channels.map((c) => (
-        <div
-          key={c.label}
-          className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-3 py-1"
-        >
-          <span className={`w-2 h-2 rounded-full ${c.color}`} />
-          <span className="text-xs font-medium text-slate-600">{c.label}</span>
-          <span className="text-xs font-bold text-slate-800">
-            {isFinite(c.value) ? c.value.toFixed(1) : "0.0"}%
-          </span>
-        </div>
-      ))}
+    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+      <h3 className="text-sm font-bold text-slate-800 mb-4">
+        Channel Comparison
+      </h3>
+      <div style={{ height: "220px" }}>
+        <Bar
+          data={data}
+          plugins={[ChartDataLabels]}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 20 } },
+            plugins: {
+              datalabels: {
+                align: "top" as const,
+                anchor: "end" as const,
+                color: "#64748b",
+                font: { size: 9, weight: "bold" as const },
+                formatter: (val: any) => (val > 0 ? fmt(val) : ""),
+              },
+              legend: {
+                position: "top",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) =>
+                    ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y!)}`,
+                },
+              },
+            },
+            scales: {
+              y: {
+                border: { display: false },
+                grid: { color: "#f1f5f9" },
+                ticks: {
+                  color: "#94a3b8",
+                  font: { size: 10 },
+                  callback: (val: any) =>
+                    "£" + new Intl.NumberFormat("en-GB").format(val),
+                },
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: "#64748b", font: { size: 11 } },
+              },
+            },
+          }}
+        />
+      </div>
     </div>
   );
 };
@@ -168,19 +227,16 @@ const ChannelMixBadges = ({ kpis }: { kpis: KpiTotals }) => {
 
 interface Props {
   kpis: KpiTotals;
+  compareKpis?: KpiTotals;
 }
 
-const AnalyticsChannelCharts = ({ kpis }: Props) => (
+const AnalyticsChannelCharts = ({ kpis, compareKpis }: Props) => (
   <div className="space-y-4">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <CostBreakdownDonut kpis={kpis} />
       <ChannelBar kpis={kpis} />
     </div>
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-      <h3 className="text-sm font-bold text-slate-800 mb-1">Channel Mix</h3>
-      <p className="text-xs text-slate-400">Revenue share by channel</p>
-      <ChannelMixBadges kpis={kpis} />
-    </div>
+    <ChannelComparisonBar kpis={kpis} compareKpis={compareKpis} />
   </div>
 );
 
