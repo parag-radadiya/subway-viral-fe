@@ -6,6 +6,7 @@ import {
   FileSpreadsheet,
   AlertCircle,
   CheckCircle2,
+  Info,
 } from "lucide-react";
 import Button from "../../../components/common/Button";
 
@@ -353,6 +354,15 @@ const ExcelImportDialog: React.FC<Props> = ({
 
         {/* Body */}
         <div className="px-5 py-4 space-y-3">
+          {activeTab === "month" && (
+            <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
+              <Info size={14} className="text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-blue-700">
+                <span className="font-semibold">Note:</span> Only the last filled month's record will be added.
+              </p>
+            </div>
+          )}
+
           {/* Drop zone */}
           <div
             onClick={() => fileInputRef.current?.click()}

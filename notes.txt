@@ -1,18 +1,18 @@
 - on 404 move to / not back ✅
 - add inventory in manager and sub manager ✅
 - sub manager should not allow to create rota, just view current active shop rota (remove selection dialog) ✅
-- manager should allow to create user of his own shops
+- manager should allow to create user of his own shops 🟥
 - manager should be allowed to update attendence ✅
 - in dashboard > channel revenue show number without hover, same for all graphs ✅
-- issue in laboub in bulk import 
+- issue in laboub in bulk import  ✅
 - show a graph for channel mix 2 column graph, crurent, compare value, also show percentage on side ✅
-- in import excel give option import all, import last recore
-- shopwise weekly > import issue in labour rate, labour cost
-- weekly remove shopId state and fetch it from the below curl (#C1)
-- issue in shopwise weekly first month data
-- add import in monthly feature 
-- change payrate to 12.71
-- when manager creates user max it sould be manager 
+- in import excel give option import all, import last recore ⌛️
+- shopwise weekly > import issue in labour rate, labour cost ✅
+- weekly remove shopId state and fetch it from the below curl (#C1) ✅
+- issue in shopwise weekly first month data (check this again)
+- add import in monthly feature ✅
+- change payrate to 12.71 ✅
+- when manager creates user max it sould be manager 🟥
 
 
 
@@ -35,3 +35,10 @@ curl --url 'https://fiction-generators-emotions-outstanding.trycloudflare.com/ap
   -H 'sec-gpc: 1' \
   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36' \
   -H 'x-device-id: 2281767056'
+
+
+
+  BE
+
+  - /manager/users/create in this page roles api give only staff, sub-manager, manager role
+  - /manager/users in this page give only the users that comes under this manager

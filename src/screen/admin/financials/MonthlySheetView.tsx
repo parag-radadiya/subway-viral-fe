@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import { financialsApi, shopsApi } from "../../../config/apiCall";
 import { MonthlyImportRow } from "./ExcelImportDialog";
+import { LABOUR_RATE } from "./components/utils";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface MonthlyShopRow {
@@ -14,7 +15,7 @@ interface MonthlyShopRow {
   customerCount: string;
   bidfood: string;
   labourHour: string;
-  labourRate: string; // NEW – default 11.5
+  labourRate: string;
   kioskPct: string;
   revScoreQ1: string;
 }
@@ -66,7 +67,7 @@ const fmtPct = (numerator: number, denominator: number) => {
  *   vat         = grossSale − netSale
  *   vatPct      = vat / net              (decimal)
  *   bidfoodPct  = bidfood / net          (decimal)
- *   labourCost  = labourHour × labourRate  (was hardcoded 11.5, now user-editable)
+ *   labourCost  = labourHour × labourRate  (was hardcoded LABOUR_RATE, now user-editable)
  *   labourPct   = labourCost / net       (decimal)
  *   totalCogs   = bidfoodPct + labourPct  (sum of two decimal fractions → display as %)
  */
@@ -76,7 +77,7 @@ const calcRow = (r: MonthlyShopRow) => {
   const vat = gross - net;
   const bidfood = n(r.bidfood);
   const labourHour = n(r.labourHour);
-  const labourRate = n(r.labourRate) || 11.5;
+  const labourRate = n(r.labourRate) || LABOUR_RATE;
   const labourCost = labourHour * labourRate;
   const bidfoodPct = net > 0 ? ((bidfood / net) * 100) / 100 : 0;
   const labourPct = net > 0 ? ((labourCost / net) * 100) / 100 : 0;
@@ -161,7 +162,7 @@ const MonthlySheetView: React.FC<MonthlySheetViewProps> = ({
     customerCount: "",
     bidfood: "",
     labourHour: "",
-    labourRate: "11.5",
+    labourRate: String(LABOUR_RATE),
     kioskPct: "",
     revScoreQ1: "",
   });
@@ -193,9 +194,19 @@ const MonthlySheetView: React.FC<MonthlySheetViewProps> = ({
   useEffect(() => {
     if (!importedRows || importedRows.length === 0 || shops.length === 0)
       return;
+
+    const lastIndex = importedRows.findIndex(
+      (valaue, index) =>
+        valaue.grossSale == 0 &&
+        importedRows[index + 1]?.grossSale === 0 &&
+        importedRows[index + 2]?.grossSale === 0,
+    );
+    const finalList = [
+      ...importedRows.slice(0, lastIndex !== -1 ? lastIndex : undefined),
+    ].reverse();
     setRows((prev) =>
       shops.map((s) => {
-        const match = importedRows.find(
+        const match = finalList.find(
           (r) =>
             r.storeName.toLowerCase().trim() === s.name.toLowerCase().trim(),
         );
@@ -208,7 +219,7 @@ const MonthlySheetView: React.FC<MonthlySheetViewProps> = ({
             customerCount: String(match.customerCount),
             bidfood: String(match.bidfood),
             labourHour: String(match.labourHour),
-            labourRate: "11.5",
+            labourRate: String(LABOUR_RATE),
             kioskPct: "",
             revScoreQ1: String(match.revScoreQ1),
           };
@@ -534,7 +545,7 @@ const MonthlySheetView: React.FC<MonthlySheetViewProps> = ({
                       </td>
                       {/* Labour Rate */}
                       <td className={inputTdCls}>
-                        {ic("labourRate", row.labourRate, "11.5")}
+                        {ic("labourRate", row.labourRate, String(LABOUR_RATE))}
                       </td>
                       {/* Labour Cost — formula */}
                       <td className={formulaTdCls}>{fmtNum(d.labourCost)}</td>

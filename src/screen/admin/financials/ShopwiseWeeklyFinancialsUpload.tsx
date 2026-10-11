@@ -6,7 +6,13 @@ import Button from "../../../components/common/Button";
 import { financialsApi, shopsApi } from "../../../config/apiCall";
 
 import { Shop, WeekCard } from "./components/types";
-import { calcDerived, n, newShopEntry, newWeekCard } from "./components/utils";
+import {
+  calcDerived,
+  LABOUR_RATE,
+  n,
+  newShopEntry,
+  newWeekCard,
+} from "./components/utils";
 import { WeekCardComponent } from "./components/WeekCardComponent";
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
@@ -118,7 +124,7 @@ const ShopwiseWeeklyFinancialsUpload = () => {
             "delivery Charges TOTAL": d.deliveryChargesTotal,
             "Delivery Charge %": d.deliveryChargePct,
             "LABOUR HOURS": n(m.labourHours),
-            "LABOUR RATE": n(m.labourRate) || 11.5,
+            "LABOUR RATE": n(m.labourRate) || String(LABOUR_RATE),
             "LABOUR COST ": d.labourCost,
             "Labour cost %": d.labourCostPct,
             "BID FOOD ": n(m.bidFood),

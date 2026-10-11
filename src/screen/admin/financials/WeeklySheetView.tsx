@@ -142,6 +142,15 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    financialsApi
+      .getWeekly(new URLSearchParams({ limit: "1", page: "1" }).toString())
+      .then(({ data }) => {
+        const lastShopId = data?.data?.rows?.[0]?.shop_id?.id;
+        if (lastShopId) setSelectedShopId(lastShopId);
+      });
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
       JSON.stringify({ selectedShopId, rows }),
@@ -155,7 +164,6 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
         const loaded = (res.data.data.shops || res.data.data.data || []).filter(
           (s: any) => !s.is_all_shops && s.is_active !== false,
         );
-        console.log("🚀 - WeeklySheetView - loaded:", loaded);
         setShops(loaded);
       })
       .catch((err: any) => toast.error(err.message || "Failed to load shops"));

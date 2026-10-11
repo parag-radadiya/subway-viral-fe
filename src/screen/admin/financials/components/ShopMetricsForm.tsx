@@ -10,7 +10,7 @@ import { Dispatch, SetStateAction } from "react";
 import Input from "../../../../components/common/Input";
 import { SectionHeading } from "./SectionHeading";
 import { Shop, ShopEntry, ShopMetrics, WeekCard } from "./types";
-import { calcDerived, fmtNum, fmtPct } from "./utils";
+import { calcDerived, fmtNum, fmtPct, LABOUR_RATE } from "./utils";
 
 export function ShopMetricsForm({
   entry,
@@ -515,7 +515,7 @@ export function ShopMetricsForm({
                       <Input
                         label="Rate (£/hr)"
                         type="number"
-                        placeholder="11.50"
+                        placeholder={String(LABOUR_RATE)}
                         value={m.labourRate}
                         onChange={(e) =>
                           onMetricChange("labourRate", e.target.value)

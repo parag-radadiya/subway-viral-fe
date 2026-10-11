@@ -8,6 +8,7 @@ import {
   Package,
   Navigation,
   Settings,
+  Users,
 } from "lucide-react";
 import { ROUTES } from "../../utils/routes";
 
@@ -56,12 +57,12 @@ export const ManagerLayout = ({ children }: { children: ReactNode }) => (
         path: ROUTES.MANAGER.INVENTORY.LIST,
         icon: Package,
       },
+      { label: "Users", path: ROUTES.MANAGER.USERS.LIST, icon: Users },
       // {
       //   label: "Rota Stats",
       //   path: ROUTES.MANAGER.ROTAS.DASHBOARD,
       //   icon: BarChart3,
       // },
-
       {
         label: "Rotas",
         path: ROUTES.MANAGER.ROTAS.LIST,
