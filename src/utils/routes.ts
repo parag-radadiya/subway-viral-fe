@@ -49,6 +49,12 @@ export const ROUTES = {
     },
   },
   MANAGER: {
+    USERS: {
+      LIST: "/manager/users",
+      CREATE: "/manager/users/create",
+      EDIT: (id: string) => `/manager/users/${id}/edit`,
+      DETAILS: (id: string) => `/manager/users/${id}`,
+    },
     DASHBOARD: "/manager/dashboard",
     ROTAS: {
       LIST: "/manager/rotas",

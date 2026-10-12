@@ -125,7 +125,9 @@ const AttendancePunchCard = ({ onSuccess }: AttendancePunchCardProps) => {
       .list()
       .then((res) => {
         const records = res.data.data.records || [];
-        const active = records.find((rec: any) => !rec.punch_out);
+        const active = records.find(
+          (rec: any) => !rec.punch_out && rec?.user_id?._id == user?.id,
+        );
         setActiveAttendance(active);
         if (active) {
           setActiveTab("out");

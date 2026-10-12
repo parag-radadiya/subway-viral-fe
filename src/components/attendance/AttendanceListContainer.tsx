@@ -94,6 +94,7 @@ interface AttendanceRecord {
 }
 
 interface AttendanceListContainerProps {
+  role: "admin" | "manager" | "sub-manager";
   title?: string;
   subtitle?: string;
 }
@@ -245,10 +246,7 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
               label="Duration"
               value={calcDuration(record.punch_in, record.punch_out)}
             />
-            <InfoRow
-              label="Source"
-              value={record.punch_out_source ?? "—"}
-            />
+            <InfoRow label="Source" value={record.punch_out_source ?? "—"} />
             <InfoRow
               label="Method"
               value={
@@ -311,7 +309,8 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
             </p>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-slate-500">
-                {record.breaks_count} break{record.breaks_count !== 1 ? "s" : ""}
+                {record.breaks_count} break
+                {record.breaks_count !== 1 ? "s" : ""}
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600">
                 {record.total_break_minutes} min total
@@ -353,7 +352,9 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
                   header: "End",
                   render: (b) => (
                     <span className="text-xs font-mono text-slate-600">
-                      {b.break_end ? fmtTime(b.break_end) : (
+                      {b.break_end ? (
+                        fmtTime(b.break_end)
+                      ) : (
                         <span className="text-warning-500">Ongoing</span>
                       )}
                     </span>
@@ -440,10 +441,7 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5">
               <History size={11} /> Manager Correction
             </p>
-            <InfoRow
-              label="Corrected By"
-              value={record.corrected_by.name}
-            />
+            <InfoRow label="Corrected By" value={record.corrected_by.name} />
             <InfoRow
               label="Corrected At"
               value={fmtDateTime(record.corrected_at)}
@@ -474,10 +472,7 @@ const RecordDetailDialog = ({ record, onClose }: RecordDetailDialogProps) => {
           <InfoRow label="Record ID" value={record._id} mono />
           <InfoRow label="Created" value={fmtDateTime(record.createdAt)} />
           <InfoRow label="Updated" value={fmtDateTime(record.updatedAt)} />
-          <InfoRow
-            label="Is Manual"
-            value={record.is_manual ? "Yes" : "No"}
-          />
+          <InfoRow label="Is Manual" value={record.is_manual ? "Yes" : "No"} />
           <InfoRow
             label="Status"
             value={
@@ -636,6 +631,7 @@ const CorrectAttendanceDialog = ({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const AttendanceListContainer = ({
+  role,
   title = "Attendance Management",
   subtitle = "Monitor and audit all personnel punch records across locations",
 }: AttendanceListContainerProps) => {
@@ -643,7 +639,6 @@ const AttendanceListContainer = ({
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingUsers, setLoadingUsers] = useState(false);
   const [showWorkedHours, setShowWorkedHours] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(
     null,
@@ -678,15 +673,13 @@ const AttendanceListContainer = ({
       return;
     }
     setUsers([]);
-    setLoadingUsers(true);
     usersApi
       .getStaffByShop(activeFilters.shop_id, { page: "1", limit: "100" })
       .then((res) => {
         const data = res.data.data;
         setUsers(data.users || []);
       })
-      .catch(() => toast.error("Failed to load staff assigned to this shop"))
-      .finally(() => setLoadingUsers(false));
+      .catch(() => toast.error("Failed to load staff assigned to this shop"));
   }, [activeFilters.shop_id]);
 
   useEffect(() => {
@@ -757,16 +750,18 @@ const AttendanceListContainer = ({
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            leftIcon={<Clock size={14} />}
-            onClick={() => setShowWorkedHours(true)}
-          >
-            View Worked Hours
-          </Button>
-        </div>
+        {role !== "sub-manager" && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Clock size={14} />}
+              onClick={() => setShowWorkedHours(true)}
+            >
+              View Worked Hours
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -949,13 +944,15 @@ const AttendanceListContainer = ({
                     >
                       <Eye size={16} />
                     </button>
-                    <button
-                      onClick={() => setCorrectingRecord(record)}
-                      className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
-                      title="Correct Clock-In/Out"
-                    >
-                      <Edit size={14} />
-                    </button>
+                    {role !== "sub-manager" && (
+                      <button
+                        onClick={() => setCorrectingRecord(record)}
+                        className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
+                        title="Correct Clock-In/Out"
+                      >
+                        <Edit size={14} />
+                      </button>
+                    )}
                   </div>
                 ),
               },

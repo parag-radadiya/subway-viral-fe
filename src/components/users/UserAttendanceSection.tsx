@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { attendanceApi } from "../../../config/apiCall";
+import { attendanceApi } from "../../config/apiCall";
 import { MapPin, Loader2, Clock, SlidersHorizontal } from "lucide-react";
 import { toast } from "react-toastify";
-import Table from "../../../components/common/Table";
-import Button from "../../../components/common/Button";
+import Table from "../../components/common/Table";
+import Button from "../../components/common/Button";
 import { UserAdjustHoursModal } from "./UserAdjustHoursModal";
 import { format } from "date-fns";
 

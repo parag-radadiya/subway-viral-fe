@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import Button from "../../../components/common/Button";
-import Input from "../../../components/common/Input";
-import Dialog from "../../../components/common/Dialog";
-import { attendanceApi } from "../../../config/apiCall";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Dialog from "../../components/common/Dialog";
+import { attendanceApi } from "../../config/apiCall";
 import { toast } from "react-toastify";
 import {
   Clock,

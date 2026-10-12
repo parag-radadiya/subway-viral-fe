@@ -23,10 +23,12 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Table from "../common/Table";
 import Tabs from "../common/Tabs";
+import { useAppSelector } from "../../store";
 
 interface RotaListContainerProps {
   title: string;
   subtitle: string;
+  role: "admin" | "manager" | "sub-manager";
   routes: {
     list: string;
     create: string;
@@ -36,6 +38,7 @@ interface RotaListContainerProps {
 }
 
 const RotaListContainer = ({
+  role,
   title,
   subtitle,
   routes,
@@ -44,8 +47,7 @@ const RotaListContainer = ({
   const [shops, setShops] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-
+  const { user } = useAppSelector((s) => s.auth);
   const navigate = useNavigate();
 
   // Tabs
@@ -53,7 +55,9 @@ const RotaListContainer = ({
 
   // Weekly View State
   const [selectedWeek, setSelectedWeek] = useState<string>("");
-  const [selectedWeeklyShop, setSelectedWeeklyShop] = useState<string>("");
+  const [selectedWeeklyShop, setSelectedWeeklyShop] = useState<string>(
+    user?.shop_id || "",
+  );
   const [weekData, setWeekData] = useState<any>(null);
 
   // Delete confirm state
@@ -61,7 +65,7 @@ const RotaListContainer = ({
 
   // Filter state
   const [activeFilters, setActiveFilters] = useState({
-    shop_id: "all",
+    shop_id: user?.shop_id || "all",
     user_id: "all",
   });
 
@@ -72,14 +76,17 @@ const RotaListContainer = ({
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    if (role === "sub-manager") return;
     shopsApi
       .list()
-      .then((res) => setShops(res.data.data.shops || []))
+      .then((res) => {
+        setShops(res.data.data.shops || []);
+      })
       .catch((err) => {
         console.error(err);
         toast.error(err.message || "Failed to load shops.");
       });
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     if (activeFilters.shop_id === "all") {
@@ -87,15 +94,13 @@ const RotaListContainer = ({
       return;
     }
     setUsers([]);
-    setLoadingUsers(true);
     usersApi
       .getStaffByShop(activeFilters.shop_id, { page: "1", limit: "100" })
       .then((res) => {
         const data = res.data.data;
         setUsers(data.users || []);
       })
-      .catch(() => toast.error("Failed to load staff assigned to this shop"))
-      .finally(() => setLoadingUsers(false));
+      .catch(() => toast.error("Failed to load staff assigned to this shop"));
   }, [activeFilters.shop_id]);
 
   useEffect(() => {
@@ -279,14 +284,16 @@ const RotaListContainer = ({
             activeTab={activeTab}
             onChange={(val) => setActiveTab(val as "all" | "weekly")}
           />
-          <Button
-            variant="primary"
-            onClick={() => navigate(routes.create)}
-            className="rounded-lg px-4"
-          >
-            <Plus size={18} className="mr-2" />
-            Create Rota
-          </Button>
+          {role !== "sub-manager" && (
+            <Button
+              variant="primary"
+              onClick={() => navigate(routes.create)}
+              className="rounded-lg px-4"
+            >
+              <Plus size={18} className="mr-2" />
+              Create Rota
+            </Button>
+          )}
         </div>
       </div>
 
@@ -294,22 +301,24 @@ const RotaListContainer = ({
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
           {activeTab === "all" && (
             <div className="flex items-center gap-3">
-              <Select
-                value={activeFilters.shop_id}
-                onChange={(e) =>
-                  setActiveFilters({
-                    ...activeFilters,
-                    shop_id: e.target.value,
-                  })
-                }
-              >
-                <option value="all">All Shops</option>
-                {shops.map((shop) => (
-                  <option key={shop._id} value={shop._id}>
-                    {shop.name}
-                  </option>
-                ))}
-              </Select>
+              {role !== "sub-manager" && (
+                <Select
+                  value={activeFilters.shop_id}
+                  onChange={(e) =>
+                    setActiveFilters({
+                      ...activeFilters,
+                      shop_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="all">All Shops</option>
+                  {shops.map((shop) => (
+                    <option key={shop._id} value={shop._id}>
+                      {shop.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
 
               <Select
                 value={activeFilters.user_id}

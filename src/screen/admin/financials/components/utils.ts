@@ -1,5 +1,7 @@
 import { ShopMetrics, ShopEntry, WeekCard } from "./types";
 
+export const LABOUR_RATE = 12.21;
+
 export const emptyMetrics = (): ShopMetrics => ({
   grossSales: "",
   vat: "",
@@ -21,7 +23,7 @@ export const emptyMetrics = (): ShopMetrics => ({
   deliverooBankReceived: "",
   deliverooVariance: "",
   labourHours: "",
-  labourRate: "11.50",
+  labourRate: String(LABOUR_RATE),
   bidFood: "",
   instoreFoodCost: "",
   instoreLabourCost: "",

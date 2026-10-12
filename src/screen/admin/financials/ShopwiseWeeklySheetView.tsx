@@ -17,6 +17,7 @@ import { Shop, ShopMetrics, WeekCard } from "./components/types";
 import {
   calcDerived,
   fmtPct,
+  LABOUR_RATE,
   n,
   newShopEntry,
   newWeekCard,
@@ -248,7 +249,7 @@ const ShopwiseWeeklySheetView = ({
             deliverooBankReceived: String(match.deliverooBankReceived),
             deliverooVariance: String(match.deliverooVariance),
             labourHours: String(match.labourHours),
-            labourRate: "",
+            labourRate: String(LABOUR_RATE),
             bidFood: String(match.bidFood),
             instoreFoodCost: String(match.instoreFoodCost),
             instoreLabourCost: String(match.instoreLabourCost),
@@ -385,7 +386,7 @@ const ShopwiseWeeklySheetView = ({
             "delivery Charges TOTAL": d.deliveryChargesTotal,
             "Delivery Charge %": d.deliveryChargePct,
             "LABOUR HOURS": n(m.labourHours),
-            "LABOUR RATE": n(m.labourRate) || 11.5,
+            "LABOUR RATE": n(m.labourRate) || LABOUR_RATE,
             "LABOUR COST ": d.labourCost,
             "Labour cost %": d.labourCostPct,
             "BID FOOD ": n(m.bidFood),
@@ -873,7 +874,7 @@ const ShopwiseWeeklySheetView = ({
                         <EditCell
                           value={m.labourRate}
                           onChange={(v) => set("labourRate", v)}
-                          placeholder="11.50"
+                          placeholder={String(LABOUR_RATE)}
                         />
                       </td>
                       <td

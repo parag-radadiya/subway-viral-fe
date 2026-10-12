@@ -3,6 +3,7 @@ import AttendanceListContainer from "../../../components/attendance/AttendanceLi
 const AttendanceList = () => {
   return (
     <AttendanceListContainer
+      role="admin"
       title="Attendance Management"
       subtitle="Monitor and audit all personnel punch records across locations"
     />

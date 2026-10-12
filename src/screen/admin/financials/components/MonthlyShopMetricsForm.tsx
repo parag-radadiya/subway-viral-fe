@@ -1,7 +1,7 @@
 import { ChevronDown, Store, Trash2 } from "lucide-react";
 import React from "react";
 import Input from "../../../../components/common/Input";
-import { fmtNum, fmtPct, n } from "./utils";
+import { fmtNum, fmtPct, LABOUR_RATE, n } from "./utils";
 
 export interface MonthlyShopEntry {
   id: string;
@@ -115,7 +115,7 @@ export function MonthlyShopMetricsForm({
   const bidfood = n(m.bidfood);
   const bidfoodPct = net > 0 ? ((bidfood / net) * 100) / 100 : 0;
   const labourHour = n(m.labourHour);
-  const labourCost = labourHour * 11.5;
+  const labourCost = labourHour * LABOUR_RATE;
   const labourPct = net > 0 ? ((labourCost / net) * 100) / 100 : 0;
   const totalCogs = bidfoodPct + labourPct;
 

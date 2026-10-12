@@ -71,16 +71,14 @@ const FinancialsUpload: React.FC = () => {
         </div>
         <div className="flex items-center gap-3 ml-auto">
           {/* Import Excel button */}
-          {activeTab !== "month" && (
-            <button
-              type="button"
-              onClick={() => setImportDialogOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
-            >
-              <Upload size={13} />
-              Import Excel
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setImportDialogOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
+          >
+            <Upload size={13} />
+            Import Excel
+          </button>
 
           <Tabs
             options={[
