@@ -5,9 +5,7 @@ This covers **what you (frontend) need to change**. Two areas:
 1. **Shops** now return two new flags — `is_active` and `is_all_shops` — so you can drop the query param you used to exclude the "All Shops" aggregate, and you can show/hide closed shops.
 2. **Financial records** (Weekly 2026 + Monthly Sale 2026) now have **edit** and **delete** endpoints.
 
-All responses use the standard envelope:
-
-
+All responses use the standard envelope: 123
 
 ```jsonc
 { "status": 200, "message": "…", "data": { … } }
