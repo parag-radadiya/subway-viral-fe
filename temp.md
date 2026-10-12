@@ -7,6 +7,8 @@ This covers **what you (frontend) need to change**. Two areas:
 
 All responses use the standard envelope:
 
+
+
 ```jsonc
 { "status": 200, "message": "…", "data": { … } }
 ```
