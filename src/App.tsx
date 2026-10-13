@@ -37,12 +37,10 @@ import NotFoundPage from "./screen/NotFoundPage";
 // Role-based Redirector
 const RoleRedirector = () => {
   const { user, isAuthenticated } = useAppSelector((s) => s.auth);
-  console.log("🚀 - RoleRedirector - user:", user, isAuthenticated);
 
   if (!isAuthenticated || !user) return <Navigate to={ROUTES.LOGIN} replace />;
 
   const role = user.role.role_name;
-  console.log("🚀 - RoleRedirector - role:", role);
 
   if (role === UserRole.ROOT)
     return <Navigate to={ROUTES.ROOT.DASHBOARD} replace />;
