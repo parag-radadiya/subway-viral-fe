@@ -1,0 +1,6 @@
+# CODEOWNERS file for subway-viral-fe
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for all files in the repository.
+# Pull requests require approval from at least one of these owners before merging.
+* @parag-radadiya @viradiyaom
