@@ -3,6 +3,7 @@ import UserListContainer from "../../../components/users/UserListContainer";
 
 const UserList = () => (
   <UserListContainer
+    role="manager"
     routes={{
       list: ROUTES.MANAGER.USERS.LIST,
       create: ROUTES.MANAGER.USERS.CREATE,

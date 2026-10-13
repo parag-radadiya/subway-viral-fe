@@ -27,7 +27,13 @@ type FinalUser = {
   phone_code: string;
   phone_num: string;
 };
-const UserListContainer = ({ routes }: { routes: any }) => {
+const UserListContainer = ({
+  role,
+  routes,
+}: {
+  routes: any;
+  role: "admin" | "manager";
+}) => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<FinalUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +119,6 @@ const UserListContainer = ({ routes }: { routes: any }) => {
         return "bg-slate-100 text-slate-700";
     }
   };
-
 
   return (
     <>
@@ -219,30 +224,28 @@ const UserListContainer = ({ routes }: { routes: any }) => {
                   render: (userItem) => (
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() =>
-                          navigate(routes.edit(userItem._id))
-                        }
+                        onClick={() => navigate(routes.edit(userItem._id))}
                         className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors inline-flex items-center"
                         title="Edit User"
                       >
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() =>
-                          navigate(routes.details(userItem._id))
-                        }
+                        onClick={() => navigate(routes.details(userItem._id))}
                         className="p-2 hover:bg-primary-50 text-primary-500 rounded-lg transition-colors inline-flex items-center"
                         title="View Details"
                       >
                         <Eye size={16} />
                       </button>
-                      <button
-                        onClick={() => setDeleteTarget(userItem)}
-                        className="p-2 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors inline-flex items-center"
-                        title="Delete User"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {role === "admin" && (
+                        <button
+                          onClick={() => setDeleteTarget(userItem)}
+                          className="p-2 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors inline-flex items-center"
+                          title="Delete User"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   ),
                 },
