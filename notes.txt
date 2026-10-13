@@ -16,6 +16,10 @@
 
 
 
+test
+
+
+
 # c1
 curl --url 'https://fiction-generators-emotions-outstanding.trycloudflare.com/api/store-reports/weekly?page=1&limit=10' \
   -H 'accept: application/json, text/plain, */*' \
