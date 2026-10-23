@@ -5,13 +5,14 @@ import {
   setISOWeek,
   startOfISOWeek,
 } from "date-fns";
-import { CheckCircle2, Plus, Trash2, X } from "lucide-react";
+import { CheckCircle2, Plus, Trash2, Upload, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
 import { financialsApi, shopsApi } from "../../../config/apiCall";
 import { Shop } from "./components/types";
 import { WeeklyImportRow } from "./ExcelImportDialog";
+import ExcelImportDialog, { type ImportedData } from "./ExcelImportDialog";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface RowData {
@@ -115,8 +116,16 @@ interface WeeklySheetViewProps {
   importedRows?: WeeklyImportRow[];
 }
 
-const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
+const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows: importedRowsProp }) => {
   const [shops, setShops] = useState<Shop[]>([]);
+
+  // ── Import dialog state ─────────────────────────────────────────────────────
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importedRows, setImportedRows] = useState<WeeklyImportRow[] | undefined>(importedRowsProp);
+
+  const handleImport = (data: ImportedData) => {
+    if (data.type === "weekly") setImportedRows(data.rows);
+  };
 
   const [selectedShopId, setSelectedShopId] = useState<string>(
     "" /* () => {
@@ -341,6 +350,16 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
           className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-200 rounded-lg px-3 py-2 bg-white hover:bg-red-50 transition-colors"
         >
           <Trash2 size={13} /> Reset
+        </button>
+
+        {/* Import Excel button */}
+        <button
+          type="button"
+          onClick={() => setImportDialogOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
+        >
+          <Upload size={13} />
+          Import Excel
         </button>
       </div>
 
@@ -629,6 +648,15 @@ const WeeklySheetView: React.FC<WeeklySheetViewProps> = ({ importedRows }) => {
           </Button>
         </div>
       </div>
+
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        isOpen={importDialogOpen}
+        activeTab="weekly"
+        onClose={() => setImportDialogOpen(false)}
+        onImport={handleImport}
+        knownShopNames={shops.map((s) => s.name)}
+      />
     </div>
   );
 };

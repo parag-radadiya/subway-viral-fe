@@ -5,9 +5,9 @@ import {
   endOfISOWeek,
   format,
 } from "date-fns";
-import { CheckCircle2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { CheckCircle2, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { toast } from "react-toastify";
 import Button from "../../../components/common/Button";
@@ -23,6 +23,7 @@ import {
   newWeekCard,
 } from "./components/utils";
 import { ShopwiseWeeklyImportRow } from "./ExcelImportDialog";
+import ExcelImportDialog, { type ImportedData } from "./ExcelImportDialog";
 
 // ─── Editable cell ─────────────────────────────────────────────────────────────
 const EditCell = ({
@@ -93,7 +94,7 @@ interface ShopwiseWeeklySheetViewProps {
 }
 
 const ShopwiseWeeklySheetView = ({
-  importedRows,
+  importedRows: importedRowsProp,
 }: ShopwiseWeeklySheetViewProps) => {
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
@@ -102,6 +103,17 @@ const ShopwiseWeeklySheetView = ({
 
   const [submitting, setSubmitting] = useState(false);
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
+
+  // ── Import dialog state ───────────────────────────────────────────────────
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importedRows, setImportedRows] = useState<
+    ShopwiseWeeklyImportRow[] | undefined
+  >(importedRowsProp);
+  console.log("🚀 - ShopwiseWeeklySheetView - importedRows:", importedRows);
+
+  const handleImport = (data: ImportedData) => {
+    if (data.type === "shopwise_week") setImportedRows(data.rows);
+  };
 
   const activeWeek = weeks[activeWeekIdx];
 
@@ -227,6 +239,7 @@ const ShopwiseWeeklySheetView = ({
           (r) =>
             r.storeName.toLowerCase().trim() === shop.name.toLowerCase().trim(),
         );
+        console.log("🚀 - ShopwiseWeeklySheetView - match:", match);
         if (match) {
           entry.metrics = {
             grossSales: String(match.grossSales),
@@ -249,7 +262,11 @@ const ShopwiseWeeklySheetView = ({
             deliverooBankReceived: String(match.deliverooBankReceived),
             deliverooVariance: String(match.deliverooVariance),
             labourHours: String(match.labourHours),
-            labourRate: String(LABOUR_RATE),
+            labourRate: String(
+              match.labourHours > 0
+                ? (match.labourCost / match.labourHours).toFixed(2)
+                : LABOUR_RATE,
+            ),
             bidFood: String(match.bidFood),
             instoreFoodCost: String(match.instoreFoodCost),
             instoreLabourCost: String(match.instoreLabourCost),
@@ -409,21 +426,35 @@ const ShopwiseWeeklySheetView = ({
       toast.error("Please set Start and End dates for all weeks.");
       return;
     }
-    const payload = buildPayload();
+    const { entries } = buildPayload();
+    const CHUNK_SIZE = 50;
+    const chunks: object[][] = [];
+    for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+      chunks.push(entries.slice(i, i + CHUNK_SIZE));
+    }
     setSubmitting(true);
-    financialsApi
-      .submitWeeklyReport(payload)
-      .then(({ data }) => {
+    try {
+      const allErrors: string[] = [];
+      for (const chunk of chunks) {
+        const { data } = await financialsApi.submitWeeklyReport({
+          entries: chunk,
+        });
         if (data.data?.errors?.length) {
-          toast.error(data?.errors?.join(",") || "Failed");
-          return;
+          allErrors.push(...(data.data.errors as string[]));
         }
-        toast.success(data.message);
-        setWeeks([newWeekCard()]);
-        setActiveWeekIdx(0);
-      })
-      .catch((err: any) => toast.error(err.message || "Failed to import data"))
-      .finally(() => setSubmitting(false));
+      }
+      if (allErrors.length) {
+        toast.error(allErrors.join(", ") || "Failed");
+        return;
+      }
+      toast.success("Weekly report submitted successfully.");
+      setWeeks([newWeekCard()]);
+      setActiveWeekIdx(0);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to import data");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const gc = "bg-green-50/50"; // input cell tint
@@ -509,6 +540,16 @@ const ShopwiseWeeklySheetView = ({
             )}
           </div>
         )}
+
+        {/* Import Excel button */}
+        <button
+          type="button"
+          onClick={() => setImportDialogOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
+        >
+          <Upload size={13} />
+          Import Excel
+        </button>
       </div>
 
       {/* ── Spreadsheet ──────────────────────────────────────────────────────── */}
@@ -1171,6 +1212,15 @@ const ShopwiseWeeklySheetView = ({
           </div>
         </div>
       )}
+
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        isOpen={importDialogOpen}
+        activeTab="shopwise_week"
+        onClose={() => setImportDialogOpen(false)}
+        onImport={handleImport}
+        knownShopNames={shops.map((s) => s.name)}
+      />
     </div>
   );
 };
