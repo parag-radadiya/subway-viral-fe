@@ -9,6 +9,7 @@ import {
   Info,
 } from "lucide-react";
 import Button from "../../../components/common/Button";
+import Tabs from "../../../components/common/Tabs";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,7 @@ export interface ShopwiseWeeklyImportRow {
   deliverooBankReceived: number;
   deliverooVariance: number;
   labourHours: number;
+  labourCost: number;
   bidFood: number;
   instoreFoodCost: number;
   instoreLabourCost: number;
@@ -56,6 +58,7 @@ export interface MonthlyImportRow {
   customerCount: number;
   bidfood: number;
   labourHour: number;
+  labourCost: number;
   revScoreQ1: number;
 }
 
@@ -113,10 +116,7 @@ function parseShopwiseWeekly(rows: any[][]): ShopwiseWeeklyImportRow[] {
     if (!colB || colB === "STORE " || colB.trim() === "") continue;
     // Skip aggregate/total rows — not real stores
     if (colB.trim().toLowerCase() === "total") continue;
-    if (
-      typeof row[2] !== "number" &&
-      isNaN(parseFloat(String(row[2] ?? "")))
-    )
+    if (typeof row[2] !== "number" && isNaN(parseFloat(String(row[2] ?? ""))))
       continue;
 
     result.push({
@@ -143,6 +143,7 @@ function parseShopwiseWeekly(rows: any[][]): ShopwiseWeeklyImportRow[] {
       deliverooBankReceived: num(row[27]),
       deliverooVariance: num(row[28]),
       labourHours: num(row[31]),
+      labourCost: num(row[32]),
       bidFood: num(row[34]),
       instoreFoodCost: num(row[37]),
       instoreLabourCost: num(row[38]),
@@ -174,10 +175,7 @@ function parseMonthly(rows: any[][]): MonthlyImportRow[] {
     if (!storeName || storeName.toUpperCase().startsWith("STORE")) continue;
     // Skip aggregate/total rows
     if (storeName.toLowerCase() === "total") continue;
-    if (
-      typeof row[2] !== "number" &&
-      isNaN(parseFloat(String(row[2] ?? "")))
-    )
+    if (typeof row[2] !== "number" && isNaN(parseFloat(String(row[2] ?? ""))))
       continue;
     result.push({
       storeName: storeName.toLowerCase(),
@@ -186,6 +184,7 @@ function parseMonthly(rows: any[][]): MonthlyImportRow[] {
       customerCount: num(row[6]),
       bidfood: num(row[7]),
       labourHour: num(row[9]),
+      labourCost: num(row[10]),
       revScoreQ1: num(row[14]),
     });
   }
@@ -221,6 +220,9 @@ const ExcelImportDialog: React.FC<Props> = ({
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [parsing, setParsing] = useState(false);
+  const [importMode, setImportMode] = useState<"last_week" | "all">(
+    "last_week",
+  );
 
   const sheetName = SHEET_MAP[activeTab];
 
@@ -292,9 +294,29 @@ const ExcelImportDialog: React.FC<Props> = ({
     reader.readAsArrayBuffer(file);
   };
 
+  const getEffectiveData = (): ImportedData | null => {
+    if (!parsedData) return null;
+    if (parsedData.type === "shopwise_week" && importMode === "last_week") {
+      const allWeeks = Array.from(
+        new Set(parsedData.rows.map((r) => r.weekNumber)),
+      ).sort((a, b) => a - b);
+      const lastWeekNum =
+        allWeeks.length > 0
+          ? allWeeks[allWeeks.length - 1]
+          : parsedData.rows[parsedData.rows.length - 1]?.weekNumber;
+      return {
+        type: "shopwise_week",
+        rows: parsedData.rows.filter((r) => r.weekNumber === lastWeekNum),
+      };
+    }
+    return parsedData;
+  };
+
+  const effectiveData = getEffectiveData();
+
   const handleConfirm = () => {
-    if (!parsedData) return;
-    onImport(parsedData);
+    if (!effectiveData) return;
+    onImport(effectiveData);
     handleClose();
   };
 
@@ -307,20 +329,24 @@ const ExcelImportDialog: React.FC<Props> = ({
   if (!isOpen) return null;
 
   const unmatched =
-    parsedData && knownShopNames.length > 0
-      ? findUnmatched(parsedData, knownShopNames)
+    effectiveData && knownShopNames.length > 0
+      ? findUnmatched(effectiveData, knownShopNames)
       : [];
 
   const summaryLine = (): string => {
-    if (!parsedData) return "";
-    if (parsedData.type === "shopwise_week") {
-      const weeks = new Set(parsedData.rows.map((r) => r.weekNumber)).size;
-      return `${weeks} week${weeks !== 1 ? "s" : ""} · ${parsedData.rows.length} store-week records`;
+    if (!effectiveData) return "";
+    if (effectiveData.type === "shopwise_week") {
+      const weeks = new Set(effectiveData.rows.map((r) => r.weekNumber)).size;
+      const weekLabel = effectiveData.rows[0]?.weekLabel;
+      if (importMode === "last_week") {
+        return `${weekLabel ? `${weekLabel} · ` : ""}${effectiveData.rows.length} store records`;
+      }
+      return `${weeks} week${weeks !== 1 ? "s" : ""} · ${effectiveData.rows.length} store-week records`;
     }
-    if (parsedData.type === "weekly") {
-      return `${parsedData.rows.length} week row${parsedData.rows.length !== 1 ? "s" : ""}`;
+    if (effectiveData.type === "weekly") {
+      return `${effectiveData.rows.length} week row${effectiveData.rows.length !== 1 ? "s" : ""}`;
     }
-    return `${parsedData.rows.length} store row${parsedData.rows.length !== 1 ? "s" : ""}`;
+    return `${effectiveData.rows.length} store row${effectiveData.rows.length !== 1 ? "s" : ""}`;
   };
 
   return (
@@ -354,11 +380,26 @@ const ExcelImportDialog: React.FC<Props> = ({
 
         {/* Body */}
         <div className="px-5 py-4 space-y-3">
+          {activeTab === "shopwise_week" && (
+            <div className="flex pb-1">
+              <Tabs
+                options={[
+                  { label: "Last Week", value: "last_week" },
+                  { label: "All Records", value: "all" },
+                ]}
+                className="w-full"
+                activeTab={importMode}
+                onChange={(val) => setImportMode(val as "last_week" | "all")}
+              />
+            </div>
+          )}
+
           {activeTab === "month" && (
             <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
               <Info size={14} className="text-blue-500 mt-0.5 shrink-0" />
               <p className="text-xs text-blue-700">
-                <span className="font-semibold">Note:</span> Only the last filled month's record will be added.
+                <span className="font-semibold">Note:</span> Only the last
+                filled month's record will be added.
               </p>
             </div>
           )}
@@ -395,10 +436,7 @@ const ExcelImportDialog: React.FC<Props> = ({
           {/* Parse error */}
           {error && (
             <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-xl p-3.5">
-              <AlertCircle
-                size={14}
-                className="text-red-400 mt-0.5 shrink-0"
-              />
+              <AlertCircle size={14} className="text-red-400 mt-0.5 shrink-0" />
               <p className="text-xs text-red-600 font-medium whitespace-pre-line">
                 {error}
               </p>
@@ -409,10 +447,7 @@ const ExcelImportDialog: React.FC<Props> = ({
           {parsedData && !error && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3.5 py-2.5">
-                <CheckCircle2
-                  size={14}
-                  className="text-emerald-500 shrink-0"
-                />
+                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
                 <p className="text-xs font-semibold text-emerald-700">
                   Ready · {summaryLine()}
                 </p>
@@ -427,8 +462,8 @@ const ExcelImportDialog: React.FC<Props> = ({
                   <div>
                     <p className="text-xs font-semibold text-amber-700 mb-1.5">
                       {unmatched.length} store
-                      {unmatched.length !== 1 ? "s" : ""} not found in system
-                      — will be skipped:
+                      {unmatched.length !== 1 ? "s" : ""} not found in system —
+                      will be skipped:
                     </p>
                     <ul className="space-y-0.5">
                       {unmatched.map((name) => (
@@ -458,7 +493,7 @@ const ExcelImportDialog: React.FC<Props> = ({
           <Button
             variant="primary"
             onClick={handleConfirm}
-            disabled={!parsedData || !!error}
+            disabled={!effectiveData || !!error}
             leftIcon={<Upload size={13} />}
           >
             Fill into table
