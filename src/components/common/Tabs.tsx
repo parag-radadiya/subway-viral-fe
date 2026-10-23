@@ -24,7 +24,7 @@ export default function Tabs({
         <button
           key={option.value}
           className={clsx(
-            "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+            "px-4 py-2 rounded-lg text-xs font-bold transition-all flex-1 whitespace-nowrap",
             activeTab === option.value
               ? "bg-white text-slate-800 shadow-sm"
               : "text-slate-500 hover:text-slate-700",
